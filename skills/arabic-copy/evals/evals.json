@@ -1,0 +1,31 @@
+{
+  "skill_name": "arabic-copy",
+  "evals": [
+    {
+      "id": 0,
+      "name": "weak-sentence",
+      "prompt": "«جرّبه على خوادمك أنت.» جملة ضعيفة عربياً. الملف ar.php في نفس المجلد.",
+      "expected_output": "Rewrites the flagged CTA AND finds the same English shapes across the rest of the file — the em dashes in prose, يتم, قم بـ, الخاص بـ, the second trailing أنت, the comparative with no second term, ارتقِ on a plan card. Leaves the three console strings alone. Hands back a before/after table with a one-clause reason per row. Writes the corrected file.",
+      "files": ["fixtures/weak-sentence/ar.php"]
+    },
+    {
+      "id": 1,
+      "name": "write-arabic",
+      "prompt": "حوّل en.php لعربي للسوق السعودي. منتج تقارير محاسبية مجدولة اسمه Ledgerly، والجمهور مدراء مالية وأصحاب أعمال. احفظه ar.php جنبه.",
+      "expected_output": "Arabic in the Gulf SaaS register: verb-first CTA, benefit in the headings, و-chains instead of em dashes, the product as a grammatical subject somewhere. Ledgerly, PDF, XLSX, CSV stay Latin. No invented social proof — no customer counts or ratings that the English did not have. Body copy stays tight.",
+      "files": ["fixtures/write-arabic/en.php"]
+    },
+    {
+      "id": 2,
+      "name": "review-page",
+      "prompt": "راجع صفحة الأمان كاملة. عندك ar.php و en.php و Panel.vue و NOTES.md في نفس المجلد.",
+      "expected_output": "Catches five planted defects: (1) the inverted modality — 'should not have to ask' rendered as forbidding the reviewer from asking; (2) عقد / contract, the codebase's own vocabulary on a marketing page; (3) the checks lead restating the pillar above it with clauses swapped, in both languages; (4) append-only counted as two layers where NOTES.md documents three, and the PHP/Laravel versions contradicting NOTES.md; (5) the English placeholder, aria-label and title in Panel.vue plus the hardcoded Latin initial. Fixes the ones that are wrong in English too, not only the Arabic.",
+      "files": [
+        "fixtures/review-page/ar.php",
+        "fixtures/review-page/en.php",
+        "fixtures/review-page/Panel.vue",
+        "fixtures/review-page/NOTES.md"
+      ]
+    }
+  ]
+}
