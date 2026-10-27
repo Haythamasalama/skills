@@ -84,8 +84,8 @@ This is the theme of his own site (Nuxt 4 + Tailwind 4 + `@nuxtjs/color-mode`, d
 
 - Dark by default: `colorMode: { preference: 'dark', fallback: 'dark', classSuffix: '', storageKey: 'theme' }` with
   `@nuxtjs/color-mode`, or `<html class="dark">` in plain sites.
-- Tailwind 4 only emits `@theme` variables that a utility uses. A variable read from JavaScript or SVG goes outside
-  `@theme` (in `:root`).
+- A variable read from JavaScript or SVG goes in `:root`, not in `@theme`
+  ([why](../../nuxt-ui/references/theme.md#a-brand-palette)).
 - Pages use the semantic classes (`bg-bg`, `bg-raised`, `border-line`, `text-fg`, `text-soft`, `text-muted`,
   `text-faint`), not raw hex. Raw hex is only for specimen tiles that must look the same in both themes.
 
@@ -128,7 +128,9 @@ off under `prefers-reduced-motion`.
 ## Nuxt UI 4
 
 His site does not use Nuxt UI, so this mapping is a suggested starting point; check contrast and selected states on
-the first page built with it.
+the first page built with it. How Nuxt UI theming works (the three files, why `@theme static`, the `--ui-*` tokens,
+component defaults, dark mode) is in the `nuxt-ui` skill's [theme.md](../../nuxt-ui/references/theme.md); this section holds only the brand's
+values.
 
 ```css
 /* app/assets/css/main.css */
@@ -235,9 +237,9 @@ For a one-off page, an email-safe banner or a slide rendered to an image.
 
 - `assets/haytham-brand-tokens.css` names the fonts "Geist" and "Geist Mono", which match Google Fonts. With
   Fontsource variable packages the names are "Geist Variable" and "Geist Mono Variable".
-- An Arabic page: `<html lang="ar" dir="rtl">`, logical properties (`margin-inline-start`, `padding-inline`), and an
-  Arabic face beside Geist (Geist has no Arabic letters), for example IBM Plex Sans Arabic. Keep the name, handle and
-  domain in Latin letters.
+- An Arabic page: `<html lang="ar" dir="rtl">` and an Arabic face beside Geist (Geist has no Arabic letters), for
+  example IBM Plex Sans Arabic. Keep the name, handle and domain in Latin letters. Logical properties, isolation
+  and fonts: [i18n-rtl.md](../../nuxt-ui/references/i18n-rtl.md#layout-once-both-directions).
 
 ## Social card (1200 × 630)
 

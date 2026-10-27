@@ -3,6 +3,9 @@
 How to run one Nuxt UI app in Arabic (right to left) and English (left to right) without writing the layout twice.
 Checked 2026-10-27.
 
+The sections from "Layout once, both directions" to "Fonts for Arabic" hold for any stack. They are the
+one home of the generic bidi rules; `admin-ui` and `arabic-copy` link here for them.
+
 ## Two settings, both needed
 
 1. **Component strings and direction-aware behaviour** (dates in pickers, "close", menus opening the right way):
@@ -105,8 +108,8 @@ export default {
 - Keys built from outside data use a fallback: `` tOr(`status.${code}`, code) ``.
 - Keep the dictionaries in `shared/` when the server also answers in the user's language. Pass the language in a
   header (for example `X-Locale`) and hold it for the request with `AsyncLocalStorage`.
-- Nitro resolves relative runtime imports in `shared/` differently from Vite. Import the dictionaries as types in
-  shared code and hand the data in from an app plugin and a server util.
+- In `shared/` code import the dictionaries as types only, and hand the data in from an app plugin and a server
+  util ([why](gotchas.md#nitro-auto-imports-and-shared-code)).
 - A public site with several pages and translated routes is a better fit for `@nuxtjs/i18n`.
 
 ## Layout once, both directions
@@ -128,20 +131,66 @@ export default {
 
 ## Mixed-direction text
 
-- **Left-to-right values inside an Arabic line** (phone numbers, IDs, codes, file paths, versions, emails, URLs):
-  `<bdi dir="ltr">{{ value }}</bdi>`. Without it, `+1 555 0100` or `v1.2.3` reorder.
-- Inside a translated string, wrap the value in Unicode isolates: `` `⁦${path}⁩` ``.
+Any run in a language other than its surroundings must be isolated, or neutral characters (slashes, digits,
+brackets, trailing punctuation) jump ends and the line renders reversed. This is a correctness bug, not a style
+preference.
+
+- **Left-to-right values inside an Arabic line** (phone numbers, IDs, codes, file paths, versions, emails, URLs,
+  hosts, database names, permission keys): `<bdi dir="ltr">{{ value }}</bdi>`, or `dir="ltr"` on the inline
+  element that shows it. Without it, `+1 555 0100` or `v1.2.3` reorder.
+- **A block in the other language** (an example sentence, a quote): `lang` and `dir` on the element plus a small
+  utility with `unicode-bidi: isolate`, and the font picked from `:lang()`:
+
+  ```html
+  <p class="bidi" lang="ar" dir="rtl">وين ساكنة؟</p>
+  <p class="bidi" lang="en" dir="ltr">wēn sākne?</p>
+  ```
+
+- **Inside a translated string**, wrap the value in Unicode isolates U+2066 … U+2069 (LRI … PDI):
+  `` `⁦${path}⁩` ``. Add them where the rendered page shows a flip, not in advance: they are invisible in the
+  source and easy to duplicate.
 - **Text a user typed or a message that can be in either language:** `dir="auto"` on the element (textarea,
   preview bubble, list excerpt).
-- **Inputs follow the page direction.** Right aligned in Arabic, left aligned in English, even for a URL. Typing
-  Latin text into an RTL input works; forcing `dir="ltr"` on some inputs makes a form look broken.
 - Code and commands: `<pre dir="ltr" class="text-start">`.
-- A numeric chart axis: `dir="ltr"` on the axis container.
+
+### Inputs
+
+- **Inputs follow the page direction.** Right aligned in Arabic, left aligned in English. Typing Latin text into
+  an RTL input works.
+- **`dir="ltr"` is for display, never for a plain input.** It drags the caret to the far side from where the
+  reader starts, an Arabic placeholder lands on the wrong edge of its own box, and a form with some inputs forced
+  left to right looks broken.
+- An input that holds Latin (a code, a host, a URL, a JSON body) may take `dir="auto"` once it has a value.
+  `dir="auto"` alone is not enough: an empty box has no value to read, browsers fall back to LTR, and the
+  placeholder lands on the wrong edge. Return `undefined` while the box is empty, so the page decides:
+
+  ```ts
+  export const autoDir = (value: unknown): 'auto' | undefined =>
+    value === null || value === undefined || value === '' ? undefined : 'auto'
+  ```
+
+- **An affix with meaning makes the whole group LTR**, affix included: a subdomain with a `.example.test` suffix,
+  a `db_` prefix, the dial code before a phone number.
+- **A leading icon is not an affix.** It carries no order, so the group stays in the page direction: the icon sits
+  at the start, the label above agrees, and a Latin value still renders left to right on its own. Email,
+  password, price, a bare host: all plain.
 
 ## Icons that point somewhere
 
-Arrows, chevrons, "send", "external link", "undo/redo" point the reading way. Mirror them in RTL, in one list in
-`main.css`:
+Logical classes cover position and spacing. What they can't cover (a glyph that points, a transform, a shadow
+offset) takes the `rtl:` and `ltr:` variants, which read `dir` on `<html>`. Prefer them to writing a rule twice,
+and never branch on the page direction in script for something CSS can state.
+
+- **Flip:** chevrons, arrows, back/forward, undo/redo, indent, reply, send, external link.
+- **Never flip:** clocks, phones, checkmarks, play buttons, logos, anything containing a digit or a letter.
+- **Rotate** (`rtl:rotate-180`) a glyph that is symmetrical about its centre (chevrons, plain arrows). **Mirror**
+  (`rtl:-scale-x-100`) one that is not (an arrow entering a door).
+- Use the left chevron for "previous" and the right one for "next", and let the class flip both. Don't swap icons
+  by direction.
+- **A directional character typed into copy (`→`, `←`) can do neither.** It is an icon, never a literal. An up
+  arrow «↑» is direction-neutral.
+
+With `@nuxt/icon` in CSS mode (`<span class="iconify i-lucide:send">`), keep the flips in one list in `main.css`:
 
 ```css
 [dir="rtl"] .iconify.i-lucide\:send,
@@ -154,9 +203,12 @@ Arrows, chevrons, "send", "external link", "undo/redo" point the reading way. Mi
 }
 ```
 
-The selector matches `@nuxt/icon`'s CSS mode (`<span class="iconify i-lucide:send">`). In SVG mode, or for one-off
-cases, put `class="rtl:-scale-x-100"` on the `UIcon`. Do not mirror icons that show real objects (a clock, a phone,
-a check mark, a brand logo).
+In SVG mode, or for one-off cases, put `class="rtl:-scale-x-100"` on the `UIcon`.
+
+## Charts
+
+Chart libraries draw axes left to right. A time series reading left to right inside an Arabic page is the normal
+convention; leave it, and put `dir="ltr"` on a numeric axis container that would otherwise inherit RTL.
 
 ## Numbers, dates and money
 
@@ -177,23 +229,24 @@ a check mark, a brand logo).
 
 ## Fonts for Arabic
 
-- One family that covers both scripts keeps mixed lines even: IBM Plex Sans Arabic, Noto Sans Arabic, Readex Pro
-  and Tajawal all include Latin letters.
+- Either one family that covers both scripts, which keeps mixed lines even (IBM Plex Sans Arabic, Noto Sans
+  Arabic, Readex Pro and Tajawal all include Latin letters), or an Arabic face beside the Latin one, its
+  `@font-face` scoped with `unicode-range` so Latin text keeps its own face.
 - `@nuxt/fonts` needs `subsets: ['arabic', 'latin']`, or every Arabic letter falls back to the system font.
-- Arabic reads larger at the same size. Keep line height at about 1.6 or more for paragraphs; avoid `tracking-*`
-  on Arabic text (letter spacing breaks joined letters).
-- Never use `uppercase` or small caps on Arabic; it has no case. Keep `font-mono` labels Latin only.
+- Arabic reads larger at the same size. Keep line height at about 1.6 or more for paragraphs.
+- `letter-spacing: normal` under `[lang='ar']`, set on the element, not only on `html`: letter spacing breaks
+  joined letters, so no `tracking-*` on Arabic text.
+- Never `uppercase` or small caps on Arabic; it has no case. An uppercase or `font-mono` label that gets
+  translated drops the `text-transform` and takes the Arabic face; keep `font-mono` for Latin-only values.
 
 ## Writing the copy
 
-- Arabic is Modern Standard Arabic (فصحى), short and plain, no dialect.
-- English says the same thing, rewritten, not translated word for word.
-- Product names, technical names and identifiers stay in Latin letters inside Arabic text (GitHub, Docker, API names,
-  status codes). Template names, IDs and codes stay exactly as the source wrote them.
-- Use the Arabic comma (،) and question mark (؟) in Arabic text.
-- Keep one word per concept across the whole app. A glossary at the top of the dictionary helps.
+Arabic register, wording, punctuation and the terms that stay in Latin letters: the
+[arabic-copy](../../arabic-copy/SKILL.md) skill. For this stack:
+
+- Keep its glossary of fixed terms at the top of the dictionary: one word per concept across the app.
+- Template names, IDs and codes stay exactly as the source wrote them.
 - Error messages are a sentence that says what to do, in the user's language, never the raw text from a vendor.
-- For a deeper review of Arabic copy, use the `arabic-copy` skill.
 
 ## SEO for two languages
 

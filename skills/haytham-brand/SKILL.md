@@ -32,7 +32,7 @@ the facts from it, checked 2026-10-27. When they disagree, the site wins; tell h
 |---|---|
 | [references/colors.md](references/colors.md) | you need any colour: full Iris and Azure scales, dark and light tokens, gradients, OKLCH values, contrast, code and diagram palettes |
 | [references/logo.md](references/logo.md) | placing the signature, favicon or app icon; sizes, clear space, animation, misuse |
-| [references/voice.md](references/voice.md) | writing any text: English and Arabic voice, bios, lengths, words to avoid, what never to publish |
+| [references/voice.md](references/voice.md) | writing any text: English and Arabic voice, words to avoid, bios, and links to the lengths, employer rules and Arabic rules |
 | [references/apply.md](references/apply.md) | building it: Tailwind 4 tokens, Nuxt UI mapping, plain HTML and CSS, social card and thumbnail layouts |
 | [assets/](assets/) | signature SVGs (white, black, gradient, each with a heavier "small" cut), favicon SVGs, app icon, `favicon.ico`, `apple-touch-icon.png`, `haytham-brand-tokens.css` |
 
@@ -123,9 +123,9 @@ Full scales, light-theme tokens and the code and diagram palettes: [references/c
 - Plain words, short sentences, one idea per paragraph. First person for his own work, "the team" for shared work.
 - No marketing words and no unmeasured claims.
 - English: British spelling in new text, sentence-case headings.
-- Arabic: Modern Standard Arabic, short and plain; technical and product names stay in Latin letters.
+- Arabic: the `arabic-copy` register (Modern Standard Arabic, short and plain), with Latin digits.
 
-Full rules, bios and lengths: [references/voice.md](references/voice.md).
+Full rules and bios: [references/voice.md](references/voice.md).
 
 ## Do and don't
 

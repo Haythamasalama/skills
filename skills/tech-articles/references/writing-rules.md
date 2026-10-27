@@ -1,21 +1,15 @@
 # Writing rules
 
-The rules for every word in an article, a case study, a caption, alt text and the social drafts.
+The rules for every word in an article, a case study, a project card, a caption, alt text and the
+social drafts.
 
 ## Voice
 
-- Plain words over jargon. Show the work before the title. Warm, never loud.
-- First person for your own work ("I designed…"); "the team" for shared work.
-- Short sentences. One idea per paragraph.
-- No marketing words: "cutting-edge", "seamless", "robust", "blazing", "revolutionary",
-  "world-class", "leverage", "empower", "unlock". If a sentence still works without the adjective,
-  drop the adjective.
-- No AI-sounding filler: "In today's fast-paced world", "It's worth noting", tricolons for rhythm,
-  a summary sentence that repeats the paragraph. (A humanizer pass can check a draft.)
-- Pick one spelling variant per site and keep it for new text (the owner's default is British:
-  colour, behaviour, organisation). Don't churn existing pages to change it.
-- Headings in sentence case, saying plainly what the section is.
-- Meta lines with a middle dot: `Founder · Aug 2026 – now`.
+The owner's voice lives in the `haytham-brand` skill:
+[voice.md](../../haytham-brand/references/voice.md) (plain words, first person, short sentences,
+headings, spelling, meta lines, and the marketing words and AI filler to avoid in English and
+Arabic). Arabic copy also follows the `arabic-copy` skill. The rules below are the ones that voice
+file links back to; they hold for every text about the owner's work, not only articles.
 
 ## Honesty and attribution
 
@@ -52,9 +46,10 @@ These hold for every past and future employer or client.
   services, payment gateways, AI models, messaging. Name a public platform only where it explains
   what the product does.
 - **Don't name the AI tooling vendor.** Say "AI coding agents".
-- **In case-study copy about employer work, don't name frameworks.** Describe the design instead.
-  (A deep dive may name the stack its snippets use.)
-- **Colleagues:** "the team" on the site. Name them only in LinkedIn drafts, as contributors.
+- **In project cards and case-study copy about employer work, don't name frameworks.** Describe the
+  design instead. (A deep dive may name the stack its snippets use.)
+- **Colleagues:** "the team" on the site. Name them only where they agreed, as contributors (in
+  LinkedIn drafts).
 - **Keep claims modest**, so former teams aren't upset.
 - **Never publish:** secrets, hostnames, endpoint paths, database schemas, permission keys,
   rate-limit numbers, crypto parameters, known weaknesses, pricing, customer or personal data.
@@ -70,7 +65,7 @@ no edge or firewall setup.
 | Text | Length |
 |---|---|
 | article `description` (search, link previews) | 120–200 characters |
-| case study `description` | 150–220 characters |
+| case study or site page `description` (search, link previews) | 150–220 characters |
 | project card description | one sentence, about 80–160 characters: what was built and your part |
 | deep dive | 800–1,500 words |
 | project story | 500–900 words |

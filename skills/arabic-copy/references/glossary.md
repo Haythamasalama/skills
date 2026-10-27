@@ -43,8 +43,8 @@ one: «ارتقى» is rising in rank or morals, not growing in size («يكبر
 - Engine and language names, SQL keywords, table and column names, hostnames, handles.
 - Version numbers and identifiers.
 
-Wrap a Latin run that sits next to punctuation in bidi isolates only after the rendered page shows
-it flipping.
+Expand an acronym the first time if the reader may not know it. Bidi isolation for a Latin run next
+to punctuation: [tells-and-rewrites.md §6](tells-and-rewrites.md#6-bidi).
 
 ## Words an audience says as they say them
 
@@ -76,6 +76,7 @@ terms are standard: use them.
   Sunday morning" already fits; "Monday morning" for "start of the week" does not.
 - One digit set and one date format per site. Don't mix Arabic-Indic and Western digits.
 - No full stop on headings and buttons in Arabic, whatever the English does. Unify the file.
+- Arabic punctuation in Arabic text: the comma «،» and the question mark «؟».
 - A CTA is a verb. A nudge or reassurance line goes under it, and only with real terms (trial
   length, no card needed): ask for them rather than invent them.
 

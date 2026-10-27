@@ -1,7 +1,12 @@
 # Direction and bidi
 
-How one set of markup runs RTL in Arabic and LTR in English, where the registry needs help, and
-how to keep mixed-language text in order. Nothing is written twice.
+How one set of markup runs RTL in Arabic and LTR in English on this stack, and where the registry
+needs help. Nothing is written twice.
+
+The generic bidi rules (logical classes, isolating mixed-language runs, `dir="auto"` and inputs,
+which icons flip and how, Latin digits, Arabic fonts, charts) live once in the `nuxt-ui` skill's
+[i18n-rtl.md](../../nuxt-ui/references/i18n-rtl.md); they hold for any stack. This file keeps what
+is specific to Inertia, Reka and the shadcn-vue registry.
 
 ## Where direction comes from
 
@@ -17,77 +22,27 @@ how to keep mixed-language text in order. Nothing is written twice.
 
 ## What you write
 
-Logical, always: `ms-` `me-` `ps-` `pe-` `start-` `end-` `border-s` `border-e` `rounded-s`
-`rounded-e` `text-start` `text-end`. Never `ml-` `mr-` `pl-` `pr-` `left-` `right-` `text-left`
-`text-right`.
-
-## Isolate runs of the other language
-
-Any run of text in a language different from its surroundings must be isolated, or neutral
-characters (slashes, digits, brackets, trailing punctuation) jump ends and the line renders
-reversed. This is a correctness bug, not a style preference.
-
-```html
-<p class="bidi" lang="ar" dir="rtl">وين ساكنة؟</p>
-<p class="bidi" lang="en" dir="ltr">wēn sākne?</p>
-```
-
-A `.bidi` utility sets `unicode-bidi: isolate`, and the font is picked from `:lang()`. Inside a
-translated string, wrap the run in U+2066 … U+2069 (LRI … PDI) instead.
-
-## `dir="ltr"` is for display, not for typing
-
-A Latin identifier shown inside Arabic copy (a host, a URL, a database name, a permission key)
-goes in a `dir="ltr"` wrapper, so bidi does not reorder it around the dots:
+Logical classes always
+([the mapping](../../nuxt-ui/references/i18n-rtl.md#layout-once-both-directions)). Mixed-language
+runs and inputs follow
+[Mixed-direction text](../../nuxt-ui/references/i18n-rtl.md#mixed-direction-text); in this registry:
 
 ```vue
 <a :href="customer.url" dir="ltr">{{ customer.url }}</a>
 <span class="font-mono text-xs" dir="ltr">{{ permission.key }}</span>
+<Input v-model="form.host" :dir="autoDir(form.host)" />
 ```
 
-**Never on a plain input.** It drags the caret to the far side from where the reader starts, and
-an Arabic placeholder ends up on the wrong edge of its own box. An input that holds Latin (a code,
-a host, a URL, a JSON body) takes `:dir="autoDir(value)"`:
+The affix group that turns `dir="ltr"` is an `InputGroup` whose affix carries order; an
+`InputGroupAddon` holding only an icon is not an affix, so that group stays in the page direction.
 
-```ts
-export const autoDir = (value: unknown): 'auto' | undefined =>
-    value === null || value === undefined || value === '' ? undefined : 'auto';
-```
-
-`dir="auto"` alone is not enough: it reads the value, an empty box has none, browsers fall back to
-LTR, and the placeholder lands on the wrong edge. `autoDir` returns `undefined` while the box is
-empty (the page decides) and `"auto"` once there is a value.
-
-**An affix with meaning makes the whole group LTR.** An `InputGroup` whose affix side matters (a
-subdomain with a `.example.test` suffix, a `db_` prefix, the dial code before a phone number) is
-`dir="ltr"`, affix included.
-
-**A leading icon is not an affix.** An `InputGroupAddon` holding only an icon carries no order, so
-the group stays in the page direction: the icon sits at the start, the label above agrees, and a
-Latin value still renders left to right on its own. Adding `dir="ltr"` there flips the whole field
-away from the rest of the form. Email, password, price, a bare host: all plain.
-
-## `rtl:` and `ltr:` for what must differ
-
-Logical properties cover position and spacing. What they can't cover (a glyph that points, a
-transform, a shadow offset) takes Tailwind's direction variants, which read `dir` on `<html>`:
+Glyphs that point use Tailwind's direction variants on the Lucide component
+([which and how](../../nuxt-ui/references/i18n-rtl.md#icons-that-point-somewhere)):
 
 ```vue
 <ChevronRightIcon class="rtl:rotate-180" />     <!-- symmetrical: rotate -->
 <LogInIcon class="rtl:-scale-x-100" />          <!-- an arrow inside a glyph: mirror -->
 ```
-
-- **Rotate** a glyph that is symmetrical about its centre (chevrons, plain arrows).
-- **Mirror** (`-scale-x-100`) one that is not (an arrow entering a door).
-- Use `ChevronLeft` for "previous" and `ChevronRight` for "next" and let the class flip both. Don't
-  swap components by direction.
-- **A directional character typed into copy (`→`, `←`) can do neither.** It is an icon, never a
-  literal.
-- Prefer these variants to writing a rule twice, and never branch on the page direction in script
-  for something CSS can state.
-
-**Flip:** chevrons, arrows, back/forward, undo/redo, indent, reply, send.
-**Never flip:** clocks, checkmarks, play buttons, logos, anything containing a digit or a letter.
 
 ## Registry gaps and the fixes
 
@@ -123,10 +78,7 @@ Components that still held physical classes but were not in use yet; fix them th
 Things that were already right in that sweep: pagination arrows, the breadcrumb separator, the
 sidebar's collapsible chevron and the toaster all flip.
 
-## Charts are the exception
-
-Chart libraries draw axes left to right. A time series reading left to right inside an Arabic page
-is the normal convention; leave it.
+Charts keep their left-to-right axes: [Charts](../../nuxt-ui/references/i18n-rtl.md#charts).
 
 ## Checking it
 

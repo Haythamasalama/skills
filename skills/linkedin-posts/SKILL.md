@@ -1,13 +1,14 @@
 ---
 name: linkedin-posts
-description: Use when writing, polishing or publishing a LinkedIn post or an X (Twitter) thread for the owner, especially launching an open-source project or a product he built, in Arabic or English. Covers the "developer story" structure that worked, Arabic tone, one strong image instead of carousels or PDFs, making the image from HTML, the approval rule (show the final draft, publish only on an explicit go), posting through the browser and the LinkedIn composer quirks, and checking the post after it is live. Triggers include "منشور لينكدين", "بوست", "انشر على لينكدين", "ثريد تويتر", "LinkedIn post", "launch post".
+description: Use when writing, polishing or publishing a LinkedIn post or an X (Twitter) thread for the owner, especially launching an open-source project or a product he built, or sharing a published article, in Arabic or English. Covers the "developer story" structure that worked, the article thread and post templates, Arabic tone, one strong image instead of carousels or PDFs, making the image from HTML, the approval rule (show the final draft, publish only on an explicit go), posting through the browser and the LinkedIn composer quirks, and checking the post after it is live. Triggers include "منشور لينكدين", "بوست", "انشر على لينكدين", "ثريد تويتر", "LinkedIn post", "launch post".
 ---
 
 # LinkedIn and X posts
 
 **Read when:** drafting or publishing a post about something the owner built or learned.
-**Owns:** structure, tone, image, approval and publishing steps. For the visual identity see the
-`haytham-brand` skill; for long articles turned into posts see `tech-articles`.
+**Owns:** structure, tone, image, approval and publishing steps, and the X thread and LinkedIn post
+that share an article. For the visual identity and the voice see the `haytham-brand` skill; for the
+article itself, its Medium import and a LinkedIn Projects entry see `tech-articles`.
 
 ## TL;DR
 
@@ -17,8 +18,8 @@ description: Use when writing, polishing or publishing a LinkedIn post or an X (
   points, how it runs, one question to the reader, links, hashtags.
 - **One image.** A single clear product screenshot (in the post's language) beat a 6-image carousel;
   nobody opens PDFs. Make extra images only if asked.
-- Arabic posts are written in simple Modern Standard Arabic (فصحى بسيطة), warm and direct, with
-  technical names left in Latin script (Nuxt, Docker, SQLite).
+- Arabic posts are warm and direct, in the register of the [arabic-copy](../arabic-copy/SKILL.md)
+  skill (simple فصحى, technical names in Latin script).
 - Attach the image **before** pasting text that contains a link: once LinkedIn shows a link preview the
   media button disappears.
 - After publishing, open the post's URL and check the text, the image count and the links.
@@ -46,10 +47,12 @@ when the user is unhappy, and let them pick.
 ## 2. Tone rules
 
 - First person, the builder speaking to peers. Concrete over impressive: numbers, real steps.
-- No marketing superlatives ("ثوري", "الأفضل", "blazingly fast"), no fake metrics.
+- The owner's voice applies, including the words to avoid in both languages and no unmeasured
+  numbers: [haytham-brand voice](../haytham-brand/references/voice.md).
 - Emojis: one per point, plus at most 2 elsewhere. Never a row of emojis.
-- English posts follow the same order; plain words, short sentences.
-- Run the `humanizer` skill (if installed) over the English draft to remove AI tells.
+- English posts follow the same order.
+- Check the draft for AI tells: the `humanizer` skill (if installed) for English, the
+  [arabic-copy tells](../arabic-copy/references/tells-and-rewrites.md) for Arabic.
 
 ## 3. The image
 
@@ -81,3 +84,42 @@ when the user is unhappy, and let them pick.
   already deleted.
 - Advice to give the user: reply to every comment in the first hours; pin the repo link in the first
   comment only if the user wants it there.
+
+## 6. Sharing an article
+
+Write these after the article is published, reuse its figures (WebP exports), and keep them honest
+about what they link to. Keep drafts out of the repository.
+
+X thread, five to eight posts:
+
+```
+1/ <The problem in one line, from the reader's side.> [figure: the before/after or the architecture]
+2/ <What was hard about it.>
+3/ <The idea that solved it.>
+4/ <How it works, in one or two lines.> [figure: the key one]
+5/ <A trade-off you made and why.>
+6/ <What it changed.>
+7/ <What you'd do differently.>
+8/ The full write-up, with the figures: <link>
+```
+
+- One figure on the first post and one on the key post; the link goes in the last post.
+- No hashtag walls.
+
+LinkedIn post:
+
+```
+<Hook: three short lines. The problem or the surprising result.>
+
+<Five to eight short lines on the idea and the result.
+One line each. No bullets of buzzwords.>
+
+<Optional: thanks to the colleagues who shared the work, by name.>
+
+<Link to the article.>
+```
+
+- One figure.
+- Colleagues may be named here (not on the site), as contributors.
+- The article's employer rules hold (no internal counts, dated milestones or vendor lists):
+  [tech-articles writing rules](../tech-articles/references/writing-rules.md#employers-and-clients).

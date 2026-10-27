@@ -31,12 +31,12 @@ Checked 2026-10-27. Each entry: **symptom** → cause → fix.
 - **Icons fail offline or behind a firewall.** → They are fetched from the Iconify API at runtime.
   → Install `@iconify-json/lucide` and set `icon.serverBundle: 'local'` (server apps) or bundle them as above.
 - **Arrows point the wrong way in Arabic.** → Icons are not mirrored by default.
-  → Add the icon to the RTL flip list in `main.css` or put `rtl:-scale-x-100` on it.
+  → [Icons that point somewhere](i18n-rtl.md#icons-that-point-somewhere).
 
 ## Fonts
 
 - **Arabic text shows in the system font while Latin text uses the brand font.**
-  → `@nuxt/fonts` skips the Arabic subset by default. → `subsets: ['arabic', 'latin']` on the family.
+  → `@nuxt/fonts` skips the Arabic subset by default. → [Fonts for Arabic](i18n-rtl.md#fonts-for-arabic).
 - **Bold text looks smeared or too thin.** → That weight was not downloaded, so the browser fakes it.
   → List every weight in `fonts.families[].weights`.
 - **The second app in the repo uses system fonts.** → The `fonts` block lives in `nuxt.config.ts`, not in CSS.
@@ -68,7 +68,7 @@ Checked 2026-10-27. Each entry: **symptom** → cause → fix.
   → Add them to `nitro.prerender.routes`.
 - **Two pages show each other's data.** → Two `useAsyncData` calls share a key. → Give each call a unique key.
 - **A hydration warning about a date.** → The server and the browser format in different time zones.
-  → Pass a fixed `timeZone` to `Intl.DateTimeFormat`.
+  → A fixed `timeZone`: [Numbers, dates and money](i18n-rtl.md#numbers-dates-and-money).
 - **An ISR page caches an outage.** → The page returned 200 with an error state. → Return a 503 so the host keeps
   the last good copy.
 - **The browser shows an old page after a rebuild.** → The page payload is cached. → Reload with a query string
@@ -83,14 +83,13 @@ Checked 2026-10-27. Each entry: **symptom** → cause → fix.
 - **A table or long ID overflows its card.** → A flex child without `min-w-0` refuses to shrink.
   → Add `min-w-0` on the flex child and `truncate` or `break-all` on the text.
 - **The layout is mirrored wrong in Arabic.** → Physical classes (`ml-*`, `left-*`, `text-left`).
-  → Logical classes (`ms-*`, `start-*`, `text-start`).
-- **Phone numbers, versions or paths scramble inside Arabic sentences.** → The bidi algorithm reorders neutral
-  characters. → `<bdi dir="ltr">`, or `⁦ ... ⁩` inside translated strings.
-- **A user's message shows with the wrong alignment.** → It inherits the page direction.
-  → `dir="auto"` on the element that shows it.
+  → [Layout once, both directions](i18n-rtl.md#layout-once-both-directions).
+- **Phone numbers, versions or paths scramble inside Arabic sentences, or a user's message shows with the wrong
+  alignment.** → The bidi algorithm reorders neutral characters; typed text inherits the page direction.
+  → [Mixed-direction text](i18n-rtl.md#mixed-direction-text).
 - **In Arabic, submenus open toward the wrong side or arrow keys move the wrong way in tabs.** → `UApp` has no
-  locale, so Reka UI assumes LTR.
-  → `<UApp :locale="ar">`; setting `<html dir>` alone is not enough.
+  locale, so Reka UI assumes LTR. → [Two settings, both needed](i18n-rtl.md#two-settings-both-needed);
+  setting `<html dir>` alone is not enough.
 
 ## Tooling
 

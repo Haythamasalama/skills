@@ -110,7 +110,7 @@ Load the file for the part you are working on.
   language in `nuxt.config.ts` `app.head.htmlAttrs` so the first paint is right.
 - A small typed dictionary per language and a `t(key, params)` helper is enough for a dashboard. A public site gives
   each language its own URL (`/` and `/ar/`) so both get indexed.
-- Arabic copy is Modern Standard Arabic, short and plain. Product and technical names stay in Latin letters.
+- Arabic copy follows the [arabic-copy](../arabic-copy/SKILL.md) skill.
 - Arrows, chevrons, "send" and "external link" icons point the reading way: mirror them in RTL.
 - Pick digits on purpose. Latin digits in Arabic UI: `Intl` locale `ar-u-ca-gregory-nu-latn`.
 

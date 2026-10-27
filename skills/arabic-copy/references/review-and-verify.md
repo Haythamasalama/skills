@@ -102,14 +102,16 @@ Rules that came from false clean reports:
 
 ## 5. RTL checklist
 
-- Logical properties only: `ms-`/`me-`, `ps-`/`pe-`, `start-`/`end-`, `text-start`/`text-end`.
-- A directional glyph («→») is an icon with an RTL flip (`rtl:rotate-180`), never a typed character.
-- No horizontal overflow at mobile width.
-- `letter-spacing: normal` under `[lang='ar']`, set on the element, not only on `html`. Letter
-  spacing breaks joined Arabic letters.
-- Uppercase and monospace labels get the Arabic face and lose the `text-transform`.
-- Scope the Arabic `@font-face` with `unicode-range` so Latin text keeps its own face.
-- Check light and dark, mobile and desktop, in both languages.
+The rules behind these checks (logical classes, isolation, which icons flip, digits, Arabic fonts)
+live once in the `nuxt-ui` skill's [i18n-rtl.md](../../nuxt-ui/references/i18n-rtl.md#layout-once-both-directions); they hold for
+any stack. On the rendered page, check:
+
+- no physical direction class (`ml-`, `pr-`, `left-`, `text-left`) on anything that should flip;
+- no typed directional glyph («→»): each is an icon that flips;
+- no horizontal overflow at mobile width;
+- Arabic text has normal letter spacing and no uppercase transform, labels and eyebrows included;
+- Latin text keeps its own face;
+- light and dark, mobile and desktop, in both languages.
 
 ## 6. Gates, in order
 

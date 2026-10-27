@@ -27,6 +27,7 @@ Fix this first; it is the cheapest win.
 | Metaphor carried over whole | «باب يدخل منه أحد، لا باب يُترك مفتوحاً» | drop it, or one plain clause |
 | One dialect word in formal copy | «استعلام واحد **بس**» | «فقط», then grep the family |
 | Heading that names an abstraction | «ما الذي يحدث بلا حوكمة.» | «ما يحدث حين يكون الوصول يدوياً» |
+| A scene-setting opening, stacked synonyms | «في ظل التطور المتسارع الذي يشهده العالم...» | start with the point |
 | Rhetorical split title translated word by word | "Nobody chases the numbers. The numbers arrive." → «لا أحد يطارد الأرقام. الأرقام تصل بنفسها.» | negation + affirmation to the reader: «لا تلاحق التقارير. التقارير تصلك في موعدها.» |
 
 **Balance the subject.** Naming the product as the doer once or twice a page is right: verb-first
@@ -138,12 +139,12 @@ No scanner finds these. The side-by-side dump does.
 ## 6. Bidi
 
 - A `#41`, a bare identifier, a host or a version next to punctuation reorders on screen.
-- Wrap the run in U+2066 … U+2069 (LRI … PDI), or `dir="ltr"` on an inline element in markup.
-- Check the rendered page first. Don't add isolates in advance: they are invisible in the source
-  and easy to duplicate.
-- A Latin word right before an Arabic comma («Slack،») usually renders fine. Look before you wrap.
-- An up arrow «↑» is direction-neutral. A horizontal arrow typed as a character cannot flip; use
-  an icon that flips in RTL.
+- Wrap the run in U+2066 … U+2069 (LRI … PDI) in a string, or `<bdi dir="ltr">` in markup. The
+  mechanics, and why not to add isolates in advance: [Mixed-direction text](../../nuxt-ui/references/i18n-rtl.md#mixed-direction-text).
+- Check the rendered page first. A Latin word right before an Arabic comma («Slack،») usually
+  renders fine. Look before you wrap.
+- A horizontal arrow typed as a character cannot flip; use an icon
+  ([which icons flip](../../nuxt-ui/references/i18n-rtl.md#icons-that-point-somewhere)).
 
 ## What the scanner covers
 

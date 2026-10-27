@@ -185,8 +185,8 @@ When every row hangs off a tenant:
 
 - Middleware resolves the tenant once per request through the tenant's Contract and leaves it on the
   request; a base-controller trait reads it back (`$this->currentTenant()`).
-- A stranger gets **404**, a member without the permission gets **403**. Why: a 403 to a stranger
-  confirms the tenant exists and lets anyone enumerate tenants.
+- A stranger gets **404**, a member without the permission gets **403**
+  ([why](../../laravel-code-quality/references/security.md#multi-tenant-apps)).
 - Every `Filter{Entity}Data` over tenant data declares its scoping property, and the controller pins it
   after the spread. See [dtos.md](dtos.md) and [controllers-requests-api.md](controllers-requests-api.md).
 - Laravel passes route parameters to a controller **by position, not by name**. If middleware consumed

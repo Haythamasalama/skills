@@ -168,9 +168,8 @@ export default defineAppConfig({
 - `@nuxt/fonts` downloads the families listed in `nuxt.config.ts` at build time and serves them from the app, so
   there is no request to a font CDN at runtime.
 - List every weight you use. A missing weight falls back to faux bold or to the system font.
-- Arabic needs `subsets: ['arabic', 'latin']`. The default skips the Arabic subset.
-- Set `--font-sans` and `--font-mono` in `@theme static`. One family that covers both Arabic and Latin
-  (for example IBM Plex Sans Arabic) keeps mixed lines even.
+- Set `--font-sans` and `--font-mono` in `@theme static`.
+- Arabic (the subset `@nuxt/fonts` skips, one family or two): [Fonts for Arabic](i18n-rtl.md#fonts-for-arabic).
 - `font-mono` for IDs, codes, version numbers and code editors. Add `tabular-nums` to columns of numbers.
 
 ## Dark mode

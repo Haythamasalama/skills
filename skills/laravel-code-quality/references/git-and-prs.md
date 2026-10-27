@@ -7,12 +7,12 @@
 ## TL;DR
 
 - Branch: `<type>/<scope>-<short-description>`, lowercase kebab-case.
-- Commits and PR titles: `<type>(<scope>): <description>`, imperative, under ~72 characters.
+- Commit format, types, body, splitting and when to commit: the [commit-messages](../../commit-messages/SKILL.md) skill. A PR
+  title uses the same `<type>(<scope>): <description>` line.
 - Scopes name the layer that changed (`domain-actions`, `api-controllers`, `migrations`).
-- The body says **why**; the diff already shows what.
 - Squash-merge; the PR title becomes the commit subject, so get it right before merging.
 - Stage named files, never `git add -A` / `git add .`. Never commit `.env*`, keys, credentials or dumps.
-- Commit and push only when the owner asks; many owners review and commit themselves.
+- Push and open a PR only when the owner asks.
 
 ## Workflow
 
@@ -31,7 +31,8 @@ refactor/domain-services-delegate-to-actions
 
 ## Scopes by layer
 
-Pick the most specific scope that fits. Learn the repo's existing scopes from its history first.
+Pick the most specific scope that fits, after reading the history for the scopes the repo already
+uses ([how](../../commit-messages/SKILL.md#before-you-write)).
 
 | Layer | Scopes |
 |---|---|
@@ -81,4 +82,4 @@ committed, rotate it; deleting it in a later commit does not remove it from hist
 1. `vendor/bin/pint --dirty`, then the affected tests.
 2. Review the diff, including the comment check in
    [code-style-and-comments.md](code-style-and-comments.md).
-3. One commit per reason to change, each revertable on its own.
+3. Split into commits per [commit-messages](../../commit-messages/SKILL.md#splitting-work).
