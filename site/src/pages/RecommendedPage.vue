@@ -1,18 +1,26 @@
 <script setup lang="ts">
-import { ArrowUpRight, ChevronDown } from 'lucide-vue-next';
-import { ref } from 'vue';
-import { publishers, recommended } from '../catalog';
+import { ArrowUpRight, ChevronDown, X } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { type Publisher, publishers, type Recommended, recommended } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
 
-const open = ref(new Set<string>());
+const ALL_COMMAND = 'npx skills experimental_install';
 
-function toggle(key: string) {
-  const next = new Set(open.value);
-  next.has(key) ? next.delete(key) : next.add(key);
-  open.value = next;
+const open = ref<string | null>(null);
+const selected = ref<Recommended | null>(null);
+
+const key = (p: Publisher) => `${p.owner}/${p.repo}`;
+
+function choosePublisher(p: Publisher) {
+  const k = key(p);
+  open.value = open.value === k ? null : k;
+  selected.value = open.value ? p.skills[0] : null;
 }
 
-const restore = 'npx skills experimental_install';
+const command = computed(() => selected.value?.command ?? ALL_COMMAND);
+const label = computed(() =>
+  selected.value ? `${selected.value.name} · ${selected.value.source}` : 'All of them: copy skills-lock.json into the project, then',
+);
 </script>
 
 <template>
@@ -23,28 +31,39 @@ const restore = 'npx skills experimental_install';
         Skills from the people who build the tools, and a few from the community. They are listed in
         <code class="font-mono text-[15px] text-fg">skills-lock.json</code> and installed from their own source.
       </p>
-
-      <div class="mt-6 flex max-w-2xl flex-col gap-1">
-        <span class="text-[13px] text-faint">All of them: copy <code class="font-mono">skills-lock.json</code> into the project, then</span>
-        <div class="flex items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
-          <span class="font-mono text-[13px] text-faint select-none">$</span>
-          <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[13px] whitespace-nowrap text-fg">{{ restore }}</code>
-          <CopyButton :text="restore" label="the restore command" />
-        </div>
-      </div>
     </section>
 
-    <section aria-label="Publishers" class="pt-14">
+    <div class="sticky top-0 z-10 -mx-6 mt-6 bg-bg/90 px-6 py-3 backdrop-blur">
+      <div class="flex max-w-2xl items-center justify-between gap-3">
+        <span class="truncate font-mono text-[12.5px]" :class="selected ? 'text-fg' : 'text-faint'">{{ label }}</span>
+        <button
+          v-if="selected"
+          type="button"
+          class="link-muted inline-flex shrink-0 cursor-pointer items-center gap-1 text-[12px]"
+          @click="(selected = null), (open = null)"
+        >
+          <X class="size-3.5" /> All
+        </button>
+      </div>
+      <div class="mt-1.5 flex max-w-2xl items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
+        <span class="font-mono text-[13px] text-faint select-none">$</span>
+        <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[13px] whitespace-nowrap text-fg">{{ command }}</code>
+        <CopyButton :text="command" label="the install command" />
+      </div>
+    </div>
+
+    <section aria-label="Sources" class="pt-8">
       <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-line px-2 py-2 font-mono text-[11px] tracking-[0.08em] text-faint uppercase">
         <span>Creator</span><span>Skills</span>
       </div>
 
-      <div v-for="p in publishers" :key="p.owner + p.repo" class="border-b border-line">
+      <div v-for="p in publishers" :key="key(p)" class="border-b border-line">
         <button
           type="button"
           class="grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg px-2 py-3 text-left transition-colors hover:bg-raised"
-          :aria-expanded="open.has(p.owner + p.repo)"
-          @click="toggle(p.owner + p.repo)"
+          :class="open === key(p) && 'bg-raised'"
+          :aria-expanded="open === key(p)"
+          @click="choosePublisher(p)"
         >
           <span class="flex min-w-0 items-center gap-3">
             <img v-if="p.avatar" :src="p.avatar" alt="" width="32" height="32" class="avatar-mono size-8 shrink-0 rounded-lg" loading="lazy" />
@@ -58,19 +77,23 @@ const restore = 'npx skills experimental_install';
           </span>
           <span class="flex items-center gap-2 font-mono text-[13px] text-muted">
             {{ p.skills.length }}
-            <ChevronDown class="size-4 text-faint transition-transform" :class="open.has(p.owner + p.repo) && 'rotate-180'" />
+            <ChevronDown class="size-4 text-faint transition-transform" :class="open === key(p) && 'rotate-180'" />
           </span>
         </button>
 
-        <div v-if="open.has(p.owner + p.repo)" class="flex flex-col gap-2 px-2 pb-4 pl-[3.25rem]">
-          <div v-for="s in p.skills" :key="s.name" class="flex flex-col gap-1">
-            <span class="font-mono text-[13.5px] text-fg">{{ s.name }}</span>
-            <div class="flex min-w-0 items-center gap-2 rounded-lg border border-line py-0.5 pr-1 pl-3">
-              <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[12px] whitespace-nowrap text-soft">{{ s.command }}</code>
-              <CopyButton :text="s.command" :label="`the install command for ${s.name}`" />
-            </div>
-          </div>
-          <a :href="p.url" target="_blank" rel="noopener" class="link-muted mt-1 inline-flex items-center gap-1 text-xs">
+        <div v-if="open === key(p)" class="flex flex-wrap items-center gap-2 px-2 pt-1 pb-4 pl-[3.25rem]">
+          <button
+            v-for="s in p.skills"
+            :key="s.name"
+            type="button"
+            class="inline-flex min-h-8 cursor-pointer items-center rounded-full px-3 font-mono text-[12.5px] transition-colors"
+            :class="selected?.name === s.name ? 'border border-fg bg-surface text-fg' : 'border border-chip text-muted hover:text-fg'"
+            :aria-pressed="selected?.name === s.name"
+            @click="selected = s"
+          >
+            {{ s.name }}
+          </button>
+          <a :href="p.url" target="_blank" rel="noopener" class="link-muted ml-auto inline-flex items-center gap-1 text-xs">
             Source <ArrowUpRight class="size-3.5" />
           </a>
         </div>
