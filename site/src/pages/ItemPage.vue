@@ -11,6 +11,20 @@ const props = defineProps<{ item: Item; path: string; anchor: string }>();
 const file = computed(() => props.item.files.find(f => f.path === props.path) ?? mainFile(props.item));
 const isMain = computed(() => file.value.path === 'SKILL.md');
 
+// The frontmatter description, read as a summary: its first sentence leads, the rest follows.
+const summary = computed(() => {
+  const text = props.item.description
+    .split(/\s(?:Also triggers|Triggers|Arabic triggers)\b/)[0]
+    .replace(/^Use when /, '')
+    .replace(/^./, c => c.toUpperCase())
+    .trim();
+  const cut = text.search(/ — |\. /);
+
+  return cut > 0 ? { lead: text.slice(0, cut).replace(/\.$/, '') + '.', rest: text.slice(cut + 2).trim() } : { lead: text, rest: '' };
+});
+
+const [owner, repoName] = REPO.split('/');
+
 const tabs = computed(() => [
   { label: 'Command', text: `npx skills add ${REPO} --skill ${props.item.name}` },
   { label: 'Prompt', text: `Install the ${props.item.name} skill from ${REPO} in this project` },
@@ -65,12 +79,23 @@ watch(
 
 <template>
   <div class="pt-12 md:pt-16">
-    <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 font-mono text-[13px] text-faint">
-      <a href="#/" class="hover:text-fg">skills</a>
-      <span aria-hidden="true">/</span>
-      <span>{{ REPO }}</span>
-      <span aria-hidden="true">/</span>
-      <span class="text-fg">{{ item.name }}</span>
+    <nav aria-label="Breadcrumb">
+      <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[13.5px]">
+        <li><a href="#/" class="link-muted">skills</a></li>
+        <li aria-hidden="true" class="text-chip">/</li>
+        <li><a :href="`https://github.com/${owner}`" target="_blank" rel="noopener" class="link-muted">{{ owner }}</a></li>
+        <li aria-hidden="true" class="text-chip">/</li>
+        <li><a href="#/" class="link-muted">{{ repoName }}</a></li>
+        <li aria-hidden="true" class="text-chip">/</li>
+        <li>
+          <a v-if="!isMain" :href="`#/item/${item.name}`" class="link-muted">{{ item.name }}</a>
+          <span v-else class="text-fg" aria-current="page">{{ item.name }}</span>
+        </li>
+        <template v-if="!isMain">
+          <li aria-hidden="true" class="text-chip">/</li>
+          <li class="text-fg" aria-current="page">{{ file.path }}</li>
+        </template>
+      </ol>
     </nav>
 
     <h1 class="mt-4 font-mono text-[26px] leading-tight font-medium tracking-[-0.01em] [overflow-wrap:anywhere] md:text-[32px]">
@@ -104,14 +129,21 @@ watch(
           </div>
         </section>
 
+        <section v-if="isMain && summary.lead" aria-labelledby="summary" class="mt-10">
+          <h2 id="summary" class="eyebrow">Summary</h2>
+          <p class="mt-3 text-[15.5px] leading-[1.7] text-soft">
+            <strong class="font-semibold text-fg">{{ summary.lead }}</strong>
+            {{ summary.rest }}
+          </p>
+        </section>
+
         <section id="content" aria-label="Skill content" class="mt-10 scroll-mt-6">
           <div class="flex items-center justify-between gap-3">
-            <p class="flex min-w-0 items-center gap-2 font-mono text-[12px] text-faint">
-              <a v-if="!isMain" :href="`#/item/${item.name}`" class="inline-flex shrink-0 items-center gap-1 hover:text-fg">
-                <ArrowLeft class="size-3.5" /> SKILL.md
+            <p class="flex min-w-0 items-center gap-2">
+              <a v-if="!isMain" :href="`#/item/${item.name}`" class="link-muted inline-flex shrink-0 items-center gap-1 text-[13px]">
+                <ArrowLeft class="size-3.5" /> Back to SKILL.md
               </a>
-              <span v-if="!isMain" aria-hidden="true">·</span>
-              <span class="truncate text-fg">{{ file.path }}</span>
+              <span v-else class="eyebrow">SKILL.md</span>
             </p>
             <CopyButton v-if="file.content !== null" :text="file.content" :label="file.path" />
           </div>
@@ -140,32 +172,36 @@ watch(
       </div>
 
       <aside class="flex flex-col gap-8 text-[13px] md:sticky md:top-6 md:self-start">
-        <dl class="grid gap-4">
-          <div>
-            <dt class="eyebrow">Tags</dt>
-            <dd class="mt-2 flex flex-wrap gap-1.5">
-              <span v-for="t in item.tags" :key="t" class="rounded-full border border-chip px-2.5 py-0.5 font-mono text-[11.5px] text-muted">{{ t }}</span>
-            </dd>
-          </div>
-          <div>
-            <dt class="eyebrow">Size</dt>
-            <dd class="mt-1.5 font-mono text-muted">{{ item.files.length }} files · {{ item.lines.toLocaleString('en-US') }} lines</dd>
-          </div>
-          <div>
-            <dt class="eyebrow">Repository</dt>
-            <dd class="mt-1.5">
+        <dl class="flex flex-col divide-y divide-line border-y border-line">
+          <div class="flex flex-col gap-1 py-3">
+            <dt class="text-[13px] text-faint">Repository</dt>
+            <dd>
               <a
                 :href="`https://github.com/${REPO}/tree/main/skills/${item.name}`"
                 target="_blank"
                 rel="noopener"
-                class="link-muted inline-flex items-center gap-1 font-mono"
-              >{{ REPO }} <ArrowUpRight class="size-3.5" /></a>
+                class="link inline-flex items-center gap-1 font-mono text-[14px]"
+              >{{ REPO }} <ArrowUpRight class="size-3.5 text-faint" /></a>
+            </dd>
+          </div>
+          <div class="flex flex-col gap-1 py-3">
+            <dt class="text-[13px] text-faint">Files</dt>
+            <dd class="font-mono text-[15px] text-fg">{{ item.files.length }}</dd>
+          </div>
+          <div class="flex flex-col gap-1 py-3">
+            <dt class="text-[13px] text-faint">Lines</dt>
+            <dd class="font-mono text-[15px] text-fg">{{ item.lines.toLocaleString('en-US') }}</dd>
+          </div>
+          <div class="flex flex-col gap-2 py-3">
+            <dt class="text-[13px] text-faint">Tags</dt>
+            <dd class="flex flex-wrap gap-1.5">
+              <span v-for="t in item.tags" :key="t" class="rounded-full border border-chip px-2.5 py-0.5 font-mono text-[11.5px] text-muted">{{ t }}</span>
             </dd>
           </div>
         </dl>
 
         <div>
-          <p class="eyebrow">Files</p>
+          <p class="text-[13px] text-faint">Files</p>
           <div class="mt-2 flex flex-col gap-3">
             <div v-for="[dir, files] in groups" :key="dir" class="flex flex-col">
               <span v-if="dir" class="mb-1 font-mono text-[11px] text-faint">{{ dir }}/</span>
