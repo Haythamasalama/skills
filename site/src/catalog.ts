@@ -15,9 +15,22 @@ const binary = import.meta.glob<string>(['../../*/skills/**/*.{png,ico,jpg,jpeg,
 
 export interface RepoFile {
   path: string;
+  title: string;
   content: string | null;
   url: string | null;
   lines: number;
+}
+
+const KIND_TITLES: Record<string, string> = { sh: 'Shell script', py: 'Python script', mjs: 'Node script', js: 'Script', json: 'Data', css: 'Stylesheet', html: 'Template', svg: 'Image', png: 'Image', ico: 'Icon', php: 'PHP fixture', vue: 'Vue fixture' };
+
+function titleOf(path: string, content: string | null): string {
+  if (path === 'SKILL.md') return 'Overview';
+
+  const heading = content?.match(/^#\s+(.+)$/m)?.[1]?.trim();
+
+  if (heading && path.endsWith('.md')) return heading.replace(/[*`]/g, '');
+
+  return KIND_TITLES[path.split('.').pop() ?? ''] ?? 'File';
 }
 
 export interface Item {
@@ -91,7 +104,7 @@ function add(key: string, content: string | null, url: string | null) {
 
   const item = items.get(name)!;
   const lines = content === null ? 0 : content.split('\n').length;
-  item.files.push({ path, content, url, lines });
+  item.files.push({ path, title: kind === 'agent' ? 'Agent' : titleOf(path, content), content, url, lines });
   item.lines += lines;
 
   if ((path === 'SKILL.md' || kind === 'agent') && content !== null) {
