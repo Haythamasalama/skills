@@ -1,31 +1,35 @@
 # Code style and comments
 
-**Read when:** writing or reviewing any PHP, and always before a commit (the comment check).
-**Owns:** formatting, one-line signatures, the comment and PHPDoc policy, naming, types, `readonly`,
-imports, morph type values, private methods over single-use classes.
-**See also:** [conditionals.md](conditionals.md) · [anti-patterns.md](anti-patterns.md)
+**Read when:** writing or reviewing any PHP, and always before calling a change done (the comment check).
+**Owns:** formatting, one-line signatures, named arguments, the comment and PHPDoc policy and the comment
+check, naming, types, `readonly`, imports, morph type values, private methods over single-use classes.
 
 ## TL;DR
 
 - Pint owns formatting. Run `vendor/bin/pint --dirty` on the files you changed; never hand-align.
 - **Method signatures stay on one line**, however long. Only DTO constructors go one property per line.
+- **Named arguments** when a call passes a bare literal (`true`, `null`, a number) or two or more values
+  of the same type.
 - **Write few comments; default to none.** A comment says a WHY a competent reader would get wrong
   without it, in 1–2 lines. Delete anything that restates code or narrates history.
 - PHPDoc only for what a signature cannot say: array shapes, generic collections, meaningful `@throws`.
   No docblocks on top of classes or methods that restate them. Never `@inheritdoc`.
 - A comment above a declaration is a `/** … */` docblock; `//` lives only inside a method body.
-- **Before every commit**, list each comment line you added and delete each one that fails the bar.
-  Leave pre-existing comments alone unless asked.
 - A step that one class needs stays a private method there; a new class needs real reuse.
 - Types on every parameter and return; `?Type`, not `Type|null`. `readonly` wherever nothing changes.
 
 ## Formatting
 
 - `vendor/bin/pint --dirty` formats only modified files. Run the full `vendor/bin/pint` only when asked;
-  a repo-wide format buries the real diff.
-- If Pint's output is wrong for the project, change `pint.json`, not the code around it.
+  a repo-wide format buries the real diff. CI runs `vendor/bin/pint --test` and fails on any change it
+  would make.
+- If Pint's output is wrong for the project, change `pint.json`, not the code around it. Start from the
+  `laravel` preset and add only the rules the team decided.
 - `[]`, never `array()`. Single quotes unless interpolating (`"Invoice {$number} issued"`).
+- Curly braces on every control structure, even a one-line body.
 - One class per `use`; Pint orders them; no unused imports.
+- New models declare casts in a `casts()` method, not the `$casts` property. Leave existing ones until
+  that model is refactored.
 
 ## One-line signatures (deliberate)
 
@@ -41,8 +45,27 @@ public function getInvoice(
 public function getInvoice(?int $id = null, ?FilterInvoiceData $filters = null, array $withRelations = []): ?Invoice;
 ```
 
-Why: every Contract, Action and Service method then scans the same way, and a diff of a signature is one
-line. The exception is a DTO constructor: one promoted property per line.
+Why: every public method then scans the same way, and a diff of a signature is one line. The exception is
+a DTO constructor: one promoted property per line.
+
+## Named arguments at call sites
+
+Name the arguments when a call to your own code passes:
+
+- a bare literal (`true`, `false`, `null`, a number), whose meaning the call cannot show;
+- two or more values of the same type, which could be swapped without any error.
+
+```php
+// ❌ what is `true`, and which model is the customer?
+new InvoiceFormProps($invoice, true, $customer, $employee);
+
+// ✅
+new InvoiceFormProps(invoice: $invoice, isCreate: true, customer: $customer, preparedBy: $employee);
+```
+
+A call with one obvious argument (`getInvoice($id)`) or a framework helper (`abort(404)`,
+`route('invoices.show', $id)`) stays positional. Why the limit: a named call ties the caller to the
+parameter name, so renaming the parameter means updating its named callers.
 
 ## Comments
 
@@ -61,10 +84,11 @@ if ($response->status() === 502) {
 
 ### What to delete
 
-- **Restating the code.** `// get the invoice` above `getInvoice()`.
+- **Restating the code.** `// get the invoice` above `getInvoice()`; a docblock that repeats a method or
+  constant name in a sentence.
 - **Narrating steps.** One comment per non-obvious decision, not one per line.
-- **History.** "Changed from X", "added after the bug in Y", ticket or decision numbers with their story:
-  that is the commit message's job. A live constraint is fine ("keep while app v2.3 still sends this").
+- **History.** "Changed from X", "added after the bug in Y", ticket numbers with their story: that belongs
+  in the change description. A live constraint is fine ("keep while app v2.3 still sends this").
 - **Repetition.** State a rationale once, where it is enforced, not at every call site.
 - **Explaining the language** or naming what the next line does.
 - **Docblocks that restate the signature:**
@@ -106,11 +130,13 @@ public function getInvoice(int $id): ?Invoice
 - Rewriting code means rewriting (or deleting) its comments. A stale comment is worse than none.
 - Cite a decision record by its number instead of restating its reasoning, if the project keeps them.
 
-### The pre-commit check
+### The check before calling a change done
 
-1. `git diff` and list every added comment or docblock line.
+1. Read your diff and list every comment or docblock line you added.
 2. For each, ask: what would go wrong without it?
-3. No answer → delete. Keep only what has one.
+3. No answer → delete it. Keep only what has one.
+
+Leave pre-existing comments alone unless asked; they are not part of your change.
 
 ## When PHPDoc is needed
 
@@ -138,14 +164,14 @@ An `array` parameter without a shape is a review finding; usually it should be a
 | Classes, enums, interfaces | `PascalCase` | `IssueInvoice`, `InvoiceContract` |
 | Methods, variables, parameters | `camelCase` | `getInvoice()`, `$invoiceId` |
 | Constants | `UPPER_SNAKE_CASE` | `MAX_LINES` |
-| Enum cases | the project's one choice | `PAID` or `Paid`, never both |
+| Enum cases | the project's one choice | `PAID` or `Paid`, never both in one codebase |
 | DTO properties | `snake_case` (deliberate carve-out) | `$customer_id` |
 | Files | match the class exactly | `IssueInvoice.php` |
 
 - Names say what a thing is or does: `isRegisteredForDiscounts`, not `discount()`.
-- Booleans read as questions: `isLocked`, `hasLines`, `wasUnlinked`.
-- Suffixes in a DDD layout: Actions have none, DTOs end in `Data`, interfaces in `Contract`,
-  implementations in `Service`.
+- Booleans read as questions: `isLocked`, `hasLines`, `wasRefunded`.
+- In a layered layout, suffixes say the role: single-operation classes have none (`IssueInvoice`), DTOs
+  end in `Data`, interfaces in `Contract`, their implementations in `Service`.
 
 ## Types
 
@@ -178,7 +204,7 @@ map, never a hard-coded class string.
 ## Private methods over single-use classes
 
 ```php
-// ❌ a class whose only caller is one Action
+// ❌ a class whose only caller is one operation class
 final class FormatReminderLines
 {
     public static function handle(Invoice $invoice): array { /* … */ }
@@ -198,8 +224,8 @@ final class SendInvoiceReminder
 ```
 
 A class earns its own file through reuse (more than one caller). Readability alone is a reason for a
-better private method, not a new class. Raise it before adding one. This does not change how Actions are
-split by operation; it is about the steps inside one.
+better private method, not a new class. Raise it before adding one. This does not change how operations
+are split into classes (one per create, update, issue…); it is about the steps inside one.
 
 ## Static analysis
 
@@ -207,6 +233,8 @@ Run Larastan / PHPStan at the highest level the codebase passes, and raise it ov
 can be checked statically belong in a rule (custom PHPStan rule or Pest `arch()`), not only in prose.
 
 ## Verify
+
+These find existing code too. Treat the output as a review list scoped to what you changed.
 
 ```bash
 # Multi-line method signatures
@@ -216,11 +244,11 @@ grep -rnE "function [a-zA-Z_]+\($" src/ app/ --include='*.php'
 grep -rni "@inheritdoc" src/ app/
 
 # // comments directly above a declaration
-grep -rnE -A1 "^\s*// " src/ --include='*.php' | grep -E "^\S+-[0-9]+-\s*(public|protected|private|final|class|const|function)"
+grep -rnE -A1 "^\s*// " src/ app/ --include='*.php' | grep -E "^\S+-[0-9]+-\s*(public|protected|private|final|class|const|function)"
 
 # Hard-coded morph class strings
-grep -rnE "_type'\s*=>\s*'[A-Z][A-Za-z\\\\]+'" src/
+grep -rnE "_type'\s*=>\s*'[A-Z][A-Za-z\\\\]+'" src/ app/
 
 # Instantiating a model only for its morph class
-grep -rn "(new [A-Z][A-Za-z]*)->getMorphClass()" src/
+grep -rn "(new [A-Z][A-Za-z]*)->getMorphClass()" src/ app/
 ```
