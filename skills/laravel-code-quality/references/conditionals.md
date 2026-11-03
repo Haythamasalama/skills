@@ -2,12 +2,11 @@
 
 **Read when:** writing or reviewing an `if`, `elseif`, `match`, a ternary, or a condition with more than one part.
 **Owns:** guard clauses, naming conditions, `elseif` for sequential checks, lookup maps instead of branches.
-**See also:** [code-style-and-comments.md](code-style-and-comments.md) · [anti-patterns.md](anti-patterns.md)
 
 ## TL;DR
 
-- **Guard clauses first.** Handle the special or failing case, `return` / `throw`, and let the main path
-  run last, unindented. No `else` after a `return`.
+- **Guard clauses first.** Handle the special or failing case, `return` / `throw` / `$fail()`, and let the
+  main path run last, unindented. No `else` after a `return`.
 - **Name the condition.** A condition with more than one part goes in a variable named for its meaning, or
   a private method if it is reused. The name replaces the comment you would otherwise write.
 - **One `if / elseif` chain for an exclusive choice** in the middle of a method, never a row of separate `if`s.
@@ -170,13 +169,15 @@ out `default`, so a new case fails loudly.
 
 ## Verify
 
+These find existing code too. Treat the output as a review list scoped to what you changed.
+
 ```bash
 # else / elseif right after a return: guard-clause candidates
-grep -rnE -B2 "\} ?(elseif|else)\b" src/ --include='*.php' | grep -E "return|throw" | head
+grep -rnE -B2 "\} ?(elseif|else)\b" src/ app/ --include='*.php' | grep -E "return|throw" | head
 
 # Ternaries inside an if condition: name them
-grep -rnE "if \(.*\?.*:.*\) \{" src/ --include='*.php'
+grep -rnE "if \(.*\?.*:.*\) \{" src/ app/ --include='*.php'
 
 # else if instead of elseif
-grep -rn "else if" src/ --include='*.php'
+grep -rn "else if" src/ app/ --include='*.php'
 ```

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>macOS window</title>
+<link rel="stylesheet" href="mac.css">
+<style>
+  /* The stage is yours: a brand gradient or a wallpaper image behind the window. */
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(160deg, #62C6FF, #1650D0);
+  }
+  .placeholder { padding: 24px 12px; font: 400 13px/16px var(--font); color: var(--content-label-2); }
+</style>
+<script>
+  // ?theme=dark  ?state=inactive  ?dir=rtl  ?sidebar=0  — so one file renders every variant.
+  const q = new URLSearchParams(location.search);
+  document.documentElement.dir = q.get("dir") || "ltr";
+  if (q.get("lang")) document.documentElement.lang = q.get("lang");
+  addEventListener("DOMContentLoaded", () => {
+    const w = document.querySelector(".mac");
+    if (q.get("theme") === "dark") w.classList.add("dark");
+    if (q.get("state") === "inactive") w.classList.add("inactive");
+    if (q.get("sidebar") === "0") { w.classList.add("no-sidebar"); w.querySelector(".sidebar").remove(); w.querySelector(".toolbar").prepend(w.querySelector(".controls-slot").content.cloneNode(true)); }
+  });
+</script>
+</head>
+<body>
+  <div class="mac" style="--w: 1000px; --h: 620px">
+    <aside class="sidebar">
+      <div class="bar">
+        <div class="controls"><i></i><i></i><i></i></div>
+        <span class="glass"><b>􀰱</b></span>
+      </div>
+      <nav class="list">
+        <div class="section">
+          <div class="section-title">Library</div>
+          <div class="row selected"><span class="symbol">􀉉</span><span>Recents</span></div>
+          <div class="row"><span class="symbol">􀈕</span><span>Screenshots</span><span class="detail">24</span></div>
+          <div class="row"><span class="symbol">􀋂</span><span>Favourites</span></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Projects</div>
+          <div class="row"><span class="symbol">􀈕</span><span>Website</span></div>
+          <div class="row"><span class="symbol">􀈕</span><span>App Store</span></div>
+        </div>
+      </nav>
+    </aside>
+    <section class="main">
+      <div class="edge"></div>
+      <template class="controls-slot"><div class="controls"><i></i><i></i><i></i></div></template>
+      <header class="toolbar">
+        <span class="glass"><b>􀆉</b><b>􀆊</b></span>
+        <div class="title">Recents<small>24 items</small></div>
+        <span class="glass"><b>􀈂</b><b class="on">􀏅</b><b>􀈑</b></span>
+        <span class="glass search"><span class="glyph">􀊫</span>Search</span>
+      </header>
+      <div class="content">
+        <div class="placeholder">Your app's content goes here.</div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

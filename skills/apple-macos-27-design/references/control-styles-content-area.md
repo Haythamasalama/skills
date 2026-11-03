@@ -1,0 +1,399 @@
+# Control fill styles, Content Area — macOS 27
+
+**Read when:** you need an exact macOS 27 value for control fill styles, Content Area as Apple's kit stores it.
+**Owns:** the shared layer styles in the groups Content Area.
+
+Source: `Apple macOS 27 UI Kit.sketch` from Apple Design Resources (developer.apple.com/design/resources), read 2026-11-01. Every value below is copied from the kit's shared tokens by a script; nothing is estimated. Shared layer styles the controls use for each state. Component pages name the style each part uses.
+
+## How to read the effect lines
+
+- Colours are `#RRGGBB`, with `@NN%` for alpha below 100%. A name in `{braces}` is the kit swatch the colour is bound to.
+- `blend plus-darker` / `blend plus-lighter` are the Plus Darker / Plus Lighter blend modes the kit uses for vibrant colours.
+- `shadow` / `inner-shadow`: x offset, y offset, blur radius, spread, colour.
+- `blur background`: background blur radius and saturation. `blur glass`: Sketch's glass effect with its radius, saturation, brightness, distortion, depth and chromatic aberration values.
+- `corners R smoothingS styleN`: corner radius R (`max` = fully rounded, a capsule or circle), corner smoothing S and the kit's corner style number N, as stored.
+- `opacity` is the layer opacity; a fill's own opacity and blend mode are in brackets after it.
+
+
+## Content Area/Dark
+
+- **Content Area/Dark/01 - Bordered/01 - Idle**
+  - fill #FFFFFF@7%
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/01 - Bordered/03 - Clicked**
+  - fill #FFFFFF@16%
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/01 - Bordered/04 - Disabled**
+  - fill #FFFFFF@4%
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/02 - Bordered Tinted/01 - Idle**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+  - opacity 20%
+- **Content Area/Dark/02 - Bordered Tinted/03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+  - opacity 28%
+- **Content Area/Dark/02 - Bordered Tinted/04 - Disabled**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+  - opacity 12%
+- **Content Area/Dark/03 - Bordered Destructive/01 - Idle**
+  - fill #FF4245 {System Colors/Dark/1 Red} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+  - opacity 22%
+- **Content Area/Dark/03 - Bordered Destructive/03 - Clicked**
+  - fill #FF4245 {System Colors/Dark/1 Red} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+  - opacity 28%
+- **Content Area/Dark/03 - Bordered Destructive/04 - Disabled**
+  - fill #FF4245 {System Colors/Dark/1 Red} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+  - corners max smoothing0.6 style1
+  - opacity 12%
+- **Content Area/Dark/04 - Prominent (Default)/01 - Idle**
+  - fill #0091FF {System Colors/Dark/8 Blue}
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/04 - Prominent (Default)/03 - Clicked**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue} + #FFFFFF@10% (blend plus-lighter)
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/04 - Prominent (Default)/04 - Disabled**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue}
+  - corners max smoothing0.6 style1
+  - opacity 40%
+- **Content Area/Dark/05 - Prominent (Default) Destructive/01 - Idle**
+  - fill #FF4245 {System Colors/Dark/1 Red}
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/05 - Prominent (Default) Destructive/03 - Clicked**
+  - fill #FF4747 {System Colors/Dark (use plus lighter)/1 Red} + #FFFFFF@10% (blend plus-lighter)
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/05 - Prominent (Default) Destructive/04 - Disabled**
+  - fill #FF4747 {System Colors/Dark (use plus lighter)/1 Red}
+  - corners max smoothing0.6 style1
+  - opacity 40%
+- **Content Area/Dark/Controls/Active, Off, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary} (blend plus-darker)
+- **Content Area/Dark/Controls/Active, Off, 03 - Clicked**
+  - fill #FFFFFF@19%
+- **Content Area/Dark/Controls/Active, Off, 04 - Disabled**
+  - fill #FFFFFF@5% {Fills/Dark/3 Tertiary}
+  - blend plus-darker
+- **Content Area/Dark/Controls/Active, On, 01 - Idle**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@5% {Fills/Dark Vibrant (use plus lighter)/3 Tertiary} (blend plus-lighter)
+- **Content Area/Dark/Controls/Active, On, 03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@8% {Fills/Dark Vibrant (use plus lighter)/2 Secondary} (blend plus-lighter)
+- **Content Area/Dark/Controls/Active, On, 04 - Disabled**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@5% {Fills/Dark Vibrant (use plus lighter)/3 Tertiary} (blend plus-lighter)
+  - opacity 45%
+- **Content Area/Dark/Controls/Inactive, Off, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Controls/Inactive, Off, 03 - Clicked**
+  - fill #FFFFFF@19%
+- **Content Area/Dark/Controls/Inactive, Off, 04 - Disabled**
+  - fill #FFFFFF@3% {Fills/Dark/4 Quatenary}
+- **Content Area/Dark/Controls/Inactive, On, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Controls/Inactive, On, 03 - Clicked**
+  - fill #FFFFFF@19%
+- **Content Area/Dark/Controls/Inactive, On, 04 - Disabled**
+  - fill #FFFFFF@3% {Fills/Dark/4 Quatenary}
+- **Content Area/Dark/Fills/Default, 01 - Primary**
+  - fill #000000@85%
+- **Content Area/Dark/Fills/Default, 02 - Secondary**
+  - fill #000000@50%
+- **Content Area/Dark/Fills/Default, 03 - Tertiary**
+  - fill #000000@25%
+- **Content Area/Dark/Fills/Default, 04 - Quaternary**
+  - fill #000000@10%
+- **Content Area/Dark/Fills/Default, 05 - Quinary**
+  - fill #000000@5%
+- **Content Area/Dark/Fills/Default, 06 - Seximal**
+  - fill #000000@3%
+- **Content Area/Dark/Fills/Selected 01 - Primary**
+  - fill #FFFFFF
+- **Content Area/Dark/Fills/Selected 02 - Secondary**
+  - fill #FFFFFF@55%
+- **Content Area/Dark/Fills/Selected 03 - Tertiary**
+  - fill #FFFFFF@25%
+- **Content Area/Dark/Fills/Selected 04 - Quaternary**
+  - fill #FFFFFF@10%
+- **Content Area/Dark/Fills/Selected 05 - Quinary**
+  - fill #FFFFFF@5%
+- **Content Area/Dark/Fills/Selected 06 - Seximal**
+  - fill #FFFFFF@2.5%
+- **Content Area/Dark/Input Fields/01 - Idle**
+  - fill #1E1E1E
+  - border 1 outside #FFFFFF@4%
+  - corners 9 smoothing0.6 style1
+- **Content Area/Dark/Input Fields/03 - Focus Ring**
+  - border 3.5 outside #0091FF {System Colors/Dark/8 Blue} (blend plus-lighter)
+  - border 1 inside #0091FF {System Colors/Dark/8 Blue} (blend plus-lighter)
+  - corners 9 smoothing0.6 style1
+  - opacity 50%
+- **Content Area/Dark/Input Fields/04 - Disabled**
+  - fill #1E1E1E@50%
+  - border 1 outside #000000@4%
+  - corners 9 smoothing0.6 style1
+  - opacity 50%
+- **Content Area/Dark/Knobs - Toggle/01 - Idle**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+- **Content Area/Dark/Knobs - Toggle/03 - Clicked**
+  - fill #FFFFFF@0% (blend lighten)
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+- **Content Area/Dark/Knobs - Toggle/03 - Clicked**
+  - inner-shadow x0 y-4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread-0.25 #171717 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread-0.25 #171717 (blend plus-lighter)
+  - inner-shadow x0 y20 blur20 spread-20 #F2F2F2 (blend plus-darker)
+  - inner-shadow x0 y-40 blur10 spread-40 #333333 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #333333 (blend plus-lighter)
+  - blur glass radius0 saturation1 brightness1 distortion0.12 depth0.3 chromatic0.4
+  - corners 50 smoothing0.6 style1
+- **Content Area/Dark/Knobs - Toggle/03 - Clicked - Glow**
+  - border 1 outside #000000@20% (blend plus-darker)
+  - corners 50 smoothing0.6 style1
+- **Content Area/Dark/Knobs - Toggle/03 - Clicked - Shadow**
+  - border 1 inside #000000
+  - blur gaussian radius3
+  - corners max smoothing0.6 style1
+- **Content Area/Dark/Knobs - Toggle/04 - Disabled**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+  - opacity 50%
+- **Content Area/Dark/Segmented Control/Active, On, 01 - Idle**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@4% {Fills/Dark Vibrant (use plus lighter)/4 Quatenary} (blend plus-lighter)
+- **Content Area/Dark/Segmented Control/Active, On, 03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+- **Content Area/Dark/Segmented Control/Active, On, 04 - Disabled**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@4% {Fills/Dark Vibrant (use plus lighter)/4 Quatenary} (blend plus-lighter)
+  - opacity 45%
+- **Content Area/Dark/Tracks/Active, Filled, 01 - Idle**
+  - fill #0091FF {System Colors/Dark/8 Blue}
+- **Content Area/Dark/Tracks/Active, Filled, 03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@8% {Fills/Dark/2 Secondary}
+- **Content Area/Dark/Tracks/Active, Filled, 04 - Disabled**
+  - fill #FFFFFF@3% {Fills/Dark Vibrant (use plus lighter)/5 Quinary}
+- **Content Area/Dark/Tracks/Active, Unfilled, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Tracks/Active, Unfilled, 03 - Clicked**
+  - fill #FFFFFF@19%
+- **Content Area/Dark/Tracks/Active, Unfilled, 04 - Disabled**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Tracks/Inactive, Filled, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Tracks/Inactive, Filled, 04 - Disabled**
+  - fill #FFFFFF@5% {Fills/Dark/3 Tertiary}
+- **Content Area/Dark/Tracks/Inactive, Unfilled, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Tracks/Inactive, Unfilled, 04 - Disabled**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+- **Content Area/Dark/Tracks/Tick Mark - Centerpoint, Idle**
+  - fill #000000@85% (blend plus-darker)
+- **Content Area/Dark/Tracks/Tick Mark - Disabled**
+  - fill #000000@10% (blend plus-darker)
+- **Content Area/Dark/Tracks/Tick Mark - Idle**
+  - fill #000000@25% (blend plus-darker)
+
+## Content Area/Light
+
+- **Content Area/Light/01 - Bordered/01 - Idle**
+  - fill #000000@8%
+- **Content Area/Light/01 - Bordered/03 - Clicked**
+  - fill #000000@16%
+  - corners max smoothing0.6 style1
+- **Content Area/Light/01 - Bordered/04 - Disabled**
+  - fill #000000@4%
+  - corners 0 smoothing0.6 style1
+- **Content Area/Light/02 - Bordered Tinted/01 - Idle**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@10% {Fills/Light/1 Primary} (blend plus-darker)
+  - opacity 22%
+- **Content Area/Light/02 - Bordered Tinted/03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #000000@10% {Fills/Light/1 Primary} (blend plus-darker)
+  - opacity 28%
+- **Content Area/Light/02 - Bordered Tinted/04 - Disabled**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@10% {Fills/Light/1 Primary} (blend plus-darker)
+  - opacity 10%
+- **Content Area/Light/03 - Bordered Destructive/01 - Idle**
+  - fill #FF383C {System Colors/Light/1 Red} + #000000@10% {Fills/Light/1 Primary}
+  - opacity 20%
+- **Content Area/Light/03 - Bordered Destructive/03 - Clicked**
+  - fill #FF383C {System Colors/Light/1 Red} + #000000@10% {Fills/Light/1 Primary} (blend plus-darker)
+  - opacity 28%
+- **Content Area/Light/03 - Bordered Destructive/04 - Disabled**
+  - fill #FF383C {System Colors/Light/1 Red} + #000000@10% {Fills/Light/1 Primary}
+  - opacity 10%
+- **Content Area/Light/04 - Prominent (Default)/01 - Idle**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@3% {Fills/Light Vibrant (use plus darker)/4 Quatenary} (blend plus-darker)
+  - corners max smoothing0.6 style1
+- **Content Area/Light/04 - Prominent (Default)/03 - Clicked**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@10% (blend plus-darker)
+  - corners 6 smoothing0.6 style1
+- **Content Area/Light/04 - Prominent (Default)/04 - Disabled**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue}
+  - corners max smoothing0.6 style1
+  - opacity 40%
+- **Content Area/Light/05 - Prominent (Default) Destructive/01 - Idle**
+  - fill #FF383C {System Colors/Light/1 Red}
+  - corners max smoothing0.6 style1
+- **Content Area/Light/05 - Prominent (Default) Destructive/03 - Clicked**
+  - fill #F52F32 {System Colors/Light Vibrant (use plus darker)/1 Red} + #000000@10% (blend plus-darker)
+  - corners max smoothing0.6 style1
+- **Content Area/Light/05 - Prominent (Default) Destructive/04 - Disabled**
+  - fill #F52F32 {System Colors/Light Vibrant (use plus darker)/1 Red}
+  - opacity 40%
+- **Content Area/Light/Controls/Active, Off, 01 - Idle**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Controls/Active, Off, 03 - Clicked**
+  - fill #000000@19%
+  - blend plus-darker
+- **Content Area/Light/Controls/Active, Off, 04 - Disabled**
+  - fill #000000@5% {Fills/Light/3 Tertiary}
+- **Content Area/Light/Controls/Active, On, 01 - Idle**
+  - fill #0088FF {System Colors/Light/8 Blue}
+- **Content Area/Light/Controls/Active, On, 03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #000000@7% {Fills/Light Vibrant (use plus darker)/2 Secondary} (blend plus-darker)
+- **Content Area/Light/Controls/Active, On, 04 - Disabled**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@5% {Fills/Light Vibrant (use plus darker)/3 Tertiary} (blend plus-darker)
+  - opacity 45%
+- **Content Area/Light/Controls/Inactive, Off, 01 - Idle**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Controls/Inactive, Off, 03 - Clicked**
+  - fill #000000@19%
+- **Content Area/Light/Controls/Inactive, Off, 04 - Disabled**
+  - fill #000000@3% {Fills/Light/4 Quatenary}
+- **Content Area/Light/Controls/Inactive, On, 01 - Idle**
+  - fill #000000@14%
+- **Content Area/Light/Controls/Inactive, On, 03 - Clicked**
+  - fill #000000@6% (blend plus-darker) + #000000@13%
+- **Content Area/Light/Controls/Inactive, On, 04 - Disabled**
+  - fill #000000@5% {Fills/Light/3 Tertiary}
+- **Content Area/Light/Fills/Default, 01 - Primary**
+  - fill #000000@85%
+- **Content Area/Light/Fills/Default, 02 - Secondary**
+  - fill #000000@50%
+- **Content Area/Light/Fills/Default, 03 - Tertiary**
+  - fill #000000@25%
+- **Content Area/Light/Fills/Default, 04 - Quaternary**
+  - fill #000000@10%
+- **Content Area/Light/Fills/Default, 05 - Quinary**
+  - fill #000000@5%
+- **Content Area/Light/Fills/Default, 06 - Seximal**
+  - fill #000000@3%
+- **Content Area/Light/Fills/Selected 01 - Primary**
+  - fill #FFFFFF
+- **Content Area/Light/Fills/Selected 02 - Secondary**
+  - fill #FFFFFF@55%
+- **Content Area/Light/Fills/Selected 03 - Tertiary**
+  - fill #FFFFFF@25%
+- **Content Area/Light/Fills/Selected 04 - Quaternary**
+  - fill #FFFFFF@10%
+- **Content Area/Light/Fills/Selected 05 - Quinary**
+  - fill #FFFFFF@5%
+- **Content Area/Light/Fills/Selected 06 - Seximal**
+  - fill #FFFFFF@2.5%
+- **Content Area/Light/Input Fields/01 - Idle**
+  - fill #FFFFFF
+  - border 1 outside #000000@5% (blend plus-darker)
+  - corners 9 smoothing0.6 style1
+- **Content Area/Light/Input Fields/03 - Focus Ring**
+  - border 3.5 outside #0088FF {System Colors/Light/8 Blue}
+  - border 1 inside #0088FF {System Colors/Light/8 Blue}
+  - corners 9 smoothing0.6 style1
+  - opacity 50%
+- **Content Area/Light/Input Fields/04 - Disabled**
+  - fill #FFFFFF@50%
+  - border 1 outside #000000@4% (blend plus-darker)
+  - corners 0 smoothing0.6 style1
+- **Content Area/Light/Knobs - Sliders/01 - Idle**
+  - fill #FFFFFF
+  - shadow x0 y1 blur5 spread0 #000000@10%
+  - corners max smoothing0.6 style1
+- **Content Area/Light/Knobs - Toggle/01 - Idle**
+  - fill #FFFFFF
+  - shadow x0 y3 blur36 spread0 #000000@5%
+  - corners 50 smoothing0.6 style1
+- **Content Area/Light/Knobs - Toggle/03 - Clicked**
+  - fill #FFFFFF@0% (blend lighten) + #FF0000
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+- **Content Area/Light/Knobs - Toggle/03 - Clicked**
+  - inner-shadow x0 y-4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread-0.25 #171717 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread-0.25 #171717 (blend plus-lighter)
+  - inner-shadow x0 y20 blur20 spread-20 #F2F2F2 (blend plus-darker)
+  - inner-shadow x0 y-40 blur10 spread-40 #333333 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #333333 (blend plus-lighter)
+  - blur glass radius0 saturation1 brightness1 distortion0.12 depth0.3 chromatic0.4
+  - corners 50 smoothing0.6 style1
+- **Content Area/Light/Knobs - Toggle/03 - Clicked - Glow**
+  - border 1 outside #D9D9D9 (blend plus-darker)
+  - border 0.5 outside #FFFFFF@45%
+  - corners 50 smoothing0.6 style1
+- **Content Area/Light/Knobs - Toggle/03 - Clicked - Shadow**
+  - border 1 inside #000000
+  - blur gaussian radius3
+  - corners max smoothing0.6 style1
+- **Content Area/Light/Knobs - Toggle/04 - Disabled**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+  - opacity 50%
+- **Content Area/Light/Segmented Control/Active, On, 01 - Idle**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@3% {Fills/Light Vibrant (use plus darker)/4 Quatenary} (blend plus-darker)
+- **Content Area/Light/Segmented Control/Active, On, 03 - Clicked**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@15% {Fills/Light Vibrant (use plus darker)/1 Primary} (blend plus-darker)
+- **Content Area/Light/Segmented Control/Active, On, 04 - Disabled**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@3% {Fills/Light Vibrant (use plus darker)/4 Quatenary} (blend plus-darker)
+  - corners max smoothing0.6 style1
+  - opacity 45%
+- **Content Area/Light/Tracks/Active, Filled, 01 - Idle**
+  - fill #0088FF {System Colors/Light/8 Blue}
+- **Content Area/Light/Tracks/Active, Filled, 03 - Clicked**
+  - fill #0088FF {System Colors/Light/8 Blue} + #000000@8% {Fills/Light/2 Secondary}
+- **Content Area/Light/Tracks/Active, Filled, 04 - Disabled**
+  - fill #000000@2% {Fills/Light Vibrant (use plus darker)/5 Quinary}
+- **Content Area/Light/Tracks/Active, Unfilled, 01 - Idle**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Tracks/Active, Unfilled, 03 - Clicked**
+  - fill #000000@19%
+- **Content Area/Light/Tracks/Active, Unfilled, 04 - Disabled**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Tracks/Inactive, Filled, 01 - Idle**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Tracks/Inactive, Filled, 04 - Disabled**
+  - fill #000000@5% {Fills/Light/3 Tertiary}
+- **Content Area/Light/Tracks/Inactive, Unfilled, 01 - Idle**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Tracks/Inactive, Unfilled, 04 - Disabled**
+  - fill #000000@10% {Fills/Light/1 Primary}
+- **Content Area/Light/Tracks/Tick Mark - Centerpoint, Idle**
+  - fill #000000@85% (blend plus-darker)
+- **Content Area/Light/Tracks/Tick Mark - Disabled**
+  - fill #000000@10% {Labels/Light/4 Quaternary}
+  - corners 10 smoothing0.6 style0
+- **Content Area/Light/Tracks/Tick Mark - Idle**
+  - fill #000000@25% {Labels/Light/3 Tertiary}
+  - corners 10 smoothing0.6 style0

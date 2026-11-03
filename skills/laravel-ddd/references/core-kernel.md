@@ -1,227 +1,254 @@
 # Core kernel
 
 **Read when:** starting this layout in a new app, or when a rule elsewhere names `Arrayable`,
-`FilterData`, `GetDataAbstract`, `whereByType`, `whereLikeText`, `ModelAbility` or `BaseEnum`.
-**Owns:** the small shared classes in `src/Domain/Core/` that every other domain depends on.
-**See also:** [dtos.md](dtos.md) · [actions.md](actions.md) · [queries.md](queries.md)
+`FilterData`, `GetDataAbstract`, `whereByType`, `whereLikeText`, `countUpTo`, `createOrUpdateOrDelete`,
+`BaseEnum`, `ModelAbility`, `BaseException` or `CurrentUser`.
+**Owns:** the shared classes in `src/Domain/Core/` (plus the exception base and the `CurrentUser`
+binding) that every domain depends on, and how they are registered.
+**See also:** [dtos.md](dtos.md) · [queries.md](queries.md) · [enums-and-states.md](enums-and-states.md) ·
+[models.md](models.md)
 
 ## TL;DR
 
-- `Core` is the one domain every other domain may import directly. Keep it small and generic.
-- `Arrayable` gives a DTO `fromArray()` and `toArray()`. Decide once whether `fromArray()` is strict.
-- `GetDataAbstract` is the base of every `Get{Entity}s` list Action: the caller picks
-  `pagination()`, `collection()`, `count()` or `exists()`, so counting never loads rows.
-- `whereByType` and `whereLikeText` are query-builder macros registered in `CoreServiceProvider`.
-- `ModelAbility` wires an entity to its `{Entity}Abilities` class.
-- `BaseEnum` adds `values()`, `options()` and `fromOrAbort()` to backed enums.
+- `Core` is the one domain every other domain imports directly, with no Contract. It imports no other
+  domain. Why: it holds plumbing, not business data, so it has nothing to hide.
+- `Arrayable` gives every DTO a lenient `fromArray()`, `toArray()` and the sent-keys helpers.
+- `FilterData` is the base of every `Filter{Entity}Data` and carries the list controls.
+- `GetDataAbstract` is the base of every list Action: the caller picks `pagination()`, `collection()`,
+  `count()` or `exists()`, so counting never loads rows.
+- Query macros (`whereByType`, `whereLikeText`, `countUpTo`, `createOrUpdateOrDelete`) are registered once
+  in `CoreServiceProvider`.
+- Add to `Core` only what at least two domains use. Why: a kernel that grows business rules becomes the
+  domain everything depends on.
 
-If the project already has these under other names, use those. The templates below are a starting point.
+If the project already has these under other names, use those. The code is a starting point.
+
+## The Core tree
+
+```
+src/Domain/Core/
+├── Abstracts/             GetDataAbstract, Feature
+├── Actions/               LockTransactionRunner, IncrementSequenceCount
+├── Casts/                 reusable casts (an enum-array cast, for example)
+├── Contracts/ Services/   only for cross-cutting services (sequences, uploads, job batches)
+├── DataTransferObjects/   FilterData
+├── Exceptions/            ProcessException
+├── Helpers/               the bodies of the query macros
+├── Models/Entities/       Sequence
+├── Providers/             CoreServiceProvider
+└── Traits/                Arrayable, BaseEnum, ModelAbility
+```
 
 ## Arrayable
 
 ```php
 namespace Domain\Core\Traits;
 
-use Domain\Core\Exceptions\UnknownPropertyException;
-use ReflectionClass;
-use WeakMap;
-
 trait Arrayable
 {
-    private static ?WeakMap $sentKeys = null;
+    private static ?WeakMap $arrayableState = null;
 
-    /** @param array<string, mixed> $data */
     public static function fromArray(array $data): static
     {
         $reflection = new ReflectionClass(static::class);
-        $arguments = [];
+        $parameters = array_map(fn (ReflectionParameter $p) => $p->getName(), $reflection->getConstructor()?->getParameters() ?? []);
+        $instance = $reflection->newInstanceArgs(array_intersect_key($data, array_flip($parameters)));
 
-        foreach ($reflection->getConstructor()?->getParameters() ?? [] as $parameter) {
-            $name = $parameter->getName();
-            $arguments[$name] = array_key_exists($name, $data)
-                ? $data[$name]
-                : ($parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null);
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            if (! $property->isReadOnly() && array_key_exists($property->getName(), $data)) {
+                $property->setValue($instance, $data[$property->getName()]);
+            }
         }
 
-        $unknown = array_diff(array_keys($data), array_keys($arguments));
-
-        if ($unknown !== []) {
-            throw UnknownPropertyException::for(static::class, $unknown);
-        }
-
-        $instance = $reflection->newInstanceArgs($arguments);
-        self::$sentKeys ??= new WeakMap;
-        self::$sentKeys[$instance] = array_keys($data);
-
-        return $instance;
+        return $instance->remember(data: null, sent: $data);
     }
 
-    /** @return array<string, mixed> */
+    public static function arrayFrom(array $items): array
+    {
+        return array_map(fn (array $item) => static::fromArray($item), $items);
+    }
+
+    public function excludeUnsent(): static
+    {
+        return $this->remember(Arr::only($this->toArray(), array_keys($this->sent())));
+    }
+
+    public function isSent(string ...$keys): bool
+    {
+        return array_diff($keys, array_keys($this->sent())) === [];
+    }
+
     public function toArray(): array
     {
-        return get_object_vars($this);
+        return self::state()[$this]['data'] ?? $this->publicValues();
     }
 
-    /** @return array<string, mixed> */
-    public function sentOnly(): array
+    public function __serialize(): array
     {
-        return array_intersect_key($this->toArray(), array_flip(self::$sentKeys[$this] ?? []));
+        return ['props' => $this->publicValues(), 'sent' => $this->sent()];
+    }
+
+    public function __unserialize(array $payload): void
+    {
+        foreach ($payload['props'] as $key => $value) {
+            $this->{$key} = $value;
+        }
+
+        $this->remember(data: null, sent: $payload['sent']);
+    }
+
+    public function __clone(): void
+    {
+        foreach (self::state() as $source => $entry) {
+            if ($source !== $this && $source::class === static::class && $source->publicValues() === $this->publicValues()) {
+                $this->remember($entry['data'], $entry['sent']);
+
+                return;
+            }
+        }
+    }
+
+    private function remember(?array $data, ?array $sent = null): static
+    {
+        $state = self::state();
+        $state[$this] = ['data' => $data, 'sent' => $sent ?? $this->sent()];
+
+        return $this;
+    }
+
+    private function sent(): array
+    {
+        return self::state()[$this]['sent'] ?? [];
+    }
+
+    private function publicValues(): array
+    {
+        $names = array_map(fn (ReflectionProperty $p) => $p->getName(), (new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC));
+
+        return Arr::only(get_object_vars($this), $names);
+    }
+
+    private static function state(): WeakMap
+    {
+        return self::$arrayableState ??= new WeakMap;
     }
 }
 ```
 
-```php
-namespace Domain\Core\Exceptions;
-
-use LogicException;
-
-final class UnknownPropertyException extends LogicException
-{
-    /** @param array<int, string> $keys */
-    public static function for(string $class, array $keys): self
-    {
-        return new self(sprintf('%s has no property [%s].', class_basename($class), implode(', ', $keys)));
-    }
-}
-```
-
-Declare DTOs as `final class` with `public readonly` properties, not `final readonly class`: a readonly
-class cannot use a trait that holds a static property (PHP fatal error, checked on 8.4).
-
-### Strict or lenient `fromArray()`
-
-| | Strict (throws on unknown key) | Lenient (drops unknown keys) |
-|---|---|---|
-| Filter input | `$request->validated()` from an `Index{Entity}Request` | `$request->all()` is safe |
-| A misspelled key | fails loudly where it is written | is dropped; the filter silently stops filtering |
-| Cost | every index endpoint needs a Form Request | none |
-
-Pick strict for new code and for any tenant-scoped data. Why: a dropped scoping key is a query that
-returns every tenant's rows, and it looks correct in review. To make it lenient, delete the `$unknown`
-check. It is a `LogicException` because it is a programmer error, not a user error.
-
-### Two ways to do partial updates
-
-- `Arr::whereNotNull($data->toArray())` — simple; a field can never be set back to `null`.
-- `$data->sentOnly()` — writes exactly the keys the caller sent, so `null` clears a column. It only works
-  when every DTO is built through `fromArray()`; a DTO built with `new` has no sent keys and the update
-  writes nothing. That is one more reason `new` is banned at call sites.
+- `fromArray()` drops keys the DTO does not declare; a missing required key throws. Where input may come
+  from, and strict mode as a per-project option: [dtos.md](dtos.md).
+- The sent keys and the working set live in a `WeakMap`, off the object. Why: they never show in `dd()`
+  and are freed with the DTO.
+- `only($keys)`, `exclude($keys)` and `filterNull()` are written like `excludeUnsent()`:
+  `$this->remember(<a narrowed toArray()>)`. All four narrow **this instance**. Clone first when the
+  DTO is read again: `(clone $data)->exclude(['contacts'])->excludeUnsent()->toArray()`.
+- `__clone()` finds the source in the map (a shallow clone's public values are `===` to it) and copies its
+  entry. Why: PHP gives `__clone()` no reference to the source.
+- `__serialize()` carries the sent keys through the queue. Why: the `WeakMap` entry does not survive
+  `unserialize()`, so a queued update would otherwise write nothing.
+- DTOs are `final class` with `public readonly` properties, not `final readonly class`. Why: a readonly class
+  cannot hold the trait's static property (PHP fatal error, checked 2026-11-03 on PHP 8.4).
 
 ## FilterData
 
 ```php
 namespace Domain\Core\DataTransferObjects;
 
-abstract class FilterData {}
+class FilterData
+{
+    public ?int $pages_count = 20;
+
+    public ?string $page_name = 'page';
+
+    public string|array|null $sort_by = 'id';
+
+    public ?string $sort_by_direction = 'desc';
+
+    public array $select = [];
+}
 ```
 
-Every `Filter{Entity}Data` extends it, uses `Arrayable`, and makes every property nullable with a `null`
-default, so an empty filter is valid. Some projects put list controls on the base (`sort_by`,
-`sort_by_direction`, `per_page`, `page_name`) and let `GetDataAbstract` apply them; others pass page size
-to `pagination()`. Either is fine; choose one.
+The list controls are writable base properties, so `fromArray()` fills them from the same input as the
+filter's own fields. `sort_by` is a column or `['column' => 'direction']`. Validate it against a fixed list
+in the Form Request. Why: `orderBy()` takes it as an identifier, so an unchecked value lets a client sort by
+any column, hidden ones included ([http.md](http.md)). The filter's own fields: [dtos.md](dtos.md).
 
 ## GetDataAbstract
 
 ```php
-namespace Domain\Core\Actions;
+namespace Domain\Core\Abstracts;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
-/** @template TModel of \Illuminate\Database\Eloquent\Model */
 abstract class GetDataAbstract
 {
-    protected mixed $data = null;
+    protected function __construct(protected readonly ?FilterData $data, protected readonly array $withRelations = [], protected readonly array $withCount = []) {}
 
-    /** @var array<int, string> */
-    protected array $withRelations = [];
+    public static function for(?FilterData $data = null, array $withRelations = [], array $withCount = []): static
+    {
+        return new static($data, $withRelations, $withCount);
+    }
 
-    /** @var array<int, string> */
-    protected array $withCount = [];
-
-    final public function __construct() {}
-
-    /** @return Builder<TModel> */
     abstract public function query(): Builder;
 
-    /** @param array<int, string> $withRelations @param array<int, string> $withCount */
-    public static function for(mixed $data = null, array $withRelations = [], array $withCount = []): static
+    public function builder(): Builder
     {
-        $instance = new static;
-        $instance->data = $data;
-        $instance->withRelations = $withRelations;
-        $instance->withCount = $withCount;
+        return $this->query()
+            ->when($this->data?->select, fn (Builder $query) => $query->select($this->data->select))
+            ->with($this->withRelations)
+            ->withCount($this->withCount)
+            ->when($this->data?->sort_by, function (Builder $query) {
+                $sorts = is_array($this->data->sort_by) ? $this->data->sort_by : [$this->data->sort_by => $this->data->sort_by_direction ?? 'desc'];
 
-        return $instance;
+                foreach ($sorts as $column => $direction) {
+                    $query->orderBy($column, $direction);
+                }
+            });
     }
 
-    public function pagination(int $perPage = 20, string $pageName = 'page'): LengthAwarePaginator
+    public function pagination(): LengthAwarePaginator
     {
-        return $this->hydrated()->paginate($perPage, ['*'], $pageName);
+        return $this->builder()->paginate(perPage: $this->data->pages_count ?? 20, pageName: $this->data->page_name ?? 'page');
     }
 
-    public function collection(): Collection
+    public function collection(?int $limit = null): Collection
     {
-        return $this->hydrated()->get();
+        return $this->builder()->when($limit, fn (Builder $query) => $query->limit($limit))->get();
     }
 
     public function count(): int
     {
-        return $this->query()->count();
+        return $this->builder()->count();
     }
 
-    public function exists(): bool
+    public function countsBy(string $column): array
     {
-        return $this->query()->exists();
-    }
-
-    /** @return Builder<TModel> */
-    protected function hydrated(): Builder
-    {
-        return $this->query()
-            ->when($this->withRelations, fn (Builder $query) => $query->with($this->withRelations))
-            ->when($this->withCount, fn (Builder $query) => $query->withCount($this->withCount));
+        return $this->query()->select($column)->selectRaw('count(*) as aggregate')->groupBy($column)->pluck('aggregate', $column)->all();
     }
 }
 ```
 
-A subclass implements only `query()`:
-
-```php
-/** @extends GetDataAbstract<Invoice> */
-final class GetInvoices extends GetDataAbstract
-{
-    public function query(): Builder
-    {
-        return Invoice::query()->filterBy($this->data);
-    }
-}
-```
-
-`pageName` lets two paginated lists share one page without moving together.
+A subclass implements only `query()` (template in [actions.md](actions.md)). The protected constructor makes
+`::for()` the one way in. `exists()` mirrors `count()`. `page_name` lets two lists on one page paginate apart. `countsBy('status')` fills
+every tab badge in one grouped query.
 
 ## Query macros
 
 ```php
 namespace Domain\Core\Helpers;
 
-use BackedEnum;
-use Illuminate\Database\Query\Builder;
-
 final class WhereByType
 {
     public static function handle(Builder $builder, string $column, mixed $value): Builder
     {
-        if ($value === null || $value === []) {
-            return $builder;
-        }
-
         $scalar = fn (mixed $item) => $item instanceof BackedEnum ? $item->value : $item;
 
-        return is_array($value)
-            ? $builder->whereIn($column, array_map($scalar, $value))
-            : $builder->where($column, $scalar($value));
+        return match (true) {
+            $value === null, $value === '', $value === [] => $builder,
+            $value instanceof Builder, $value instanceof EloquentBuilder => $builder->whereIn($column, $value),
+            is_array($value) => $builder->whereIn($column, array_map($scalar, $value)),
+            default => $builder->where($column, $scalar($value)),
+        };
     }
 }
 
@@ -229,11 +256,8 @@ final class WhereLikeText
 {
     public static function handle(Builder $builder, string $column, ?string $search): Builder
     {
-        $search = trim((string) $search);
-
-        foreach ($search === '' ? [] : preg_split('/\s+/', $search) as $term) {
-            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $term);
-            $builder->whereLike($column, "%{$escaped}%", caseSensitive: false);
+        foreach (preg_split('/\s+/', trim((string) $search), flags: PREG_SPLIT_NO_EMPTY) as $term) {
+            $builder->whereLike($column, '%'.addcslashes($term, '%_\\').'%', caseSensitive: false);
         }
 
         return $builder;
@@ -241,120 +265,135 @@ final class WhereLikeText
 }
 ```
 
-```php
-namespace Domain\Core\Providers;
+- `whereByType` takes a value, an enum, an array of either, or a sub-query, and skips an empty value.
+- `whereLikeText` requires every word, anywhere in the column. The escape stops `100%` matching every row.
+- `countUpTo($limit = 99)` counts `fromSub($builder->select(DB::raw('1'))->reorder()->limit($limit))`;
+  show `99+` past it. Why: an exact `COUNT(*)` is the slow part of a badge.
+- How filter scopes use them: [queries.md](queries.md).
 
-final class CoreServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        Builder::macro('whereByType', fn (string $column, mixed $value) => WhereByType::handle($this, $column, $value));
-        Builder::macro('whereLikeText', fn (string $column, ?string $search) => WhereLikeText::handle($this, $column, $search));
-    }
-}
-```
+`createOrUpdateOrDelete` syncs a has-many relation to a submitted list: rows missing from the list are
+deleted (or detached), the rest are upserted. It reads this parent's existing ids, sets the foreign key on every submitted row, and resets to `null`
+any submitted id that is not in that list. Then, in one transaction, it deletes (or nulls the foreign key
+of) the rows whose ids were not submitted and runs `upsert($rows, [$key])` on the related model.
 
-`Builder` here is `Illuminate\Database\Query\Builder`; Eloquent builders forward to it. Why the escape:
-a user searching for `100%` must not match every row.
-
-## ModelAbility
-
-```php
-namespace Domain\Core\Traits;
-
-trait ModelAbility
-{
-    public function getAbility(): object
-    {
-        return new $this->abilityClass($this);
-    }
-
-    public function ability(string $method, mixed ...$arguments): bool
-    {
-        return $this->getAbility()->{$method}(...$arguments);
-    }
-
-    public function hasAbility(string $method, mixed ...$arguments): bool
-    {
-        abort_unless($this->ability($method, ...$arguments), 403);
-
-        return true;
-    }
-}
-```
-
-The entity declares `protected string $abilityClass = InvoiceAbilities::class;`. See
-[models-scopes-abilities-enums.md](models-scopes-abilities-enums.md).
-
-## BaseEnum
-
-```php
-namespace Domain\Core\Traits;
-
-trait BaseEnum
-{
-    /** @return array<int, int|string> */
-    public static function values(): array
-    {
-        return array_column(self::cases(), 'value');
-    }
-
-    /** @return array<int, array{value: int|string, label: string}> */
-    public static function options(): array
-    {
-        return array_map(fn (self $case) => ['value' => $case->value, 'label' => $case->label()], self::cases());
-    }
-
-    public static function fromOrAbort(int|string $value, int $status = 404): self
-    {
-        return self::tryFrom($value) ?? abort($status);
-    }
-
-    public static function tryFromName(string $name): ?self
-    {
-        foreach (self::cases() as $case) {
-            if ($case->name === $name) {
-                return $case;
-            }
-        }
-
-        return null;
-    }
-}
-```
-
-`options()` assumes each enum defines `label()`. Use `values()` in validation: `Rule::in(InvoiceStatus::values())`
-(or `Rule::enum(InvoiceStatus::class)`).
+Why the reset: the upsert matches on the primary key alone, so a forged id would move another parent's row. A `null` key inserts on MySQL and MariaDB; on PostgreSQL split
+inserts from updates. For a morph-many relation also set the morph type column on each row.
 
 ## Registering the kernel
 
 ```php
-// bootstrap/providers.php
-return [
-    App\Providers\AppServiceProvider::class,
-    Domain\Core\Providers\CoreServiceProvider::class,
-    Domain\Billing\Providers\BillingServiceProvider::class,
-    Domain\Customer\Providers\CustomerServiceProvider::class,
-];
+class CoreServiceProvider extends ServiceProvider
+{
+    public array $bindings = [SequenceContract::class => SequenceService::class];
+
+    public function boot(): void
+    {
+        Builder::macro('whereByType', fn (string $column, mixed $value) => WhereByType::handle($this, $column, $value));
+        Builder::macro('whereLikeText', fn (string $column, ?string $search) => WhereLikeText::handle($this, $column, $search));
+        EloquentBuilder::macro('countUpTo', fn (int $limit = CountUpTo::LIMIT) => CountUpTo::handle($this, $limit));
+        HasMany::macro('createOrUpdateOrDelete', fn (iterable $records, bool $detach = false) => CreateOrUpdateOrDelete::handle($this, $records, $detach));
+    }
+}
 ```
+
+`Builder` is `Illuminate\Database\Query\Builder`; Eloquent builders forward to it. In
+`bootstrap/providers.php` register `Core` first, then one provider per domain, then one per panel.
+
+## BaseEnum and ModelAbility
+
+`BaseEnum` gives every backed enum `values()`, `isListed()` (strict), `fromName()`, `tryFromName()`,
+`fromOrAbort($value, 404)`, and `all()` / `only([...])` / `except([...])`, which return each case as an
+object with every public instance method's result folded in (`label`, `color`), for dropdowns and badges.
+It reads the methods with `ReflectionEnum` once and calls each on every case.
+
+`fromOrAbort()` is `self::tryFrom($value) ?? abort($status)`. Callers and case naming:
+[enums-and-states.md](enums-and-states.md).
+
+`ModelAbility` gives an entity `getAbility()` (`new $this->abilityClass($this)`, throwing a `LogicException`
+when the entity declares none), `ability($method, ...$args)` (asks it), and `hasAbility($method, ...$args)`
+(`abort_unless(..., 403)`).
+
+How an entity declares `$abilityClass` and what an Abilities class may ask: [models.md](models.md).
+
+## Exceptions
+
+```php
+namespace App\Exceptions;
+
+class BaseException extends Exception
+{
+    protected array $data = [];
+
+    public function __construct(protected string $key, protected int $status = 400, protected array $replace = [])
+    {
+        parent::__construct(trans("errors.{$key}", $replace));
+    }
+
+    public static function withMessage(string $key, array $replace = []): static
+    {
+        return new static($key, replace: $replace);
+    }
+
+    public function render(Request $request): Responsable|RedirectResponse
+    {
+        if (! $request->expectsJson()) {
+            return back()->withErrors($this->getMessage())->withInput();
+        }
+
+        $response = res($this->status, $this->key, $this->replace);
+
+        return $this->data ? $response->data($this->data) : $response;
+    }
+}
+```
+
+`statusCode(int)` and `withData(array)` set the property and return `$this`. Each domain has one exception
+class with a named constructor per failure: `EmployeeException::alreadyArchived()` returns
+`self::withMessage('employee_already_archived')->statusCode(409)`.
+
+Why: an Action throws and never builds a response, yet the user gets a translated message and the right
+status. The base lives in `app/` because `render()` is HTTP glue. `res()` and its envelope:
+[json-api.md](json-api.md).
+
+## Concurrency helpers
+
+`LockTransactionRunner::run($key, $refId, $callback)` runs the callback inside
+`Cache::lock("{$key}_{$refId}", 60)->block(10, fn () => DB::transaction($callback))` and turns a
+`LockTimeoutException` into `ProcessException::processIsLocked()`.
+
+The lock needs a cache store with atomic locks (Redis, database, memcached). `IncrementSequenceCount::handle($key)`
+runs `Sequence::query()->lockForUpdate()->firstOrCreate(['key' => $key])` and `increment('count')` in a
+transaction, and `sequences.key` is unique, so two first callers cannot both create the row. When to use
+each: [actions.md](actions.md).
+
+## Feature flags (optional)
+
+`Domain\Core\Abstracts\Feature` has `abstract protected static function flag(): FeatureFlag` and
+`enabled()` / `disabled()` that ask Pennant for `static::flag()->value`. `FeatureFlag` is a Core enum whose
+cases `CoreServiceProvider::boot()` defines from config. A domain wraps its flag in
+`Models/Features/{Name}Feature.php`, so callers ask `EmployeeInvitationsFeature::enabled()` and never spell
+the flag string.
+
+## CurrentUser
+
+```php
+interface CurrentUser
+{
+    public function admin(): ?Admin;
+}
+
+// app/Providers/AppServiceProvider::register()
+$this->app->singleton(CurrentUser::class, fn () => new CurrentUserResolver(['admin' => fn () => auth('admin')->user()]));
+```
+
+`CurrentUserResolver` keeps the map of closures; `admin()` runs `$this->guards['admin']` when it is set and
+returns the result only if it is an `Admin`, else `null`.
+
+It lives in the domain that owns the user models, not in `Core`. Add one accessor per kind of actor. The
+resolver runs the guard on every call and checks the type. Why: the singleton never holds a stale user,
+and a guard wired to the wrong provider answers "nobody" instead of the wrong person. The rule it serves is
+in [architecture.md](architecture.md#who-is-acting).
 
 ## Enforcing the kernel
 
-A convention that nothing checks drifts. Two ways to check the shapes above automatically:
-
-- **Pest `arch()` tests** — cheap to add, coarse (they check imports, not every call):
-
-```php
-$domains = array_diff(array_map('basename', glob(__DIR__.'/../../src/Domain/*', GLOB_ONLYDIR)), ['Core']);
-
-foreach ($domains as $domain) {
-    arch("{$domain}: actions are final")->expect("Domain\\{$domain}\\Actions")->classes()->toBeFinal();
-    arch("{$domain}: services do not use DB")->expect("Domain\\{$domain}\\Services")->not->toUse('Illuminate\Support\Facades\DB');
-    arch("{$domain}: dtos end in Data")->expect("Domain\\{$domain}\\DataTransferObjects")->classes()->toHaveSuffix('Data');
-}
-
-arch('no validation in the domain')->expect('Domain')->not->toUse('Illuminate\Support\Facades\Validator');
-```
-
-- **Custom PHPStan rules** — more work, more precise (for example "a `*Data` is never built with `new`
-  outside its own class", "a controller signature takes no Eloquent model"). Worth it for a large team.
+The `arch()` tests that hold these shapes are in [testing.md](testing.md).

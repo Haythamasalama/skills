@@ -1,0 +1,281 @@
+/*
+  Haytham A. Salama brand tokens. Same values and utilities as haythamasalama.me (checked 2026-11-03).
+  Dark is the default. Put class="light" on <html> for the light theme.
+  Link it from a plain page, or @import it right after Tailwind (references/code.md).
+*/
+
+@layer base, components, utilities;
+
+:root {
+  /* Fontsource variable names first, then the Google Fonts names, so either install works. */
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+  --font-serif: "Instrument Serif", Georgia, serif;
+
+  --ease-out-soft: cubic-bezier(0.23, 1, 0.32, 1);
+
+  --ink: #0b0b0c;
+  --paper: #ffffff;
+
+  --iris-50: #f5f6fe;
+  --iris-100: #e9ebfe;
+  --iris-200: #d4d7fe;
+  --iris-300: #babefe;
+  --iris-400: #9d9ffe;
+  --iris-500: #7f7cf2;
+  --iris-600: #6762d3;
+  --iris-700: #534daf;
+  --iris-800: #3f3b87;
+  --iris-900: #2c2a62;
+  --iris-950: #1d1b45;
+
+  --azure-50: #f2f7fe;
+  --azure-100: #e2eeff;
+  --azure-200: #c5ddfe;
+  --azure-300: #9ec7fe;
+  --azure-400: #70adff;
+  --azure-500: #4f9bff;
+  --azure-600: #2873d1;
+  --azure-700: #195cae;
+  --azure-800: #134686;
+  --azure-900: #0d3261;
+  --azure-950: #052144;
+}
+
+:root,
+.dark {
+  --bg: #0b0b0c;
+  --surface: #131316;
+  --raised: #0f0f11;
+  --line: #1f1f23;
+  --edge: #232328;
+  --chip: #2a2a30;
+  --fg: #ededef;
+  --soft: #c4c4cc;
+  --muted: #a1a1aa;
+  --faint: #85858f;
+  --mark: #d4d4d8;
+  --underline: #3f3f46;
+  --accent: var(--azure-500);
+  --accent-2: var(--iris-500);
+  --gradient: linear-gradient(90deg, var(--iris-500), var(--azure-500));
+  --gradient-signature: linear-gradient(90deg, #7f7cf2, #6c8cf9, #4f9bff);
+
+  color-scheme: dark;
+}
+
+.light {
+  --bg: #ffffff;
+  --surface: #f4f4f5;
+  --raised: #fafafa;
+  --line: #e4e4e7;
+  --edge: #e4e4e7;
+  --chip: #d4d4d8;
+  --fg: #0b0b0c;
+  --soft: #3f3f46;
+  --muted: #52525b;
+  --faint: #6b6b74;
+  --mark: #27272a;
+  --underline: #d4d4d8;
+  --accent: var(--azure-600);
+  --accent-2: var(--iris-600);
+  --gradient: linear-gradient(90deg, var(--iris-600), var(--azure-600));
+  --gradient-signature: linear-gradient(90deg, #6762d3, #4f6ad2, #2873d1);
+
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    scroll-padding-top: 32px;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+    transition: color 0.2s var(--ease-out-soft), background-color 0.2s var(--ease-out-soft);
+  }
+
+  ::selection {
+    background: rgb(127 124 242 / 0.35);
+  }
+
+  :where(main p) {
+    max-width: 70ch;
+  }
+
+  :where(a, button, summary):focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .signature path {
+    stroke: var(--fg);
+    animation-name: draw;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.35, 1);
+    animation-fill-mode: forwards;
+  }
+
+  .go .arrow {
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 0.25s var(--ease-out-soft);
+  }
+
+  .go:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  .menu-item {
+    animation: menu-in 0.32s var(--ease-out-soft) both;
+    animation-delay: calc(var(--i, 0) * 28ms + 40ms);
+  }
+}
+
+@layer utilities {
+  .link {
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .link:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--underline);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .link-underline {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--underline);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .link-underline:hover {
+    text-decoration-color: var(--fg);
+  }
+
+  .link-muted {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .link-muted:hover {
+    color: var(--fg);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .text-gradient {
+    color: transparent;
+    background-image: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .border-gradient {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--bg), var(--bg)) padding-box,
+      var(--gradient) border-box;
+  }
+
+  .avatar-mono {
+    filter: grayscale(1);
+    box-shadow: 0 0 0 1px var(--edge);
+  }
+
+  .animate-rise {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .animate-live {
+    animation: live 2.2s ease-out infinite;
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes live {
+  0% {
+    box-shadow: 0 0 0 0 rgb(127 124 242 / 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 0 9px rgb(127 124 242 / 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgb(127 124 242 / 0);
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signature path {
+    animation: none;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .animate-live,
+  .animate-rise,
+  .menu-item {
+    animation: none;
+  }
+
+  .go:hover .arrow {
+    transform: none;
+  }
+}

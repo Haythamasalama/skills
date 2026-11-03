@@ -1,26 +1,47 @@
 # Dockerfiles and server config
 
-Templates for the three shapes in SKILL.md. Image tags are the ones in use in 2026-09/10
-(`node:22-alpine`, `nginx:1.27-alpine`); move to the current LTS and stable tags when you start.
+**Read when:** adding a Dockerfile, `nginx.conf`, `.dockerignore` or a local compose file to an app.
+**Owns:** the copy-ready files for each runtime shape, and the health route.
+
+## TL;DR
+
+- Two stages: build with Node, then copy only the output into a small runtime image.
+- Copy `package.json` and the lockfile before the source, so the `npm ci` layer is reused when only
+  code changes.
+- No `# syntax=` line. Why: it makes every build pull an extra frontend image from the registry for
+  no gain with these files, and a blocked registry then fails the build.
+- `npm ci` needs a committed lockfile in sync with `package.json`.
+- Every image ships a `HEALTHCHECK` that calls `/healthz` with `wget`, which Alpine images carry
+  through busybox. How Coolify treats it: [coolify.md](coolify.md).
+
+## Base images (checked 2026-11-03)
+
+| Image | Tag used here | Why |
+|---|---|---|
+| Node | `node:26-alpine` | 26 is the Active LTS (since 2026-10-28, end of life 2029-04-30). 24 is Maintenance LTS until 2028-04-30 if a dependency is not ready for 26. |
+| nginx | `nginx:1.30-alpine` | 1.30 is the stable branch. `1.31` / `mainline-alpine` is mainline; stable is the one for production. |
+
+Pin the minor line (`1.30-alpine`), not `latest` or `alpine`, so a rebuild can't jump a major
+version. Move to the next LTS or stable line on purpose, with a rebuild and a smoke test.
 
 ## Static SPA (Vite) served by nginx
 
 ### Dockerfile
 
 ```dockerfile
-# ── 1. Build ─────────────────────────────────────────────────────────────
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 
-# manifests first, so the dependency layer is cached across content changes
 COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build            # type check first, then vite build: a bad file fails the image
+# Values the bundle reads at build time (import.meta.env.VITE_*) must be declared here,
+# or the Coolify variable never reaches the build. Remove if the app has none.
+ARG VITE_API_URL
+RUN npm run build
 
-# ── 2. Serve ─────────────────────────────────────────────────────────────
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.30-alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
@@ -32,10 +53,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-- **No `# syntax=` line.** It makes every build pull an extra frontend image from the registry for
-  no benefit here.
-- **`npm ci` needs a committed lockfile in sync with `package.json`.**
-- The `HEALTHCHECK` travels with the image and takes precedence over Coolify's dashboard check.
+A `VITE_*` value is public: it ends up in the JavaScript every visitor downloads. Never put a secret
+in one.
 
 ### security-headers.conf
 
@@ -45,9 +64,11 @@ add_header X-Frame-Options "SAMEORIGIN" always;
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 ```
 
-It is a separate file because of an nginx rule: **`add_header` directives are inherited from the
-`server` block only when the `location` defines none of its own.** A location that sets
-`Cache-Control` silently drops the security headers unless it includes them again.
+A separate file, included in `server` and again in every `location` that sets its own header. Why:
+see `add_header` inheritance in [debugging.md](debugging.md#nginx-pitfalls).
+
+If the app loads fonts or scripts from another host and you add a `Content-Security-Policy` here,
+list those hosts in it (for a hosted font service: the stylesheet host and the font-file host).
 
 ### nginx.conf
 
@@ -60,56 +81,48 @@ server {
     root  /usr/share/nginx/html;
     index index.html;
 
-    # Emit `Location: /foo`, not `Location: http://$host:80/foo`. nginx makes a redirect absolute
-    # with its own listen port, which is 80 in the container and not the port the visitor used
-    # behind Coolify's proxy or `docker run -p 8080:80`. A relative Location is resolved by the
-    # client against the URL it actually used, through any number of proxies.
+    # Relative Location headers: correct behind Coolify's proxy and any port mapping.
     absolute_redirect off;
 
     include /etc/nginx/snippets/security-headers.conf;
 
-    # health check for Docker and Coolify
     location = /healthz {
         access_log off;
         default_type text/plain;
         return 200 'ok';
     }
 
-    # Retired URLs that people were given: a real 301 keeps the link's search value and works
-    # before any JS runs. Keep these in step with the client router.
-    #   - `#` starts a comment here, and a fragment is never sent to the server, so targets
-    #     carry no #fragment.
-    #   - Regex locations are matched before prefix ones: anchor every pattern, and use exact
-    #     `=` matches so a redirect never shadows a real folder (`= /lessons` vs `/lessons/`).
-    location = /old-section {
-        return 301 /;
+    # Retired URLs people were given. Keep in step with the client router.
+    # Exact `=` matches and anchored regexes only; targets carry no #fragment.
+    location = /old-pricing {
+        return 301 /pricing;
     }
 
-    location ~ "^/old-item/([^/]+)/?$" {
-        return 301 /items/$1;
+    location ~ "^/guide/([^/]+)/?$" {
+        return 301 /docs/$1;
     }
 
-    # hashed build assets never change: cache hard
+    # Hashed build files never change.
     location /assets/ {
         include /etc/nginx/snippets/security-headers.conf;
         add_header Cache-Control "public, max-age=31536000, immutable";
         try_files $uri =404;
     }
 
-    # files replaced by hand without new names: cache briefly
+    # Files in public/ that keep their name when replaced.
     location /images/ {
         include /etc/nginx/snippets/security-headers.conf;
         add_header Cache-Control "public, max-age=604800";
         try_files $uri =404;
     }
 
-    # the entry point must always be revalidated, or new deploys don't reach returning visitors
+    # The entry point is revalidated on every visit, or deploys don't reach returning visitors.
     location = /index.html {
         include /etc/nginx/snippets/security-headers.conf;
         add_header Cache-Control "no-cache, must-revalidate";
     }
 
-    # history-mode routing: every unknown path falls back to the app
+    # History-mode routing: unknown paths fall back to the app.
     location / {
         try_files $uri $uri/ /index.html;
     }
@@ -120,32 +133,23 @@ server {
     gzip_comp_level   6;
     gzip_types        text/plain text/css application/javascript application/json
                       image/svg+xml application/manifest+json;
-
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
-    }
 }
 ```
 
-Deep links reach `/index.html` through the last `try_files` argument, which is an internal
-redirect, so they match `location = /index.html` and get `no-cache` too. Confirm it on a deep link:
-`smoke.sh … 'header /some/deep/link cache-control no-cache'`.
-
-If the app loads fonts or scripts from another host, a Content-Security-Policy must allow them (for
-Google Fonts: the stylesheet host and the font-file host).
+Deep links reach `/index.html` through the last `try_files` argument, an internal redirect, so they
+match `location = /index.html` and get `no-cache` too. The smoke test checks it on a deep link.
 
 ## Nuxt, prerendered (`nuxt generate`) served by nginx
 
 ```dockerfile
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npx nuxi generate          # or the project's "generate" script
+RUN npx nuxi generate
 
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.30-alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/.output/public /usr/share/nginx/html
@@ -155,25 +159,29 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-Use the same `nginx.conf`, with two changes:
+Use the SPA `nginx.conf` with three changes:
 
-- prerendered routes are files at `route/index.html`, so `try_files $uri $uri/ …` finds them;
-- the fallback for routes that were not prerendered is the SPA fallback page Nuxt writes (`200.html`
-  or `404.html` in recent versions). List `.output/public` after a build and point the last
-  `try_files` argument at the file that exists: `try_files $uri $uri/ /200.html;`.
-- Nuxt's hashed assets live under `/_nuxt/`, not `/assets/`. Cache that folder hard instead.
+- Prerendered routes are files at `route/index.html`, so `try_files $uri $uri/ …` finds them.
+- Routes that were not prerendered fall back to the page Nuxt writes for that (`200.html` or
+  `404.html`, depending on the version). List `.output/public` after a build and point the last
+  `try_files` argument at the file that exists, for example `try_files $uri $uri/ /200.html;`, and
+  give that file the `no-cache` location instead of `/index.html`.
+- Hashed files live under `/_nuxt/`, not `/assets/`. Rename that location.
+
+Values the pages read at build time (`NUXT_PUBLIC_*` used while prerendering) need an `ARG` line
+before `RUN npx nuxi generate`, as in the SPA Dockerfile.
 
 ## Nuxt or Nitro server (`nuxt build`) on Node
 
 ```dockerfile
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npm run build              # nuxt build → .output/ (server + public, dependencies traced in)
+RUN npm run build
 
-FROM node:22-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
@@ -191,14 +199,10 @@ CMD ["node", ".output/server/index.mjs"]
 export default defineEventHandler(() => 'ok');
 ```
 
-- **Bind to `0.0.0.0`.** A server that listens on `127.0.0.1` inside the container is unreachable
-  from Coolify's proxy, and every request fails.
-- `.output` is self-contained, so the runtime image needs no `npm ci`.
-- Runtime config: Nuxt reads `NUXT_*` / `NUXT_PUBLIC_*` environment variables at runtime on the
-  server. Values used at build time (prerendered pages, a static build) must be set for the build.
-- Coolify's Nuxt guide (checked 2026-10-28) also supports Nixpacks with the start command
-  `node .output/server/index.mjs`, or, for a static build, the Static site type with the output
-  directory `dist`.
+- `.output` carries its own traced dependencies, so the runtime stage needs no `npm ci`.
+- `HOST=0.0.0.0` is what makes the server reachable from Coolify's proxy.
+- `USER node` runs the server without root; the base image ships that user.
+- The longer start period covers server start-up before failures count.
 
 ## .dockerignore
 
@@ -208,24 +212,23 @@ dist
 .output
 .nuxt
 .git
-.gitignore
 .github
-*.md
-!README.md
-.env
-.env.*
-npm-debug.log*
 .vscode
 .idea
 .DS_Store
+*.md
+.env
+.env.*
+npm-debug.log*
 Dockerfile
 .dockerignore
 docker-compose.yml
 ```
 
-Keep `.env` files out: a secret copied into a build layer stays in the image.
+Keep `.env` files out. Why: a file copied into a build layer stays in the image, even if a later
+step deletes it. `node_modules` out keeps host binaries from replacing the ones `npm ci` installed.
 
-## docker-compose.yml for local testing
+## docker-compose.yml for local runs
 
 ```yaml
 services:
@@ -233,17 +236,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: unless-stopped
     ports:
-      - '8080:80'          # local only: Coolify puts its own proxy in front
-    healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/healthz']
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+      - '8080:80'          # local only; Coolify puts its own proxy in front
 ```
 
-For a Node server, map `8080:3000` and point the check at port 3000. If you deploy with Coolify's
-Docker Compose build pack instead, a service's `healthcheck` overrides the image's `HEALTHCHECK`,
-and Compose apps don't use the dashboard health-check page.
+For a server app, map `8080:3000`. The health check comes from the image, so it is not repeated
+here. This file is for your machine; Coolify deploys the Dockerfile.

@@ -1,0 +1,303 @@
+# Materials and Liquid Glass — macOS 27
+
+**Read when:** you need an exact macOS 27 value for materials and Liquid Glass as Apple's kit stores it.
+**Owns:** the shared layer styles in the groups Liquid Glass, Materials.
+
+Source: `Apple macOS 27 UI Kit.sketch` from Apple Design Resources (developer.apple.com/design/resources), read 2026-11-01. Every value below is copied from the kit's shared tokens by a script; nothing is estimated. These are the kit's shared layer styles for glass, materials and surfaces.
+
+## How to read the effect lines
+
+- Colours are `#RRGGBB`, with `@NN%` for alpha below 100%. A name in `{braces}` is the kit swatch the colour is bound to.
+- `blend plus-darker` / `blend plus-lighter` are the Plus Darker / Plus Lighter blend modes the kit uses for vibrant colours.
+- `shadow` / `inner-shadow`: x offset, y offset, blur radius, spread, colour.
+- `blur background`: background blur radius and saturation. `blur glass`: Sketch's glass effect with its radius, saturation, brightness, distortion, depth and chromatic aberration values.
+- `corners R smoothingS styleN`: corner radius R (`max` = fully rounded, a capsule or circle), corner smoothing S and the kit's corner style number N, as stored.
+- `opacity` is the layer opacity; a fill's own opacity and blend mode are in brackets after it.
+
+
+## Liquid Glass/Dark
+
+- **Liquid Glass/Dark/Dock**
+  - fill #454545@50% (blend luminosity) + #1A1A1A@10% (blend plus-darker) + #FFFFFF@8% (blend lighten)
+  - shadow x0 y0 blur0 spread0.5 #000000@25% (blend plus-darker)
+  - inner-shadow x0 y-12 blur12 spread-12 #161616@70% (blend plus-lighter)
+  - inner-shadow x1 y16 blur16 spread-16 #161616 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0.5 spread-0.5 #FFFFFF (blend overlay)
+  - inner-shadow x0 y1 blur0.5 spread-0.5 #FFFFFF (blend overlay)
+  - inner-shadow x0 y-1 blur0.5 spread-0.5 #FFFFFF@10% (blend plus-lighter)
+  - inner-shadow x0 y1 blur0.5 spread-0.5 #FFFFFF@10% (blend plus-lighter)
+  - blur glass radius1 saturation1 brightness1 distortion0.08 depth0.9 chromatic0
+  - corners 15 smoothing0.6 style1
+- **Liquid Glass/Dark/Menus**
+  - fill #5A5A5A@50% (blend luminosity)
+  - shadow x0 y4 blur24 spread0 #000000@30%
+  - shadow x0 y0 blur0 spread0.5 #000000@80%
+  - inner-shadow x0 y-4 blur8 spread-4 #0D0D0D (blend plus-lighter)
+  - inner-shadow x0 y4 blur8 spread-4 #0D0D0D (blend plus-lighter)
+  - inner-shadow x0 y-0.5 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y0.5 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y0 blur0 spread1 #666666@40% (blend plus-lighter)
+  - blur glass radius20 saturation1.2 brightness1 distortion0.3 depth0.9 chromatic0
+  - corners 12 smoothing0.6 style1
+- **Liquid Glass/Dark/Notification**
+  - fill #666666@10% (blend lighten)
+  - shadow x0 y4 blur16 spread0 #000000@10%
+  - shadow x0 y0 blur0.3 spread0.3 #ABABAB (blend plus-darker)
+  - inner-shadow x0 y-6 blur4 spread-6 #222222 (blend plus-lighter)
+  - inner-shadow x0 y6 blur4 spread-6 #222222 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur1.5 spread-1 #676767 (blend plus-lighter)
+  - inner-shadow x0 y1 blur1.5 spread-1 #676767 (blend plus-lighter)
+  - inner-shadow x0 y2 blur0.2 spread-1.2 #FFFFFF@20%
+  - blur glass radius10 saturation1 brightness1 distortion0.1 depth0.9 chromatic0
+  - corners 20 smoothing0.6 style1
+- **Liquid Glass/Dark/Regular - Large**
+  - fill #1A1A1A@50% + #1A1A1A@50% (blend luminosity) + #1A1A1A (blend lighten)
+  - shadow x0 y18 blur48 spread0 #000000@45%
+  - shadow x0 y0 blur0.3 spread0.3 #A6A6A6@80% (blend plus-darker)
+  - inner-shadow x0 y-4 blur8 spread-4 #343434 (blend plus-lighter)
+  - inner-shadow x0 y4 blur8 spread-4 #343434 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur1.5 spread-0.5 #676767 (blend plus-lighter)
+  - inner-shadow x0 y1 blur1.5 spread-0.5 #676767 (blend plus-lighter)
+  - inner-shadow x0 y2 blur0.2 spread-1.2 #FFFFFF@20%
+  - shadow x1.25 y0 blur0 spread-0.75 #A6A6A6 (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #A6A6A6 (blend plus-darker)
+  - blur glass radius30 saturation1.2 brightness1 distortion0.3 depth0.9 chromatic0
+  - corners 20 smoothing0.6 style1
+- **Liquid Glass/Dark/Regular - Medium**
+  - fill #1A1A1A@50% + #1A1A1A@90% (blend luminosity) + #1A1A1A (blend lighten)
+  - shadow x0 y18 blur48 spread0 #000000@45%
+  - shadow x0 y0 blur0.3 spread0.3 #A6A6A6@80% (blend plus-darker)
+  - inner-shadow x0 y-4 blur8 spread-4 #343434 (blend plus-lighter)
+  - inner-shadow x0 y4 blur8 spread-4 #343434 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur1.5 spread-0.5 #676767 (blend plus-lighter)
+  - inner-shadow x0 y1 blur1.5 spread-0.5 #676767 (blend plus-lighter)
+  - inner-shadow x0 y2 blur0.2 spread-1.2 #FFFFFF@20%
+  - shadow x1.25 y0 blur0 spread-0.75 #A6A6A6 (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #A6A6A6 (blend plus-darker)
+  - blur glass radius30 saturation1.2 brightness1 distortion0.3 depth0.9 chromatic0
+  - corners 20 smoothing0.6 style1
+- **Liquid Glass/Dark/Regular - Small**
+  - fill #000000 (blend screen) + #999999@17%
+  - inner-shadow x20 y0 blur20 spread-30 #B2B2B2 (blend plus-darker)
+  - inner-shadow x-20 y0 blur20 spread-30 #B2B2B2 (blend plus-darker)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread0 #171717 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread0 #171717 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@4%
+  - shadow x0 y0 blur0 spread0.5 #A6A6A6 (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #A6A6A6 (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #A6A6A6 (blend plus-darker)
+  - inner-shadow x0 y-40 blur10 spread-40 #1A1A1A (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #1A1A1A (blend plus-lighter)
+  - blur glass radius6 saturation1 brightness1 distortion0.4 depth0.8 chromatic0
+  - corners max smoothing0.6 style1
+- **Liquid Glass/Dark/Regular - Small - Inactive**
+  - fill #FFFFFF@5% {Fills/Dark/3 Tertiary}
+  - shadow x0 y0 blur0 spread0.5 #E6E6E6 (blend plus-darker)
+  - shadow x-1 y0 blur0 spread-0.5 #CCCCCC (blend plus-darker)
+  - shadow x1 y0 blur0 spread-0.5 #CCCCCC (blend plus-darker)
+  - corners max smoothing0.6 style1
+- **Liquid Glass/Dark/Regular - Small - Tint New**
+  - fill #FFFFFF@96% + #FF383C {System Colors/Light/1 Red} (blend plus-darker)
+  - inner-shadow x20 y0 blur20 spread-30 #B2B2B2 (blend plus-darker)
+  - inner-shadow x-20 y0 blur20 spread-30 #B2B2B2 (blend plus-darker)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread0 #262626 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@4%
+  - shadow x0 y0 blur0 spread0.5 #D9D9D9 (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #CCCCCC (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #CCCCCC (blend plus-darker)
+  - inner-shadow x0 y-40 blur10 spread-40 #111111 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #111111 (blend plus-lighter)
+  - blur glass radius6 saturation1 brightness1 distortion0.4 depth0.8 chromatic0
+  - corners 60 smoothing0.6 style1
+- **Liquid Glass/Dark/Regular - Small - Tinted**
+  - fill #000000 (blend screen)
+  - inner-shadow x20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x-20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y-40 blur10 spread-40 #111111 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #111111 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@4%
+  - shadow x-1.25 y0 blur0 spread-0.75 #E6E6E6 (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #E6E6E6 (blend plus-darker)
+  - blur glass radius6 saturation1 brightness1 distortion0.4 depth0.8 chromatic0
+  - corners max smoothing0.6 style1
+
+## Liquid Glass/Light
+
+- **Liquid Glass/Light/Dock**
+  - fill #4D4D4D@30% (blend luminosity) + #1A1A1A@10% (blend plus-darker) + #FFFFFF@8% (blend lighten)
+  - shadow x0 y0 blur0 spread0.5 #000000@25% (blend plus-darker)
+  - inner-shadow x0 y-12 blur12 spread-12 #161616@70% (blend plus-lighter)
+  - inner-shadow x1 y16 blur16 spread-16 #161616 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0.5 spread-0.5 #FFFFFF (blend overlay)
+  - inner-shadow x0 y1 blur0.5 spread-0.5 #FFFFFF (blend overlay)
+  - inner-shadow x0 y-1 blur0.5 spread-0.5 #FFFFFF@10% (blend plus-lighter)
+  - inner-shadow x0 y1 blur0.5 spread-0.5 #FFFFFF@10% (blend plus-lighter)
+  - blur glass radius1 saturation1 brightness1 distortion0.08 depth0.9 chromatic0
+- **Liquid Glass/Light/Menus**
+  - fill #E6E6E6@55% (blend luminosity)
+  - shadow x0 y4 blur24 spread0 #000000@30%
+  - shadow x0 y0 blur0 spread0.5 #000000@20%
+  - inner-shadow x0 y-4 blur8 spread-4 #0D0D0D (blend plus-lighter)
+  - inner-shadow x0 y4 blur8 spread-4 #0D0D0D (blend plus-lighter)
+  - inner-shadow x0 y-0.5 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y0.5 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y0 blur0 spread1 #666666@15% (blend plus-lighter)
+  - blur glass radius20 saturation0.8 brightness1 distortion0.3 depth0.9 chromatic0
+  - corners 12 smoothing0.6 style1
+- **Liquid Glass/Light/Notification**
+  - fill #BFBFBF@25% (blend lighten) + #1A1A1A (blend plus-lighter)
+  - shadow x0 y4 blur16 spread0 #000000@10%
+  - shadow x0 y0 blur0.3 spread0.3 #ABABAB (blend plus-darker)
+  - inner-shadow x0 y-6 blur4 spread-6 #222222 (blend plus-lighter)
+  - inner-shadow x0 y6 blur4 spread-6 #222222 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur1.5 spread-1 #676767 (blend plus-lighter)
+  - inner-shadow x0 y1 blur1.5 spread-1 #676767 (blend plus-lighter)
+  - inner-shadow x0 y2 blur0.2 spread-1.2 #FFFFFF@20%
+  - blur glass radius15 saturation1 brightness1 distortion0.1 depth0.9 chromatic0
+  - corners 16 smoothing0.6 style1
+- **Liquid Glass/Light/Regular - Large**
+  - fill #FFFFFF@70% (blend lighten) + #BFBFBF@10% (blend darken)
+  - shadow x0 y18 blur46 spread0 #000000@25%
+  - inner-shadow x0 y-4 blur8 spread-4 #272727 (blend plus-lighter)
+  - inner-shadow x0 y4 blur8 spread-4 #272727 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur1.5 spread-0.5 #272727 (blend plus-lighter)
+  - inner-shadow x0 y1 blur1.5 spread-0.5 #272727 (blend plus-lighter)
+  - inner-shadow x0 y2 blur0.25 spread-1.5 #FFFFFF
+  - shadow x0 y0 blur0.3 spread0.3 #DBDBDB@50% (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - blur glass radius30 saturation1.4 brightness1 distortion0.3 depth0.9 chromatic0
+  - corners 20 smoothing0.6 style1
+- **Liquid Glass/Light/Regular - Medium**
+  - fill #FFFFFF@70% (blend lighten) + #BFBFBF@10% (blend darken)
+  - shadow x0 y18 blur46 spread0 #000000@25%
+  - inner-shadow x0 y-4 blur2 spread-4 #272727 (blend plus-lighter)
+  - inner-shadow x0 y4 blur8 spread-4 #272727 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur1.5 spread-0.5 #272727 (blend plus-lighter)
+  - inner-shadow x0 y1 blur1.5 spread-0.5 #272727 (blend plus-lighter)
+  - inner-shadow x0 y2 blur0.25 spread-1.2 #FFFFFF
+  - shadow x0 y0 blur0.3 spread0.3 #DBDBDB (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - blur glass radius30 saturation1.4 brightness1 distortion0.3 depth0.9 chromatic0
+  - corners 20 smoothing0.6 style1
+- **Liquid Glass/Light/Regular - Small**
+  - fill #000000@25% + #FFFFFF@25% + #444444@60% (blend plus-lighter) + #F8F8F8@20% (blend luminosity)
+  - inner-shadow x20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x-20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #666666 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread0 #171717 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread0 #171717 (blend plus-lighter)
+  - inner-shadow x0 y40 blur30 spread-40 #E6E6E6 (blend plus-darker)
+  - inner-shadow x0 y-40 blur10 spread-40 #282828 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #282828 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@2%
+  - shadow x0 y0 blur0 spread0.5 #DBDBDB (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - blur glass radius6 saturation2 brightness1 distortion0.4 depth0.8 chromatic0
+  - corners max smoothing0.6 style1
+- **Liquid Glass/Light/Regular - Small - Inactive**
+  - fill #000000@2% {Fills/Light/5 Quinary}
+  - shadow x0 y0 blur0 spread0.5 #EBEBEB (blend plus-darker)
+  - shadow x-0.75 y0 blur0 spread-0.25 #F2F2F2 (blend plus-darker)
+  - shadow x0.75 y0 blur0 spread-0.25 #F2F2F2 (blend plus-darker)
+  - corners max smoothing0.6 style1
+- **Liquid Glass/Light/Regular - Small - Tinted**
+  - fill #FFFFFF@96% + #FF383C {System Colors/Light/1 Red} (blend plus-darker)
+  - inner-shadow x20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x-20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y-40 blur10 spread-40 #111111 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #111111 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@4%
+  - shadow x0 y0 blur0 spread0.5 #DBDBDB (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #DBDBDB (blend plus-darker)
+  - blur glass radius6 saturation1 brightness1 distortion0.4 depth0.8 chromatic0
+  - corners 1000 smoothing0.6 style1
+- **Liquid Glass/Light/Regular - Small - Tinted**
+  - fill #FFFFFF (blend multiply)
+  - inner-shadow x20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x-20 y0 blur20 spread-30 #D9D9D9 (blend plus-darker)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y4 blur0.5 spread-4 #999999 (blend plus-lighter)
+  - inner-shadow x0 y-1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y1 blur0 spread0 #262626 (blend plus-lighter)
+  - inner-shadow x0 y-40 blur10 spread-40 #111111 (blend plus-lighter)
+  - inner-shadow x0 y40 blur10 spread-40 #111111 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@4%
+  - shadow x-1.25 y0 blur0 spread-0.75 #E6E6E6 (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #E6E6E6 (blend plus-darker)
+  - blur glass radius6 saturation1 brightness1 distortion0.4 depth0.8 chromatic0
+  - corners max smoothing0.6 style1
+
+## Liquid Glass/Lock Screen Time
+
+- **Liquid Glass/Lock Screen Time**
+  - fill #F8F8F8@25% (blend luminosity) + #1A1A1A (blend plus-lighter)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #333333 (blend plus-lighter)
+  - inner-shadow x0 y-4 blur0.5 spread-4 #333333 (blend plus-lighter)
+  - inner-shadow x0 y-0.5 blur0 spread0 #333333 (blend plus-lighter)
+  - inner-shadow x0 y0.5 blur0 spread0 #333333 (blend plus-lighter)
+  - inner-shadow x0 y-10 blur5 spread-10 #404040 (blend plus-lighter)
+  - inner-shadow x0 y10 blur5 spread-10 #404040 (blend plus-lighter)
+  - shadow x0 y8 blur15 spread0 #000000@2%
+  - shadow x0 y0 blur0 spread0.5 #D9D9D9 (blend plus-darker)
+  - shadow x-1.25 y0 blur0 spread-0.75 #E6E6E6 (blend plus-darker)
+  - shadow x1.25 y0 blur0 spread-0.75 #E6E6E6 (blend plus-darker)
+  - blur glass radius3 saturation1.4 brightness1 distortion0.2 depth0.5 chromatic0
+  - corners 0 smoothing0.6 style0
+
+## Materials/Dark
+
+- **Materials/Dark/Regular**
+  - fill #2C2C2C@61%
+  - blur background radius60 saturation1.9
+- **Materials/Dark/Thick**
+  - fill #2C2C2C@71%
+  - blur background radius60 saturation1.9
+- **Materials/Dark/Thin**
+  - fill #292929@49%
+  - blur background radius60 saturation1.9
+- **Materials/Dark/Ultra Thick**
+  - fill #2C2C2C@82%
+  - blur background radius60 saturation1.9
+- **Materials/Dark/Ultra Thin**
+  - fill #292929@40%
+  - blur background radius60 saturation1.8
+
+## Materials/Light
+
+- **Materials/Light/Regular**
+  - fill #ECECEC@63%
+  - blur background radius60 saturation1.45
+  - corners 5 smoothing0.6 style1
+- **Materials/Light/Thick**
+  - fill #ECECEC@76%
+  - blur background radius60 saturation2
+  - corners 5 smoothing0.6 style1
+- **Materials/Light/Thin**
+  - fill #ECECEC@50%
+  - blur background radius60 saturation1.45
+  - corners 5 smoothing0.6 style1
+- **Materials/Light/Ultra Thick**
+  - fill #ECECEC@88%
+  - blur background radius60 saturation2
+- **Materials/Light/Ultra Thin**
+  - fill #ECECEC@38%
+  - blur background radius60 saturation1.45
+  - corners 5 smoothing0.6 style1
