@@ -1,0 +1,255 @@
+/*
+  macOS 27 window chrome for drawn screenshots.
+  Numbers come from Apple's macOS 27 UI Kit (Apple Design Resources): the Windows, Titlebars and Toolbars and
+  Sidebars pages, the shared materials and the colour swatches.
+
+  Chrome can't draw two things the kit stores, so they are converted:
+  - Plus-darker (no CSS equivalent in Chrome): colour c becomes black at alpha 1 − c.
+    Plus-lighter shadows and fills become white at alpha c.
+    Text keeps the kit's vibrant swatch colour with normal blending.
+  - Sketch glass distortion and depth have no CSS equivalent; only blur and saturation are used.
+  Light glass fill: its four kit fills give 0.52 over black and 0.97 over white, so white at 52% is used.
+  Dark glass fill: the screen-blended black is a no-op, which leaves #999999 at 17%.
+*/
+
+:root {
+  --font: "SF Pro", "SF Pro Text", -apple-system, "SF Arabic", "Geeza Pro", sans-serif;
+}
+
+.mac {
+  /* Light, Active window */
+  --window-bg: #FFFFFF;                         /* Window Backgrounds/Light Background */
+  --window-shadow: 0 36px 100px rgba(0, 0, 0, .40), 0 0 1px rgba(0, 0, 0, .80);
+  --sidebar-bg: rgba(250, 250, 250, .80);       /* Sidebar/Background/Light/Active */
+  --sidebar-blur: blur(100px) saturate(1);
+  --edge-bg: rgba(255, 255, 255, .85);          /* Scroll Edge Effect/Light - Top - Hard */
+  --edge-line: rgba(0, 0, 0, .05);
+  --label-1: #363636;                           /* Labels/Light Vibrant/1 Primary */
+  --label-2: #737373;                           /* Labels/Light Vibrant/2 Secondary */
+  --label-3: #B2B2B2;                           /* Labels/Light Vibrant/3 Tertiary */
+  --content-label: rgba(0, 0, 0, .85);          /* Labels/Light/1 Primary */
+  --content-label-2: rgba(0, 0, 0, .50);        /* Labels/Light/2 Secondary */
+  --symbol: #0078F0;                            /* System Colors/Light Vibrant/8 Blue (sidebar symbols) */
+  --accent: #0088FF;                            /* System Colors/Light/8 Blue */
+  --row-selected: rgba(0, 0, 0, .055);          /* #000000@11% at 50% layer opacity */
+  --item-selected: rgba(0, 0, 0, .07);          /* Fills/Light Vibrant/2 Secondary */
+  --separator: rgba(0, 0, 0, .10);              /* Fills/Light/1 Primary */
+  --close: #FA9891; --minimize: #FFDA66; --expand: #ADE392;
+  --close-fx: inset 0 0 1px rgba(196, 0, 0, .4), inset 2px 0 .25px -1.5px #C40000, inset -2px 0 .25px -1.5px #C40000, 0 1.5px 1px rgba(250, 129, 120, .15);
+  --minimize-fx: inset 0 0 1px rgba(158, 10, 0, .4), inset 2px 0 .25px -1.5px #9E0A00, inset -2px 0 .25px -1.5px #9E0A00, 0 1.5px 1px rgba(255, 215, 89, .15);
+  --expand-fx: inset 0 0 1px rgba(0, 86, 0, .4), inset 2px 0 .25px -1.5px #005600, inset -2px 0 .25px -1.5px #005600, 0 1.5px 1px rgba(173, 227, 146, .15);
+  --glass-blur: blur(6px) saturate(2);          /* Liquid Glass/Light/Regular - Small */
+  --glass-fill: rgba(255, 255, 255, .52);
+  --glass-shadow:
+    0 8px 15px rgba(0, 0, 0, .02),
+    0 0 0 .5px rgba(0, 0, 0, .14), -1.25px 0 0 -.75px rgba(0, 0, 0, .14), 1.25px 0 0 -.75px rgba(0, 0, 0, .14),
+    inset 20px 0 20px -30px rgba(0, 0, 0, .15), inset -20px 0 20px -30px rgba(0, 0, 0, .15),
+    inset 0 4px .5px -4px rgba(255, 255, 255, .40), inset 0 -4px .5px -4px rgba(255, 255, 255, .40),
+    inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -1px 0 rgba(255, 255, 255, .09),
+    inset 0 40px 30px -40px rgba(0, 0, 0, .10),
+    inset 0 40px 10px -40px rgba(255, 255, 255, .16), inset 0 -40px 10px -40px rgba(255, 255, 255, .16);
+  --search-text: rgba(0, 0, 0, .50);
+  color-scheme: light;
+}
+
+.mac.dark {
+  --window-bg: #1E1E1E;                         /* Window Backgrounds/Dark Background */
+  --sidebar-bg: rgba(12, 12, 12, .85);          /* Sidebar/Background/Dark/Active */
+  --sidebar-blur: blur(80px) saturate(2);
+  --edge-bg: rgba(30, 30, 30, .55);
+  --edge-line: rgba(255, 255, 255, .10);
+  --label-1: rgba(255, 255, 255, .96);          /* Labels/Dark Vibrant/1 Primary */
+  --label-2: #8A8A8A;
+  --label-3: #4C4C4C;
+  --content-label: #FFFFFF;                     /* Labels/Dark/1 Primary (Sketch swatch) */
+  --content-label-2: rgba(255, 255, 255, .55);
+  --symbol: #0A99FF;                            /* System Colors/Dark (use plus lighter)/8 Blue */
+  --accent: #0091FF;
+  --row-selected: rgba(255, 255, 255, .055);
+  --item-selected: rgba(255, 255, 255, .08);
+  --separator: rgba(255, 255, 255, .10);
+  --close: #F06E6A; --minimize: #FFCD30; --expand: #58C73B;
+  /* The dark controls' kit effects are all overlay or plus-lighter; only the top and bottom rims are kept. */
+  --close-fx: inset 0 -1.5px .25px -1px rgba(255, 255, 255, .5), inset 0 1.5px .25px -1px rgba(255, 255, 255, .6);
+  --minimize-fx: var(--close-fx);
+  --expand-fx: var(--close-fx);
+  --glass-blur: blur(6px) saturate(1);          /* Liquid Glass/Dark/Regular - Small */
+  --glass-fill: rgba(153, 153, 153, .17);
+  --glass-shadow:
+    0 8px 15px rgba(0, 0, 0, .04),
+    0 0 0 .5px rgba(0, 0, 0, .35), -1.25px 0 0 -.75px rgba(0, 0, 0, .35), 1.25px 0 0 -.75px rgba(0, 0, 0, .35),
+    inset 20px 0 20px -30px rgba(0, 0, 0, .30), inset -20px 0 20px -30px rgba(0, 0, 0, .30),
+    inset 0 4px .5px -4px rgba(255, 255, 255, .40), inset 0 -4px .5px -4px rgba(255, 255, 255, .40),
+    inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -1px 0 rgba(255, 255, 255, .09),
+    inset 0 40px 10px -40px rgba(255, 255, 255, .10), inset 0 -40px 10px -40px rgba(255, 255, 255, .10);
+  --search-text: rgba(255, 255, 255, .55);
+  color-scheme: dark;
+}
+
+.mac.inactive {
+  --window-shadow: 0 16px 32px rgba(0, 0, 0, .20), 0 0 1px rgba(0, 0, 0, .80);
+  --sidebar-bg: #F4F4F4;
+  --label-1: #B2B2B2;
+  --close: rgba(108, 118, 128, .05); --minimize: var(--close); --expand: var(--close);
+  --close-fx: inset 0 0 1px rgba(0, 0, 0, .2), inset 2px 0 .25px -1.5px rgba(0, 0, 0, .2), inset -2px 0 .25px -1.5px rgba(0, 0, 0, .2);
+  --minimize-fx: var(--close-fx); --expand-fx: var(--close-fx);
+  --glass-blur: none;
+  --glass-fill: rgba(0, 0, 0, .02);
+  --glass-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), -.75px 0 0 -.25px rgba(0, 0, 0, .05), .75px 0 0 -.25px rgba(0, 0, 0, .05);
+}
+.mac.dark.inactive {
+  --sidebar-bg: rgba(46, 46, 46, .85);
+  --sidebar-blur: blur(70px) saturate(1.8);
+  --label-1: #4C4C4C;
+  --close: #3A3A3A;
+  --close-fx: inset 0 -1.5px .25px -1px rgba(255, 255, 255, .55), inset 0 1.5px .25px -1px rgba(255, 255, 255, .6);
+  --glass-fill: rgba(255, 255, 255, .05);
+  --glass-shadow: 0 0 0 .5px rgba(0, 0, 0, .10), -1px 0 0 -.5px rgba(0, 0, 0, .20), 1px 0 0 -.5px rgba(0, 0, 0, .20);
+}
+
+.mac, .mac * { box-sizing: border-box; }
+
+.mac {
+  position: relative;
+  width: var(--w, 840px);
+  height: var(--h, 400px);
+  border-radius: 16px;
+  box-shadow: var(--window-shadow);
+  overflow: hidden;
+  display: flex;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  color: var(--content-label);
+}
+.mac.dark.no-sidebar { box-shadow: var(--window-shadow), inset 0 0 0 1px rgba(255, 255, 255, .20); }
+
+/* Sidebar pane: 256 wide, edge to edge; its material runs up under the bar. */
+.mac .sidebar {
+  flex: 0 0 256px;
+  position: relative;
+  background: var(--sidebar-bg);
+  -webkit-backdrop-filter: var(--sidebar-blur);
+  backdrop-filter: var(--sidebar-blur);
+}
+.mac .sidebar .bar {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 18px 8px;
+}
+.mac .list { padding: 0 14px 16px; }
+.mac .section { padding-bottom: 14px; }
+.mac .section-title {
+  height: 18px;
+  padding: 2px 0;
+  font: 700 11px/14px var(--font);
+  color: var(--label-3);
+}
+
+/* Medium rows: 32 tall; item icon 20 wide, then 4, then the title. Selection overhangs 4, radius 8. */
+.mac .row {
+  position: relative;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-inline-end: 2px;
+  font: 400 13px/16px var(--font);
+  color: var(--label-1);
+}
+.mac .row .symbol { flex: 0 0 20px; text-align: center; font-weight: 500; color: var(--symbol); }
+.mac .row .detail { margin-inline-start: auto; font-weight: 500; color: var(--label-2); }
+.mac .row.selected::before {
+  content: "";
+  position: absolute;
+  inset: 0 -4px;
+  border-radius: 8px;
+  background: var(--row-selected);
+}
+.mac .row > * { position: relative; }
+
+.mac .main {
+  flex: 1;
+  position: relative;
+  background: var(--window-bg);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Unified toolbar: 52 tall, items 36 tall, gap 8, padding 8. Without a sidebar the controls start at 18. */
+.mac .toolbar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  z-index: 2;
+}
+.mac.no-sidebar .toolbar { padding-inline-start: 18px; }
+.mac .toolbar .title {
+  flex: 1;
+  min-width: 0;
+  font: 700 15px/15px var(--font);
+  letter-spacing: -0.2px;
+  color: var(--label-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mac .toolbar .title small {
+  display: block;
+  margin-top: 2px;
+  font: 500 11px/13px var(--font);
+  letter-spacing: 0;
+  color: var(--label-3);
+}
+
+.mac .edge {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 52px;
+  background: var(--edge-bg);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 -0.67px 0 var(--edge-line);
+  z-index: 1;
+}
+
+.mac .content { flex: 1; padding-top: 52px; overflow: hidden; position: relative; }
+
+/* Window controls: three 14 circles, 9 apart. They stay in this order in any writing direction here;
+   the kit has no right-to-left windows. */
+.mac .controls { display: flex; gap: 9px; direction: ltr; }
+.mac .controls i { width: 14px; height: 14px; border-radius: 50%; }
+.mac .controls i:nth-child(1) { background: var(--close); box-shadow: var(--close-fx); }
+.mac .controls i:nth-child(2) { background: var(--minimize); box-shadow: var(--minimize-fx); }
+.mac .controls i:nth-child(3) { background: var(--expand); box-shadow: var(--expand-fx); }
+
+/* Glass toolbar items, XL: 36 tall capsule, inner buttons 28 with 4 inset and 9 between. */
+.mac .glass {
+  height: 36px;
+  min-width: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 4px;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  color: var(--label-1);
+  font: 500 13px/1 var(--font);
+  flex: none;
+}
+.mac .glass b { width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center; font-weight: 500; }
+.mac .glass b.on { background: var(--item-selected); }
+
+/* Search, XL: 159 × 36, padding 10, a 16-wide glyph, gap 6, SF Pro Medium 13. */
+.mac .search { width: 159px; justify-content: flex-start; gap: 6px; padding: 0 10px; color: var(--search-text); }
+.mac .search .glyph { width: 16px; text-align: center; color: var(--label-1); }

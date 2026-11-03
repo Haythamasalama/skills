@@ -1,0 +1,157 @@
+/*
+  iPhone screen (iOS 27, iPhone 18 Pro canvas 402 × 874) for drawn screenshots.
+  Numbers come from Apple's iOS 27 UI Kit (Apple Design Resources): the System page (status bar, home indicator,
+  scroll edge), the Toolbars and Tab Bars pages, the text styles, colour swatches and materials.
+  The Wi-Fi and battery glyphs in iphone-screen.html are simple shapes drawn for this template at the kit's sizes.
+  Glass is converted the same way as in mac.css: plus-darker colour c → black at 1 − c, plus-lighter
+  shadow c → white at c. Only the glass blur and saturation are kept; its distortion has no CSS form.
+*/
+
+:root {
+  --font: "SF Pro", "SF Pro Text", -apple-system, "SF Arabic", "Geeza Pro", sans-serif;
+}
+
+.iphone {
+  --bg: #FFFFFF;                          /* Backgrounds/Light/Primary */
+  --ink: #000000;                         /* status bar glyphs, Labels/Light/1 Primary */
+  --label-1: #1A1A1A;                     /* Labels - Liquid Glass/Light/1 Primary */
+  --label-2: #727272;                     /* Labels - Liquid Glass/Light/2 Secondary */
+  --content-label: #000000;
+  --content-label-2: rgba(60, 60, 67, .60); /* Labels/Light/2 Secondary */
+  --separator: rgba(0, 0, 0, .12);        /* Separators/Light/Non-Opaque */
+  --accent: #0088FF;                      /* System Colors/Light/8 Blue */
+  --tab-pill: rgba(120, 120, 128, .16);   /* Fills/Light/2 Secondary */
+  --tab-pad: 0 8px;
+  --tab-pill-radius: 999px;
+  --glass-blur: blur(6px) saturate(2);
+  --glass-fill: rgba(255, 255, 255, .52);
+  --glass-shadow:
+    0 8px 15px rgba(0, 0, 0, .02),
+    0 0 0 .5px rgba(0, 0, 0, .14), -1.25px 0 0 -.75px rgba(0, 0, 0, .14), 1.25px 0 0 -.75px rgba(0, 0, 0, .14),
+    inset 20px 0 20px -30px rgba(0, 0, 0, .15), inset -20px 0 20px -30px rgba(0, 0, 0, .15),
+    inset 0 4px .5px -4px rgba(255, 255, 255, .40), inset 0 -4px .5px -4px rgba(255, 255, 255, .40),
+    inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -1px 0 rgba(255, 255, 255, .09),
+    inset 0 40px 30px -40px rgba(0, 0, 0, .10),
+    inset 0 40px 10px -40px rgba(255, 255, 255, .16), inset 0 -40px 10px -40px rgba(255, 255, 255, .16);
+  color-scheme: light;
+}
+
+.iphone.dark {
+  --bg: #000000;                          /* Backgrounds/Dark - Base/Primary */
+  --ink: #FFFFFF;
+  --label-1: #EDEDED;                     /* Labels - Liquid Glass/Dark/1 Primary */
+  --label-2: #8A8A8A;
+  --content-label: #FFFFFF;
+  --content-label-2: rgba(235, 235, 245, .60);
+  --separator: rgba(255, 255, 255, .12);
+  --accent: #0091FF;
+  --tab-pill: rgba(120, 120, 128, .32);
+  --tab-pad: 4px 8px;
+  --tab-pill-radius: 27px;
+  --glass-blur: blur(6px) saturate(1);
+  --glass-fill: rgba(153, 153, 153, .17);
+  --glass-shadow:
+    0 8px 15px rgba(0, 0, 0, .04),
+    0 0 0 .5px rgba(0, 0, 0, .35), -1.25px 0 0 -.75px rgba(0, 0, 0, .35), 1.25px 0 0 -.75px rgba(0, 0, 0, .35),
+    inset 20px 0 20px -30px rgba(0, 0, 0, .30), inset -20px 0 20px -30px rgba(0, 0, 0, .30),
+    inset 0 4px .5px -4px rgba(255, 255, 255, .40), inset 0 -4px .5px -4px rgba(255, 255, 255, .40),
+    inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -1px 0 rgba(255, 255, 255, .09),
+    inset 0 40px 10px -40px rgba(255, 255, 255, .10), inset 0 -40px 10px -40px rgba(255, 255, 255, .10);
+  color-scheme: dark;
+}
+
+.iphone, .iphone * { box-sizing: border-box; }
+
+.iphone {
+  position: relative;
+  width: 402px;
+  height: 874px;
+  /* The kit's screens are plain rectangles; the device outline comes from Apple's product bezels. */
+  border-radius: var(--screen-radius, 0);
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  color: var(--content-label);
+}
+
+/* Status bar, iPhone 18 Pro: 402 × 62. */
+.iphone .status { position: absolute; inset: 0 0 auto; height: 62px; z-index: 5; color: var(--ink); direction: ltr; }
+.iphone .status .time {
+  position: absolute; left: 63.25px; top: 21.5px; width: 37px; height: 22px;
+  text-align: center; font: 600 17.67px/22px var(--font);
+}
+.iphone .status .island {
+  position: absolute; left: 153.5px; top: 14px; width: 95px; height: 36.67px;
+  border-radius: 999px; background: #000;
+}
+.iphone .status .cell { position: absolute; left: 277.76px; top: 25px; width: 20.32px; height: 15px; }
+.iphone .status .cell i {
+  position: absolute; bottom: 0; width: 3.33px; border-radius: 4px; background: currentColor;
+}
+.iphone .status .wifi { position: absolute; left: 306.08px; top: 25.33px; }
+.iphone .status .battery { position: absolute; left: 333.41px; top: 25.67px; }
+
+/* Top bar "Large": 402 × 105 at y 62. Glass buttons 44 at x 16 and 342; large title at x 16, y 54. */
+.iphone .nav { position: absolute; inset: 62px 0 auto; height: 105px; z-index: 4; }
+.iphone .nav .lead { position: absolute; left: 16px; top: 0; }
+.iphone .nav .trail { position: absolute; left: 342px; top: 0; }
+.iphone .nav .large-title {
+  position: absolute; inset-inline-start: 16px; top: 54px;
+  font: 700 34px/41px var(--font);       /* 01 LargeTitle/2 Bold */
+  color: var(--label-1);
+}
+
+/* Scroll Edge Effect/Top - Soft: background blur 100 under a white-to-clear mask at 60%. */
+.iphone .edge {
+  position: absolute; inset: 0 0 auto; height: 112px; z-index: 3;
+  -webkit-backdrop-filter: blur(100px); backdrop-filter: blur(100px);
+  -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent);
+  opacity: .6;
+}
+
+.iphone .glass {
+  height: 44px; min-width: 44px; padding: 4px;
+  border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 20px;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  color: var(--label-1);
+  font: 500 17px/22px var(--font);
+}
+.iphone .glass b { width: 36px; height: 36px; display: grid; place-items: center; font-weight: 500; }
+
+.iphone .content { position: absolute; inset: 167px 0 0; overflow: hidden; }
+
+/* Tab bar: 402 × 99 at y 775, padding 16, 21, 21, 21; one glass capsule 62 tall. */
+.iphone .tabbar {
+  position: absolute; inset: auto 0 0; height: 99px; padding: 16px 21px 21px; z-index: 4;
+}
+.iphone .tabbar .tabs {
+  height: 62px; padding: var(--tab-pad);
+  display: flex; align-items: center;
+  border-radius: 999px;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+}
+.iphone .tab {
+  position: relative; flex: 1; height: 54px;
+  display: flex; flex-direction: column; align-items: center;
+  color: var(--label-1);
+}
+.iphone .tab .sym { margin-top: 7px; height: 28px; font: 600 18px/22px var(--font); display: grid; place-items: center; }
+.iphone .tab .label { margin-top: 1px; font: 600 10px/12px var(--font); letter-spacing: -0.1px; }
+.iphone .tab.selected { color: var(--accent); }
+.iphone .tab.selected::before {
+  content: ""; position: absolute; inset: 0 -4px;
+  border-radius: var(--tab-pill-radius); background: var(--tab-pill);
+}
+.iphone .tab > * { position: relative; }
+
+/* Home indicator: 144 × 5 bar, radius 100, centred and flush to the bottom like the kit's iPad screens. */
+.iphone .home {
+  position: absolute; left: 50%; bottom: 8px; width: 144px; height: 5px;
+  transform: translateX(-50%); border-radius: 100px; background: var(--ink); z-index: 6;
+}

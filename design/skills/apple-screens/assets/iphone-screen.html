@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPhone screen</title>
+<link rel="stylesheet" href="iphone.css">
+<style>
+  html, body { margin: 0; }
+  body { min-height: 100vh; display: grid; place-items: center; background: linear-gradient(160deg, #62C6FF, #1650D0); }
+  .iphone { --screen-radius: 0; box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+  .rows { padding: 0 16px; }
+  .rows div { height: 52px; display: flex; align-items: center; border-bottom: .5px solid var(--separator); font: 400 17px/22px var(--font); }
+</style>
+<script>
+  // ?theme=dark  ?dir=rtl&lang=ar — one file renders every variant.
+  const q = new URLSearchParams(location.search);
+  document.documentElement.dir = q.get("dir") || "ltr";
+  if (q.get("lang")) document.documentElement.lang = q.get("lang");
+  addEventListener("DOMContentLoaded", () => {
+    if (q.get("theme") === "dark") document.querySelector(".iphone").classList.add("dark");
+  });
+</script>
+</head>
+<body>
+  <div class="iphone">
+    <div class="status">
+      <span class="time">9:41</span>
+      <span class="island"></span>
+      <span class="cell">
+        <i style="left:0;height:6.33px"></i><i style="left:5.66px;height:8.67px"></i><i style="left:11.33px;height:11px"></i><i style="left:16.99px;height:13.67px"></i>
+      </span>
+      <svg class="wifi" width="19.33" height="14.33" viewBox="0 0 19.33 14.33" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M1.5 5.4a11.6 11.6 0 0 1 16.33 0"/><path d="M4.7 8.6a7 7 0 0 1 9.93 0"/><circle cx="9.665" cy="12.3" r="1.85" fill="currentColor" stroke="none"/></svg>
+      <svg class="battery" width="29.33" height="13.67" viewBox="0 0 29.33 13.67" fill="currentColor"><rect x="0.5" y="0.5" width="25.33" height="12.67" rx="4" fill="none" stroke="currentColor" stroke-opacity=".35"/><rect x="2.5" y="2.5" width="21.33" height="8.67" rx="2.4"/><path d="M27.33 4.6a2 2 0 0 1 0 4.47z" fill-opacity=".4"/></svg>
+    </div>
+    <div class="edge"></div>
+    <header class="nav">
+      <span class="glass lead"><b>􀯶</b></span>
+      <span class="glass trail"><b>􀍠</b></span>
+      <h1 class="large-title" style="margin:0">Library</h1>
+    </header>
+    <main class="content">
+      <div class="rows">
+        <div>Recents</div><div>Screenshots</div><div>Favourites</div><div>Shared</div>
+      </div>
+    </main>
+    <nav class="tabbar">
+      <div class="tabs">
+        <div class="tab selected"><span class="sym">􀉉</span><span class="label">Recents</span></div>
+        <div class="tab"><span class="sym">􀈕</span><span class="label">Folders</span></div>
+        <div class="tab"><span class="sym">􀋂</span><span class="label">Favourites</span></div>
+        <div class="tab"><span class="sym">􀊫</span><span class="label">Search</span></div>
+      </div>
+    </nav>
+    <span class="home"></span>
+  </div>
+</body>
+</html>

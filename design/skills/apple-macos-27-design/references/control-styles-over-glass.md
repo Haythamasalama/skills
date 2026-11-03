@@ -1,0 +1,337 @@
+# Control fill styles, Over-glass — macOS 27
+
+**Read when:** you need an exact macOS 27 value for control fill styles, Over-glass as Apple's kit stores it.
+**Owns:** the shared layer styles in the groups Over-Glass.
+
+Source: `Apple macOS 27 UI Kit.sketch` from Apple Design Resources (developer.apple.com/design/resources), read 2026-11-01. Every value below is copied from the kit's shared tokens by a script; nothing is estimated. Shared layer styles the controls use for each state. Component pages name the style each part uses.
+
+## How to read the effect lines
+
+- Colours are `#RRGGBB`, with `@NN%` for alpha below 100%. A name in `{braces}` is the kit swatch the colour is bound to.
+- `blend plus-darker` / `blend plus-lighter` are the Plus Darker / Plus Lighter blend modes the kit uses for vibrant colours.
+- `shadow` / `inner-shadow`: x offset, y offset, blur radius, spread, colour.
+- `blur background`: background blur radius and saturation. `blur glass`: Sketch's glass effect with its radius, saturation, brightness, distortion, depth and chromatic aberration values.
+- `corners R smoothingS styleN`: corner radius R (`max` = fully rounded, a capsule or circle), corner smoothing S and the kit's corner style number N, as stored.
+- `opacity` is the layer opacity; a fill's own opacity and blend mode are in brackets after it.
+
+
+## Over-Glass/Dark
+
+- **Over-Glass/Dark/01 - Bordered/01 - Idle**
+  - fill #FFFFFF@12% (blend overlay) + #FFFFFF@5% (blend plus-lighter)
+  - corners max smoothing0.6 style1
+- **Over-Glass/Dark/01 - Bordered/03 - Clicked**
+  - fill #FFFFFF@12% (blend overlay) + #FFFFFF@13% (blend plus-lighter)
+  - corners max smoothing0.6 style1
+- **Over-Glass/Dark/01 - Bordered/04 - Disabled**
+  - fill #FFFFFF@6% (blend overlay) + #FFFFFF@2.5% (blend plus-lighter)
+  - corners max smoothing0.6 style1
+- **Over-Glass/Dark/04 - Prominent (Default)/01 - Idle**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue}
+  - corners max smoothing0.6 style1
+  - blend plus-darker
+- **Over-Glass/Dark/04 - Prominent (Default)/03 - Clicked**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary}
+  - corners 4 smoothing0.6 style1
+  - blend plus-lighter
+- **Over-Glass/Dark/04 - Prominent (Default)/04 - Disabled**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue}
+  - opacity 40% blend plus-lighter
+- **Over-Glass/Dark/05 - Prominent (Default) Destructive/01 - Idle**
+  - fill #F52F32 {System Colors/Light Vibrant (use plus darker)/1 Red}
+  - blend plus-lighter
+- **Over-Glass/Dark/05 - Prominent (Default) Destructive/03 - Clicked**
+  - fill #FF4747 {System Colors/Dark (use plus lighter)/1 Red} + #FFFFFF@15%
+  - corners max smoothing0.6 style1
+  - blend plus-lighter
+- **Over-Glass/Dark/05 - Prominent (Default) Destructive/04 - Disabled**
+  - fill #FF4747 {System Colors/Dark (use plus lighter)/1 Red}
+  - corners max smoothing0.6 style1
+  - opacity 50% blend plus-lighter
+- **Over-Glass/Dark/Controls/Active, Off, 01 - Idle**
+  - fill #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-darker)
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Active, Off, 03 - Clicked**
+  - fill #FFFFFF@19%
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Active, Off, 04 - Disabled**
+  - fill #FFFFFF@5% {Fills/Dark Vibrant (use plus lighter)/3 Tertiary} (blend plus-darker)
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Active, On, 01 - Idle**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@5% {Fills/Dark Vibrant (use plus lighter)/3 Tertiary} (blend plus-lighter)
+- **Over-Glass/Dark/Controls/Active, On, 03 - Clicked**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@8% {Fills/Dark Vibrant (use plus lighter)/2 Secondary} (blend plus-lighter)
+- **Over-Glass/Dark/Controls/Active, On, 04 - Disabled**
+  - fill #0091FF {System Colors/Dark/8 Blue} + #FFFFFF@5% {Fills/Dark Vibrant (use plus lighter)/3 Tertiary} (blend plus-lighter)
+  - opacity 45%
+- **Over-Glass/Dark/Controls/Inactive, Off, 01 - Idle**
+  - fill #FFFFFF@10% {Fills/Dark/1 Primary}
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Inactive, Off, 03 - Clicked**
+  - fill #FFFFFF@19%
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Inactive, Off, 04 - Disabled**
+  - fill #FFFFFF@3% {Fills/Dark Vibrant (use plus lighter)/5 Quinary}
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Inactive, On, 01 - Idle**
+  - fill #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary}
+  - blend plus-lighter
+- **Over-Glass/Dark/Controls/Inactive, On, 03 - Clicked**
+  - fill #FFFFFF@6% (blend plus-lighter) + #FFFFFF@13%
+  - blend plus-darker
+- **Over-Glass/Dark/Controls/Inactive, On, 04 - Disabled**
+  - fill #FFFFFF@3% {Fills/Dark/4 Quatenary}
+  - blend plus-lighter
+- **Over-Glass/Dark/Fills/Default, 01 - Primary**
+  - fill #000000@85%
+  - blend plus-darker
+- **Over-Glass/Dark/Fills/Default, 02 - Secondary**
+  - fill #000000@50%
+  - blend plus-darker
+- **Over-Glass/Dark/Fills/Default, 03 - Tertiary**
+  - fill #000000@25%
+  - blend plus-darker
+- **Over-Glass/Dark/Fills/Default, 04 - Quaternary**
+  - fill #000000@10%
+  - blend plus-darker
+- **Over-Glass/Dark/Fills/Default, 05 - Quinary**
+  - fill #000000@5%
+  - blend plus-darker
+- **Over-Glass/Dark/Fills/Default, 06 - Seximal**
+  - fill #000000@3%
+  - blend plus-darker
+- **Over-Glass/Dark/Fills/Selected 01 - Primary**
+  - fill #FFFFFF
+- **Over-Glass/Dark/Fills/Selected 02 - Secondary**
+  - fill #FFFFFF@55%
+- **Over-Glass/Dark/Fills/Selected 03 - Tertiary**
+  - fill #FFFFFF@25%
+- **Over-Glass/Dark/Fills/Selected 04 - Quaternary**
+  - fill #FFFFFF@10%
+- **Over-Glass/Dark/Fills/Selected 05 - Quinary**
+  - fill #FFFFFF@5%
+- **Over-Glass/Dark/Fills/Selected 06 - Seximal**
+  - fill #FFFFFF@2.5%
+- **Over-Glass/Dark/Knobs - Toggle/01 - Idle**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+- **Over-Glass/Dark/Knobs - Toggle/03 - Clicked**
+  - fill #FFFFFF@0% (blend lighten)
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+- **Over-Glass/Dark/Knobs - Toggle/04 - Disabled**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+  - opacity 50%
+- **Over-Glass/Dark/Segmented Control/Active, On, 01 - Idle**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue} + #FFFFFF@4% {Fills/Dark Vibrant (use plus lighter)/4 Quatenary} (blend plus-lighter)
+- **Over-Glass/Dark/Segmented Control/Active, On, 03 - Clicked**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue} + #FFFFFF@14% {Fills/Dark Vibrant (use plus lighter)/1 Primary} (blend plus-lighter)
+- **Over-Glass/Dark/Segmented Control/Active, On, 04 - Disabled**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue} + #FFFFFF@4% {Fills/Dark Vibrant (use plus lighter)/4 Quatenary} (blend plus-lighter)
+  - opacity 45%
+- **Over-Glass/Dark/Tracks/Active, Filled, 01 - Idle**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue}
+- **Over-Glass/Dark/Tracks/Active, Filled, 03 - Clicked**
+  - fill #0A99FF {System Colors/Dark (use plus lighter)/8 Blue} + #FFFFFF@8% {Fills/Dark Vibrant (use plus lighter)/2 Secondary}
+- **Over-Glass/Dark/Tracks/Active, Filled, 04 - Disabled**
+  - fill #FFFFFF@3% {Fills/Dark Vibrant (use plus lighter)/5 Quinary}
+  - blend plus-lighter
+- **Over-Glass/Dark/Tracks/Active, Unfilled**
+  - fill #FFFFFF@4% (blend overlay) + #FFFFFF@3% (blend plus-lighter)
+  - blend plus-lighter
+- **Over-Glass/Dark/Tracks/Inactive, Filled, 01 - Idle**
+  - fill #FFFFFF@22%
+- **Over-Glass/Dark/Tracks/Inactive, Filled, 04 - Disabled**
+  - fill #FFFFFF@10%
+  - corners 50 smoothing0.6 style1
+- **Over-Glass/Dark/Tracks/Inactive, Unfilled**
+  - fill #FFFFFF@4% (blend overlay) + #FFFFFF@3% (blend plus-lighter)
+  - blend plus-lighter
+- **Over-Glass/Dark/Tracks/Tick Mark - Centerpoint, Idle**
+  - fill #D9D9D9
+  - corners 10 smoothing0.6 style0
+  - blend plus-lighter
+- **Over-Glass/Dark/Tracks/Tick Mark - Disabled**
+  - fill #1A1A1A
+  - corners 10 smoothing0.6 style0
+  - blend plus-lighter
+- **Over-Glass/Dark/Tracks/Tick Mark - Idle**
+  - fill #404040
+  - corners 10 smoothing0.6 style0
+  - blend plus-lighter
+
+## Over-Glass/Light
+
+- **Over-Glass/Light/01 - Bordered/01 - Idle**
+  - fill #000000@12% (blend overlay) + #000000@7% (blend plus-darker)
+  - corners max smoothing0.6 style1
+- **Over-Glass/Light/01 - Bordered/03 - Clicked**
+  - fill #000000@12% (blend overlay) + #000000@13% (blend plus-darker)
+- **Over-Glass/Light/01 - Bordered/04 - Disabled**
+  - fill #000000@6% (blend overlay) + #000000@2.5% (blend plus-darker)
+  - corners max smoothing0.6 style1
+- **Over-Glass/Light/04 - Prominent (Default)/01 - Idle**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue}
+  - blend plus-darker
+- **Over-Glass/Light/04 - Prominent (Default)/03 - Clicked**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@15% {Fills/Light Vibrant (use plus darker)/1 Primary} (blend plus-darker)
+  - corners max smoothing0.6 style1
+  - blend plus-darker
+- **Over-Glass/Light/04 - Prominent (Default)/04 - Disabled**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue}
+  - opacity 40% blend plus-darker
+- **Over-Glass/Light/05 - Prominent (Default) Destructive/01 - Idle**
+  - fill #FF4747 {System Colors/Dark (use plus lighter)/1 Red}
+  - corners max smoothing0.6 style1
+  - blend plus-darker
+- **Over-Glass/Light/05 - Prominent (Default) Destructive/03 - Clicked**
+  - fill #F52F32 {System Colors/Light Vibrant (use plus darker)/1 Red} + #000000@15%
+  - corners 0 smoothing0.6 style0
+  - blend plus-darker
+- **Over-Glass/Light/05 - Prominent (Default) Destructive/04 - Disabled**
+  - fill #F52F32 {System Colors/Light Vibrant (use plus darker)/1 Red}
+  - corners 0 smoothing0.6 style1
+  - opacity 50% blend plus-darker
+- **Over-Glass/Light/Controls/Active, Off, 01 - Idle**
+  - fill #000000@15% {Fills/Light Vibrant (use plus darker)/1 Primary}
+  - blend plus-darker
+- **Over-Glass/Light/Controls/Active, Off, 03 - Clicked**
+  - fill #000000@19%
+  - blend plus-darker
+- **Over-Glass/Light/Controls/Active, Off, 04 - Disabled**
+  - fill #000000@5% {Fills/Light Vibrant (use plus darker)/3 Tertiary}
+  - inner-shadow x0 y0 blur1 spread0 #000000@2% (blend plus-darker)
+  - blend plus-darker
+- **Over-Glass/Light/Controls/Active, On, 01 - Idle**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@5% {Fills/Light Vibrant (use plus darker)/3 Tertiary} (blend plus-darker)
+- **Over-Glass/Light/Controls/Active, On, 03 - Clicked**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@7% {Fills/Light Vibrant (use plus darker)/2 Secondary} (blend plus-darker)
+- **Over-Glass/Light/Controls/Active, On, 04 - Disabled**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@5% {Fills/Light Vibrant (use plus darker)/3 Tertiary} (blend plus-darker)
+  - opacity 45%
+- **Over-Glass/Light/Controls/Inactive, Off, 01 - Idle**
+  - fill #000000@15% {Fills/Light Vibrant (use plus darker)/1 Primary}
+  - blend plus-darker
+- **Over-Glass/Light/Controls/Inactive, Off, 03 - Clicked**
+  - fill #000000@19%
+  - blend plus-darker
+- **Over-Glass/Light/Controls/Inactive, Off, 04 - Disabled**
+  - fill #000000@5% {Fills/Light/3 Tertiary}
+- **Over-Glass/Light/Controls/Inactive, On, 01 - Idle**
+  - fill #000000@15%
+  - blend plus-darker
+- **Over-Glass/Light/Controls/Inactive, On, 03 - Clicked**
+  - fill #EBEBEB (blend plus-darker) + #000000@13%
+- **Over-Glass/Light/Controls/Inactive, On, 04 - Disabled**
+  - fill #000000@5% {Fills/Light Vibrant (use plus darker)/3 Tertiary}
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Default, 01 - Primary**
+  - fill #000000@85%
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Default, 02 - Secondary**
+  - fill #000000@50%
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Default, 03 - Tertiary**
+  - fill #000000@25%
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Default, 04 - Quaternary**
+  - fill #000000@10%
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Default, 05 - Quinary**
+  - fill #000000@5%
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Default, 06 - Seximal**
+  - fill #000000@3%
+  - blend plus-darker
+- **Over-Glass/Light/Fills/Selected 01 - Primary**
+  - fill #FFFFFF
+- **Over-Glass/Light/Fills/Selected 02 - Secondary**
+  - fill #FFFFFF@55%
+- **Over-Glass/Light/Fills/Selected 03 - Tertiary**
+  - fill #FFFFFF@25%
+- **Over-Glass/Light/Fills/Selected 04 - Quaternary**
+  - fill #FFFFFF@10%
+- **Over-Glass/Light/Fills/Selected 05 - Quinary**
+  - fill #FFFFFF@5%
+- **Over-Glass/Light/Fills/Selected 06 - Seximal**
+  - fill #FFFFFF@2.5%
+- **Over-Glass/Light/Knobs - Toggle/01 - Idle**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+- **Over-Glass/Light/Knobs - Toggle/03 - Clicked**
+  - fill #FFFFFF@0% (blend lighten)
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+- **Over-Glass/Light/Knobs - Toggle/04 - Disabled**
+  - fill #FFFFFF@65% + #FFFFFF@45% (blend lighten) + #FFFFFF@35%
+  - shadow x0 y0 blur44 spread0 #000000@10%
+  - shadow x0 y0 blur4 spread-0.5 #000000@5%
+  - shadow x0 y0 blur1 spread-0.25 #000000@5%
+  - inner-shadow x1.75 y2.5 blur1 spread-1.5 #FFFFFF
+  - inner-shadow x-1.75 y-2.5 blur2 spread-1.5 #FFFFFF
+  - inner-shadow x0 y0 blur1 spread0 #FFFFFF@10% (blend plus-lighter)
+  - blur background radius7.5 saturation1.15
+  - opacity 50%
+- **Over-Glass/Light/Segmented Control/Active, On, 01 - Idle**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@3% {Fills/Light Vibrant (use plus darker)/4 Quatenary} (blend plus-darker)
+- **Over-Glass/Light/Segmented Control/Active, On, 03 - Clicked**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@15% {Fills/Light Vibrant (use plus darker)/1 Primary} (blend plus-darker)
+- **Over-Glass/Light/Segmented Control/Active, On, 04 - Disabled**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@3% {Fills/Light Vibrant (use plus darker)/4 Quatenary} (blend plus-darker)
+  - opacity 45%
+- **Over-Glass/Light/Tracks/Active, Filled, 01 - Idle**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue}
+- **Over-Glass/Light/Tracks/Active, Filled, 03 - Clicked**
+  - fill #0078F0 {System Colors/Light Vibrant (use plus darker)/8 Blue} + #000000@7% {Fills/Light Vibrant (use plus darker)/2 Secondary}
+- **Over-Glass/Light/Tracks/Active, Filled, 04 - Disabled**
+  - fill #000000@2% {Fills/Light Vibrant (use plus darker)/5 Quinary}
+  - blend plus-darker
+- **Over-Glass/Light/Tracks/Active, Unfilled**
+  - fill #000000@20% (blend overlay) + #000000@7% (blend plus-darker)
+- **Over-Glass/Light/Tracks/Inactive, Filled, 01 - Idle**
+  - fill #000000@15% {Fills/Light Vibrant (use plus darker)/1 Primary}
+  - blend plus-darker
+- **Over-Glass/Light/Tracks/Inactive, Filled, 04 - Disabled**
+  - fill #000000@5% {Fills/Light Vibrant (use plus darker)/3 Tertiary}
+  - blend plus-darker
+- **Over-Glass/Light/Tracks/Inactive, Unfilled**
+  - fill #000000@20% (blend overlay) + #000000@7% (blend plus-darker)
+  - blend plus-darker
+- **Over-Glass/Light/Tracks/Tick Mark - Centerpoint, Idle**
+  - fill #000000@85% (blend plus-darker)
+  - blend plus-darker
+- **Over-Glass/Light/Tracks/Tick Mark - Disabled**
+  - fill #000000@10% (blend plus-darker)
+  - corners 10 smoothing0.6 style0
+  - blend plus-darker
+- **Over-Glass/Light/Tracks/Tick Mark - Idle**
+  - fill #000000@25% (blend plus-darker)
+  - corners 10 smoothing0.6 style0
+  - blend plus-darker
