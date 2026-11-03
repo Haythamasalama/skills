@@ -1,181 +1,140 @@
 ---
 name: vue-inertia
-description: Use when starting or building the front end of a Laravel app with Inertia, Vue 3, TypeScript and Tailwind 4 (usually with shadcn-vue components) — setting up a new project, pages and layouts, typed props and shared props, useForm and client validation, generated route helpers, lists with server-side filters and pagination, record pages, confirm dialogs, flash toasts, status badges, design tokens and dark mode, icons and motion, and Arabic/English with RTL. Trigger for work under resources/js (pages, components, layouts, composables), anything a controller renders with Inertia::render, a page that loses state or reloads fully, an arrow pointing the wrong way in Arabic, or deciding whether a new UI library is warranted. Arabic triggers: «فيو مع إنيرشا», «صفحة جديدة», «نموذج إدخال», «اتجاه RTL», «الوضع الغامق».
+description: Use when starting or building the front end of a Laravel app with Inertia, Vue 3, TypeScript and Tailwind 4 (usually with shadcn-vue) — a blueprint for a new project (the resources/js folder map, app.ts and layouts, the flash toast listener, translations, appearance, direction sync, shared prop types, a copy-ready app.css) and the house components (PageHeader, DataTable, RowActions, ConfirmAction, FormField, DetailCard, StatusBadge, EmptyState) plus the rules for pages, typed props and shared props, useForm with zod and Form Request validation, Wayfinder routes, lists with server-side filters and pagination, record pages, deletes and confirm dialogs, toasts, status badges, on-screen copy, tokens and dark mode, icons and motion, and Arabic/English with RTL. Trigger for work under resources/js, anything a controller renders with Inertia::render, a page that loses state or reloads fully, a status colour, an arrow pointing the wrong way in Arabic, or a new UI library. Arabic triggers: «فيو مع إنيرشا», «مشروع جديد», «صفحة جديدة», «نموذج إدخال», «جدول وفلاتر», «اتجاه RTL», «الوضع الغامق».
 ---
 
 # Vue + Inertia
 
-**Read when:** writing or reviewing anything under `resources/js/` in a Laravel + Inertia + Vue app,
-or creating such an app.
-**Owns:** project setup, the data flow between controller and page, page and screen shapes, forms,
-lists, toasts, tokens, icons, motion and direction for this stack.
+**Read when:** creating a Laravel + Inertia + Vue app, or writing or reviewing anything under
+`resources/js/` in one.
+**Owns:** the project blueprint, the house components, and the rules for data flow, forms, lists,
+records, actions, feedback, copy, theme, direction, icons and motion on this stack.
 
-Inertia lets the server keep routing, controllers and validation while each page is a Vue component.
-Version facts were recorded in 2026-09/11 (Inertia 3, Vue 3.5, Tailwind 4); re-check them after a
-major upgrade.
+The server keeps routing, controllers and validation; each page is a Vue component that renders
+typed props and submits forms. Versions this skill was checked against (2026-11-03): Inertia 3,
+Vue 3.5, Tailwind 4, reka-ui 2, zod 4, vue-sonner 2, `@lucide/vue` 1. Re-check after a major upgrade.
 
 ## TL;DR
 
-- The server owns data, routing and validation. A page renders typed props and submits forms.
-- Build from the component registry (shadcn-vue), never from styled `div`s. Don't edit `components/ui/`.
-- Semantic tokens only (`bg-background`, `text-muted-foreground`). No literal colours.
-- Logical properties only (`ms-`, `pe-`, `start-`, `text-start`). Directional icons flip in RTL.
-- Every page sets `<Head :title>`, has typed props, and takes all copy from the lang files.
-- One primary action in an index header; a row shows view · edit · delete, the rest goes in `⋯`.
-- A form has one submit and no Cancel. zod validates before the request, the server after, and both
-  errors render in the same slot.
-- Every write reports through one flash listener; pages never call `toast()` for a request.
-- Destructive actions go through a confirm dialog that names the record.
-- Run the type check (`vue-tsc --noEmit`) before calling a change done, and look at it in a browser in
-  both themes (and both languages, if the app has two).
+- The server owns data, routing and validation. A page renders typed props and submits with `useForm`.
+- Start a project from [blueprint.md](references/blueprint.md) and `assets/app.css`; build the house
+  components once from [house-components.md](references/house-components.md). Every screen uses them,
+  which is what makes screens look the same.
+- Build from the registry, never from styled `div`s. Never hand-edit `components/ui/`.
+- Semantic tokens only, logical properties only. Directional icons flip in RTL.
+- Every page sets `<Head :title>`, types its props, and takes its copy from the lang files (in a
+  two-language app).
+- A row shows view · edit · delete, then `⋯`. A header shows one action. A form has one submit and
+  no Cancel.
+- Toasts come only from the flash listener. Deletes go through a confirm that names the record.
+- Run `npm run types:check` and look at the change in a browser, in both themes and both languages.
 
 ## New project
 
 ```bash
-laravel new app        # pick the Vue starter kit: Inertia, Vue, TypeScript, Tailwind, shadcn-vue
+laravel new app          # the Vue starter kit: Inertia, Vue, TypeScript, Tailwind, shadcn-vue
 cd app
-npm install && npm run build
-composer run dev       # Laravel server, queue, logs and Vite together
+npm install
+npm install zod vue-sonner @lucide/vue @vueuse/core   # whichever the kit did not already add
+composer run dev         # server, queue, logs and Vite together
 ```
 
 Then, before the first screen:
 
-1. If Arabic is a main language: set `"rtl": true` in `components.json`, re-add the installed
-   components with `npx shadcn-vue@latest add <name> --overwrite`, and add `<ConfigProvider :dir>` to
-   the layouts ([rtl-and-bidi.md](references/rtl-and-bidi.md)).
-2. Pick the fonts and the one accent colour in the stylesheet ([theme.md](references/theme.md)).
-3. Add the flash listener and a translation helper (`t()`) in `app.ts`.
-4. Add components with `npx shadcn-vue@latest add <name>` and read `git diff` on the stylesheet after
-   each one: the CLI can drop your font import and duplicate `@layer base`.
+1. Set `components.json` as in [theme.md](references/theme.md#the-registry-setup) (`rtl: true` if the
+   app has Arabic) **before** the first `npx shadcn-vue@latest add`, so the registry is written in
+   logical properties from the start.
+2. Copy `assets/app.css` to `resources/css/app.css`.
+3. Create the day-one files: `inertia-app.ts`, `app.ts`, the two layouts, `lib/flash.ts`,
+   `lib/document.ts` and `types/index.ts` from [blueprint.md](references/blueprint.md), and
+   `useTranslations` and `useAppearance` from [composables.md](references/composables.md).
+4. Add the registry parts the house components use: `button badge card table pagination select
+   dropdown-menu alert-dialog dialog sheet popover command field input-group input separator
+   skeleton spinner tabs tooltip sidebar sonner breadcrumb empty`.
+5. Build the house components from [house-components.md](references/house-components.md).
 
 ## The stack, and what it is not
 
 | Concern | Use | Not |
 |---|---|---|
-| Routing | Inertia `<Link>`, `router.visit`, generated route helpers (Wayfinder) | vue-router, hand-written paths |
-| Page data | Inertia props from the controller | client-side fetching for the page itself |
-| Writes | `useForm`: POST → redirect → GET | a REST client |
-| Validation | zod before the request, a Form Request after; same error slot | vee-validate |
-| Components | shadcn-vue primitives in `components/ui/` | another kit, or hand-rolled markup |
-| Styling | Tailwind + CSS-variable tokens | hardcoded colours |
-| Toasts | vue-sonner, fired by one flash listener | ad-hoc banners |
-| Icons | `@lucide/vue`, named imports | pasted SVG paths, a second icon set |
-| Direction | `ConfigProvider :dir` in the root layout, logical properties | `dir` patches per component |
+| routing | Inertia `<Link>`, `router.visit`, Wayfinder helpers | vue-router, hand-written paths |
+| page data | props from the controller | client-side fetching for the page |
+| writes | `useForm`: POST → redirect → GET plus a flash | a REST client |
+| validation | zod before the request, a Form Request after, one error slot | vee-validate |
+| components | shadcn-vue (Reka UI) in `components/ui/`, house wrappers in `components/` | another kit, hand-rolled markup |
+| tables | the registry's `Table` with `v-for`, filters in the URL | a client-side row model for a paged list |
+| client state | a composable with module-scoped state | Pinia or Vuex by default |
+| styling | Tailwind 4 with CSS-variable tokens | literal colours |
+| toasts | vue-sonner, fired by one router listener | ad-hoc banners |
+| icons | `@lucide/vue`, named imports | pasted SVG paths, a second set |
+| direction | `ConfigProvider :dir` in each layout, logical properties | `dir` patches per component |
 
 ## Always-on rules
 
-1. **Every page sets `<Head :title>`.** Detail pages compute it from props.
-2. **Typed props:** `defineProps<{ … }>()`. No `any`, no untyped `usePage().props`.
-3. **The `Inertia::render` string matches the file:** `Inertia::render('Customers/Index')` →
-   `resources/js/pages/Customers/Index.vue`.
-4. **Don't edit `components/ui/`.** The CLI overwrites it. Compose a wrapper in `components/`, pass
-   `class`, or change a token. Hardcoded English inside a registry component is overridden at the call
-   site (a slot, an `aria-label`).
-5. **Build from the library.** A callout is `Alert`, an empty state `Empty`, a rule `Separator`, a chip
-   `Badge`, a loading placeholder `Skeleton`. Catalogue: [components.md](references/components.md).
-6. **No literal colours.** An alpha of a token (`bg-primary/80`) when you need a shade.
-7. **Logical properties, always.** A Latin value shown inside Arabic copy goes in a `dir="ltr"`
-   wrapper, never on a plain input. A glyph that points takes `rtl:rotate-180` or `rtl:-scale-x-100`.
-8. **Copy comes from the lang files** through `t()`. Never a literal string in a template; add every
-   key to each language the app has.
-9. **A status renders a `StatusBadge` with a tone from the server.** The server enum names a meaning
-   (success, warning, danger, neutral); one client map decides the look.
-10. **Destructive actions go through `AlertDialog`**, never a bare link. A sensitive section is a
-    danger-zone card titled after what it acts on, and it stays out of tabs so it is never hidden.
-11. **Every action button carries its icon**, and a submit swaps it for a spinner while
-    `form.processing`.
-12. **Three actions, then `⋯`.** A row shows view · edit · delete; an index header shows one create; a
-    record header at most two actions. Everything else goes in a row-actions menu.
-13. **A button says the verb, not the sentence:** «إضافة», not «إنشاء وتجهيز». The card title carries
-    the context.
-14. **No Cancel button.** Leaving is what the breadcrumb and sidebar are for.
-15. **A record is a grid of detail cards, never a `Table`.** `Table` is for a list of records. Resolve
-    ids to names on the server before sending them.
+1. **Every page sets `<Head :title>`** (detail pages compute it from props), because the browser tab
+   and history are how people find a page again.
+2. **Typed props:** `defineProps<{ … }>()`, no `any`. Untyped props hide a renamed key until runtime.
+3. **The render string equals the file:** `Inertia::render('Customers/Index')` →
+   `pages/Customers/Index.vue`. A mismatch is the most common "page not found".
+4. **Never name a page prop after a shared prop.** It silently replaces the shared one on that page.
+5. **Never hand-edit `components/ui/`.** The CLI rewrites it. Wrap it, pass `class`, or change a token.
+6. **Build from the registry.** A callout is `Alert`, a chip `Badge`, a rule `Separator`, a loading
+   placeholder `Skeleton`: a hand-built one misses focus, dark mode, RTL and keyboard handling.
+7. **No literal colours.** Tokens are redefined under `.dark`; a literal is not.
+8. **Logical properties, always** (`ms-`, `pe-`, `start-`, `text-start`), so one markup serves both
+   directions.
+9. **Copy from the lang files** through `t()` in a two-language app, every key in each language,
+   because a literal string never gets translated.
+10. **Every URL from a Wayfinder helper,** so a renamed route fails the type check instead of 404ing.
+11. **Hide what the viewer may not use** with `v-if="can(...)"`; the route enforces the same rule,
+    because the template guard is a courtesy, not the boundary.
+12. **A status is a `StatusBadge` whose tone the server sends**, so one enum decides what a status
+    looks like everywhere.
+13. **Toasts come only from the flash listener**, so a toast appears only when the server confirmed
+    the outcome.
+14. **Destructive actions go through `ConfirmAction`**, which names the record, because a bare
+    button deletes on a stray click.
+15. **A record is never a `Table`.** `Table` is for a list of records, where columns repeat.
 
-## Where things live
+## Where each topic lives
 
-```
-resources/js/
-├── app.ts          # createInertiaApp: title, layout resolver, theme, language, flash listener
-├── components/     # house wrappers (PageHeader, DataTable, RowActions, ConfirmAction, …)
-│   └── ui/         # vendored shadcn-vue: do not edit
-├── composables/    # translations, appearance, client validation, list filters
-├── layouts/        # AppLayout (sidebar shell), AuthLayout (centred card)
-├── lib/            # cn(), tone map, document language sync, flash listener, button classes
-├── pages/<Area>/   # one file per screen, matching Inertia::render('<Area>/<Name>')
-└── types/          # shared prop types and the Inertia page-props augmentation
-```
-
-## Page shape
-
-- A screen with more than one section of **its own record** puts them in `Tabs`, so it stays one
-  screen tall. Sections that act **on** the record (status, tools, delete) stay below as cards.
-- `TabsContent` unmounts hidden panels, so a tabbed form must surface errors from a hidden tab
-  ([forms.md](references/forms.md)).
-- The page header holds the title, a status slot and the actions. Breadcrumbs go to the shell header
-  through layout props.
-- Auth pages get no persistent layout; they render their own centred card.
-
-## Routes
-
-Navigation and form targets use the generated helpers, never a hand-written path:
-
-```ts
-import customers from '@/routes/customers';
-
-customers.index().url;
-customers.edit(id).url;
-```
-
-The generated folders (`resources/js/routes`, `actions`, `wayfinder`) are gitignored and written by
-the Vite plugin or `php artisan wayfinder:generate`. Never edit them. A route registered only in some
-environments (a local-only tool) has no helper in a production build, so referencing one fails that
-build: write those few URLs as literals, with a comment saying why.
-
-## Toasts
-
-One listener on the Inertia router, registered once at boot. A GET stays silent. Every write reports:
-the controller's flashed `success` or `error`, or a generic outcome. Failures come from the router's
-`error`, `httpException` and `networkError` events (Inertia 3 names; Inertia 2 called the last two
-`invalid` and `exception`). Pages never call `toast()` for a request's result; the controller flashes.
-
-vue-sonner's stylesheet is imported unlayered and sets its own font, so a `font-sans` class on
-`<Toaster>` loses. Put the toaster back on `--font-sans` with an unlayered override
-([theme.md](references/theme.md)).
-
-## Copy on screens
-
-| Where | Says |
+| Working on… | Read |
 |---|---|
-| a button | the verb alone: «إضافة»، «حفظ»، «تعليق» |
-| a field label inside a titled card | the field alone: «البريد الإلكتروني», not «بريد المدير الرئيسي» |
-| a danger-zone description | what happens, one sentence, present tense |
-| a confirm dialog title | a question: «هل تريد حذف هذا العميل؟» |
-| its description | the consequence and what survives it, never a repeat of the title |
+| a new project, the folder map, entry files, layouts, naming | [references/blueprint.md](references/blueprint.md) |
+| a house component's props, slots and template | [references/house-components.md](references/house-components.md) |
+| a composable's signature and code (`useListFilters`, `useClientValidation`, …) | [references/composables.md](references/composables.md) |
+| props, shared props, state, types, permissions, routes, navigation | [references/data-flow.md](references/data-flow.md) |
+| a form, validation, field errors, tabbed and per-language forms | [references/forms.md](references/forms.md) |
+| an index page, filters, pagination, table cells, empty states | [references/lists.md](references/lists.md) |
+| a show page: facts, sections, header actions, deciding verbs | [references/records.md](references/records.md) |
+| a button, a row or header action, a delete, a dialog, a toast, a status badge | [references/actions-and-feedback.md](references/actions-and-feedback.md) |
+| a label, help text, an empty state, a confirm, Arabic wording, lang files | [references/copy.md](references/copy.md) |
+| what to build a piece of UI from, layout classes, the vendored registry | [references/components.md](references/components.md) |
+| a colour, radius, card, the shell, fonts, dark mode, `shadcn-vue add` | [references/theme.md](references/theme.md) |
+| the stylesheet to copy | [assets/app.css](assets/app.css) |
+| something on the wrong side in Arabic, a reversed value, input direction | [references/rtl-and-bidi.md](references/rtl-and-bidi.md) |
+| an icon, an animation, a new UI library | [references/icons-and-motion.md](references/icons-and-motion.md) |
 
-Say the effect, not the mechanism: «لا يُمحى سجل العميل نهائيًا، لكن خدمته تتوقف فورًا», not a
-sentence about soft-deleting a row.
+## Page shape at a glance
+
+```
+AppLayout   sidebar (inset) │ header h-16: trigger · breadcrumbs ─────── #page-actions
+            content: flex flex-1 flex-col gap-4 p-4
+Index       PageHeader (create) · DataTable (toolbar · table · pagination)
+Show        PageHeader (one action) · Tabs of DetailCard grids · DangerZone
+Create/Edit PageHeader · Card with a field grid · one submit
+Auth        no shell: AuthLayout's centred card
+```
 
 ## Before calling it done
 
 ```bash
-npm run types:check   # vue-tsc --noEmit; required for any frontend change
+npm run types:check   # vue-tsc --noEmit
 npm run build
 npm run format
 ```
 
-Every new surface works in dark mode and at 390px wide, in each language the app has. Check it in a
-browser, not by reading the diff.
-
-## Topics
-
-| Working on… | Read |
-|---|---|
-| props, shared props, writes, state, types, naming, permissions in templates | [references/inertia-pages.md](references/inertia-pages.md) |
-| an index, a show page, a delete, dialogs, page container, UI copy | [references/screens.md](references/screens.md) |
-| a form, tabbed forms, a record's detail cards, list filters | [references/forms.md](references/forms.md) |
-| an action, a status chip, a busy state | [references/buttons.md](references/buttons.md) |
-| what to build a piece of UI out of | [references/components.md](references/components.md) |
-| a colour, radius, font, dark mode | [references/theme.md](references/theme.md) |
-| something on the wrong side in Arabic | [references/rtl-and-bidi.md](references/rtl-and-bidi.md) |
-| an icon, an animation, a new UI library | [references/icons-and-motion.md](references/icons-and-motion.md) |
+- Every new surface works in light and dark, at 390px wide, and in each language the app has.
+  Check it in a browser, not by reading the diff.
+- After any `shadcn-vue add`, `git diff` the stylesheet ([theme.md](references/theme.md#changing-a-token)).
+- Logic added to `lib/` or a composable gets a Vitest test, if the project tests its front end.
