@@ -4,4 +4,4 @@
 
 | المهارة | شو بتعمل |
 |---|---|
-| `commit-messages` | رسائل Conventional Commits وتقسيم الشغل لـ commits |
+| `commit-messages` | رسائل Conventional Commits، تقسيم الشغل لـ commits، وفتح الـ PR ووصفه والرد على المراجعات والدمج |

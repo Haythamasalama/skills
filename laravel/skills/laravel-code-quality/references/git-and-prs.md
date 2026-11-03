@@ -2,7 +2,8 @@
 
 **Read when:** naming a branch, choosing a commit scope in a DDD Laravel repo, opening a PR, or staging files.
 **Owns:** branch names, the layer-based scope list, PR titles and body, squash merging, what never to commit.
-**See also:** commit message format, types, bodies and splitting: the [commit-messages](../../commit-messages/SKILL.md) skill
+**See also:** commit message format, types, bodies and splitting: the [commit-messages](../../commit-messages/SKILL.md) skill;
+PR titles, bodies, review replies and merging: its [pull-requests](../../commit-messages/references/pull-requests.md) reference
 
 ## TL;DR
 
@@ -53,19 +54,9 @@ test(domain-actions): cover IssueInvoice rollback paths
 
 ## PR body
 
-```markdown
-## Summary
-- What changed and why, as short bullets.
-
-## Test plan
-- [ ] Steps a reviewer can follow.
-- [ ] Tests added or updated.
-
-Closes #123   <!-- only if an issue exists -->
-```
-
-Write the body for a reviewer who has not seen the conversation: the problem, the decision, what is not
-done yet. Keep the title short and put detail in the body.
+The template, linking issues, review replies and the squash merge message:
+[pull-requests.md](../../commit-messages/references/pull-requests.md). In a Laravel repo, add to "How it
+was checked" the Pint run and the test command you used.
 
 ## What never goes in a commit
 

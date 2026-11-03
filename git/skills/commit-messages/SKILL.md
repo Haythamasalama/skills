@@ -1,12 +1,27 @@
 ---
 name: commit-messages
-description: Use when writing a commit message, staging or committing changes, splitting work into several commits, or rewording a commit, in any repository. Covers the Conventional Commits format, choosing a type and scope, what belongs in the body, footers and breaking changes, how to split a diff into commits that revert cleanly, and how to reword safely. Triggers include "commit this", "write the commit message", "split this into commits", "reword the last commit", «اعمل commit», «رسالة الكوميت», «قسّم الكوميتات».
+description: Use when writing a commit message, staging or committing changes, splitting work into several commits, rewording a commit, or opening, titling, describing, updating or merging a pull request, in any repository. Covers the Conventional Commits 1.0.0 format rule by rule, choosing a type and scope, what belongs in the body, footers and breaking changes, the SemVer bump each type implies, how to split a diff into commits that revert cleanly, how to reword safely, PR titles and bodies that become the squash commit, linking issues, answering review comments, and the merge message. Triggers include "commit this", "write the commit message", "split this into commits", "reword the last commit", "open a PR", "write the PR description", "squash and merge", "reply to the review", «اعمل commit», «رسالة الكوميت», «قسّم الكوميتات», «افتح PR», «وصف الـ PR», «ادمج».
 ---
 
-# Commit messages
+# Commit messages and pull requests
 
-Conventional Commits ([v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)) for any
-repository. Commit only when the user asks; many owners review and commit themselves.
+**Read when:** about to commit, reword, split work, open or update a pull request, answer a review, or
+merge one.
+**Owns:** the commit format, types, scopes, bodies, footers, breaking changes, splitting, rewording; PR
+titles, bodies, review replies and merge messages.
+**See also:** a stack skill may add its own scope list (for example layer scopes in a Laravel repo).
+
+Conventional Commits ([v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), checked 2026-11-03) for
+any repository. Commit, push, open a PR or merge only when the user asks; many owners review and commit
+themselves.
+
+## Where each topic lives
+
+| Topic | File |
+|---|---|
+| Format, types, scope, body, footers, splitting, rewording | this file |
+| The 16 rules of the spec, SemVer mapping, reverts, edge cases | [references/spec.md](references/spec.md) |
+| Branches, PR title and body, linking issues, review replies, updating, merging | [references/pull-requests.md](references/pull-requests.md) |
 
 ## TL;DR
 
@@ -18,6 +33,8 @@ repository. Commit only when the user asks; many owners review and commit themse
 - Learn the repo's scopes from its history before inventing one.
 - The build (with its type check) passes before the commit, not after.
 - Reword only commits that are not pushed, unless the owner says otherwise.
+- A PR title is a commit subject: with squash merge it becomes one. Same format, same rules.
+- `fix` → patch, `feat` → minor, any breaking change → major.
 
 ## Before you write
 
@@ -59,7 +76,12 @@ The colon and the space after it are required. The description starts right afte
 | `build` | build tooling, containers, web server config, dependencies |
 | `ci` | CI workflows |
 | `chore` | housekeeping that fits nothing above. Reach for it last |
-| `revert` | reverting an earlier commit; name it in the body |
+| `revert` | reverting an earlier commit; `Refs:` footer with its SHA ([how](references/spec.md#reverts)) |
+
+Pick by what the change does for a user of the code, not by the files touched. A bug fix in a build
+script is `fix(build)` if it was broken, `build` if it only changes how the build works. A dependency bump
+that fixes a security advisory is `fix(deps)`; a routine bump is `chore(deps)` or `build(deps)`, whichever
+the history uses.
 
 ## Scope
 
@@ -120,6 +142,9 @@ only that one. Don't invent one.
 Either a `!` before the colon, or a `BREAKING CHANGE:` footer, or both. `BREAKING-CHANGE` is a
 synonym. The token must be uppercase; everything else in the format is case-insensitive.
 
+With `!`, the `BREAKING CHANGE:` footer may be left out, and the description itself must then say what
+breaks. Prefer both: the `!` for people scanning the log, the footer for the migration note.
+
 A change is breaking when it forces work outside the commit: a public URL people were given
 changes, an API or event contract changes, the shape of stored data or content changes, a config
 key or environment variable is renamed, a supported version is dropped. A change that only affects
@@ -161,3 +186,19 @@ did not happen, so amending would change the previous one. Fix the problem and c
 - Lint and format the files you touched.
 - For anything visual, check it in a real browser before committing, not after.
 - Read `git diff --staged` once more. Nothing temporary, no secrets, no stray debug output.
+
+## Pull requests
+
+The short version; the details and the body template are in
+[references/pull-requests.md](references/pull-requests.md).
+
+- **Title** = a commit subject: `type(scope): description`, same rules. Squash merge turns it into the
+  commit on the main branch, so a vague title becomes a vague history.
+- **Body** for a reviewer who has not seen the conversation: what and why, how it was checked, what is
+  left out on purpose, breaking changes, and the issue it closes (`Closes #12`).
+- Use the repo's PR template when there is one; fill its headings, skip what does not apply.
+- **One reason per PR**, like a commit. Unrelated fixes you noticed get their own PR.
+- After review, push new commits; don't force-push a branch others have checked out.
+- **Merge message:** with squash, rewrite the generated body (a list of "fix typo" commits) into the
+  why, keep the attribution footers, and check the title once more.
+
