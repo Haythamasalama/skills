@@ -157,7 +157,7 @@ export function prerender(repo: string): Plugin {
           type: 'article',
           seo: seo.skill(skill.name, skill.summary, skill.tags),
           body: shell(
-            `${h1(skill.name)}<p class="mt-3 text-[17px] text-soft">${escape(skill.summary)}</p>${command(`${INSTALL_ALL} --skill ${skill.name}`)}<article class="prose-site prose mt-8 max-w-none">${renderMarkdown(skill.source, skill.name, 'SKILL.md')}</article>`,
+            `${h1(skill.name)}<p class="mt-3 text-[17px] text-soft">${escape(skill.summary)}</p>${command(`${INSTALL_ALL} --skill ${skill.name}`)}<article class="prose-site prose mt-8 max-w-none">${renderMarkdown(skill.source, skill.name, 'SKILL.md').replace(/<(\/?)h1\b/g, '<$1h2')}</article>`,
           ),
           schema: [
             {

@@ -65,7 +65,8 @@ const SKILL_TOPICS: Record<string, string> = {
   'whatsapp-business-manager': 'WhatsApp Cloud API',
 };
 
-const skillTitle = (name: string) => `${SKILL_TOPICS[name] ?? name} Skill for Claude Code`;
+const topicOf = (name: string) => SKILL_TOPICS[name] ?? name;
+const skillTitle = (name: string) => `${topicOf(name)} Skill for Claude Code`;
 
 export const skill = (name: string, summary: string, tags: string[] = []): Seo => ({
   title: skillTitle(name),
@@ -74,7 +75,7 @@ export const skill = (name: string, summary: string, tags: string[] = []): Seo =
 });
 
 export const skillFile = (name: string, heading: string, summary: string, tags: string[] = []): Seo => ({
-  title: `${heading} | ${skillTitle(name)}`,
+  title: `${heading} | ${topicOf(name)} Skill`,
   description: clip(summary),
   keywords: [name, heading.toLowerCase(), ...tags, ...COMMON_KEYWORDS],
 });
