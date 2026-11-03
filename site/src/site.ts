@@ -30,6 +30,12 @@ export const socials = [
 /** The owner's own apps, shown in the banner above the footer. */
 export const apps = [
   {
+    name: 'Runarks',
+    kind: 'Governed access to production databases',
+    logo: '/logos/runarks.svg',
+    to: 'https://runarks.com/',
+  },
+  {
     name: 'EasyShoot',
     kind: 'Screenshot app for macOS · coming soon',
     logo: '/logos/easyshoot.svg',
