@@ -8,4 +8,4 @@ description: Containerising an app with Docker and shipping it to Coolify.
 
 | المهارة | شو بتعمل |
 |---|---|
-| `coolify-deploy` | Dockerfile و nginx وفحص الحاوية والنشر على Coolify وحل مشاكله |
+| `coolify-deploy` | Dockerfile و nginx جاهزة للنسخ، إعدادات Coolify، فحص الحاوية في CI، وحل مشاكل النشر |

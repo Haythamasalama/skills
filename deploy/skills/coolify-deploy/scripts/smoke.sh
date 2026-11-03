@@ -1,11 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Smoke-test a running container (or any deployed URL) for the things that only break there:
 # the health route, deep links, redirects, and cache headers.
 #
-#   bash smoke.sh http://localhost:8080 \
+#   sh smoke.sh http://localhost:8080 \
 #     /healthz=200 \
-#     /some/deep/link=200 \
-#     /old-url=301:/new-url \
+#     /docs/getting-started=200 \
+#     /old-pricing=301:/pricing \
 #     'header /index.html cache-control no-cache' \
 #     'header /assets/app.js cache-control immutable'
 #
@@ -15,7 +15,7 @@
 #                             absolute one with the right path passes with a warning)
 #   'header PATH NAME TEXT'   the response header NAME must contain TEXT (case-insensitive)
 #
-# WAIT=30 bash smoke.sh …     poll the first check up to 30 s while the container starts.
+# WAIT=30 sh smoke.sh …     poll the first check up to 30 s while the container starts.
 # Exits 1 if any check fails. Read-only: plain GETs, nothing is posted.
 set -u
 
@@ -57,7 +57,11 @@ fi
 
 for check in "$@"; do
   if [ "${check#header }" != "$check" ]; then
-    read -r _ path name text <<< "$check"
+    rest="${check#header }"
+    path="${rest%% *}"
+    rest="${rest#* }"
+    name="${rest%% *}"
+    text="${rest#* }"
     headers=$(fetch "$path")
     value=$(header_of "$headers" "$name")
     if printf '%s' "$value" | grep -qi -- "$text"; then
