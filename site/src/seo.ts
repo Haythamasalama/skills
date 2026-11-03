@@ -68,6 +68,12 @@ const SKILL_TOPICS: Record<string, string> = {
 const topicOf = (name: string) => SKILL_TOPICS[name] ?? name;
 const skillTitle = (name: string) => `${topicOf(name)} Skill for Claude Code`;
 
+export const notFound: Seo = {
+  title: 'Page Not Found',
+  description: 'This page does not exist. Browse the Claude Code skills instead.',
+  keywords: COMMON_KEYWORDS,
+};
+
 export const skill = (name: string, summary: string, tags: string[] = []): Seo => ({
   title: skillTitle(name),
   description: clip(`${summary} Install with npx skills add ${REPO_NAME} --skill ${name}.`),
