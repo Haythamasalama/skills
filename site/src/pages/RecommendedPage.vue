@@ -34,7 +34,7 @@ const label = computed(() =>
     </section>
 
     <div class="sticky top-0 z-10 -mx-6 mt-6 bg-bg/90 px-6 py-3 backdrop-blur">
-      <div class="flex max-w-2xl items-center justify-between gap-3">
+      <div class="flex items-center justify-between gap-3">
         <span class="truncate font-mono text-[12.5px]" :class="selected ? 'text-fg' : 'text-faint'">{{ label }}</span>
         <button
           v-if="selected"
@@ -45,7 +45,7 @@ const label = computed(() =>
           <X class="size-3.5" /> All
         </button>
       </div>
-      <div class="mt-1.5 flex max-w-2xl items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
+      <div class="mt-1.5 flex items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
         <span class="font-mono text-[13px] text-faint select-none">$</span>
         <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[13px] whitespace-nowrap text-fg">{{ command }}</code>
         <CopyButton :text="command" label="the install command" />

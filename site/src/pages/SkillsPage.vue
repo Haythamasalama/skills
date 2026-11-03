@@ -52,7 +52,7 @@ const tryIt = `npx skills add ${REPO}`;
         Playbooks for Claude Code, each one standalone. Install one, or pick from the list, with the standard skills CLI.
       </p>
 
-      <div class="mt-6 flex max-w-2xl items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
+      <div class="mt-6 flex items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
         <span class="font-mono text-[13px] text-faint select-none">$</span>
         <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[13px] whitespace-nowrap text-fg">{{ tryIt }}</code>
         <CopyButton :text="tryIt" label="the install command" />
@@ -60,22 +60,20 @@ const tryIt = `npx skills add ${REPO}`;
     </section>
 
     <section aria-label="All skills" class="pt-14">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <h2 class="eyebrow">All skills</h2>
-        <label class="relative flex w-full items-center sm:w-72">
+      <h2 class="eyebrow">All skills</h2>
+      <label class="relative mt-4 flex w-full items-center">
           <span class="sr-only">Search skills</span>
-          <Search class="pointer-events-none absolute left-3 size-4 text-faint" />
+          <Search class="pointer-events-none absolute left-4 size-4 text-faint" />
           <input
             ref="box"
             v-model="query"
             type="search"
             placeholder="Search skills..."
             autocomplete="off"
-            class="min-h-10 w-full rounded-lg border border-chip bg-transparent pr-9 pl-9 text-[14px] text-fg outline-none placeholder:text-faint focus:border-fg"
+            class="min-h-12 w-full rounded-[14px] border border-line bg-transparent pr-10 pl-11 text-[15px] text-fg outline-none placeholder:text-faint focus:border-chip"
           />
-          <kbd v-if="!query" class="absolute right-3 rounded border border-chip px-1.5 font-mono text-[11px] text-faint">/</kbd>
-        </label>
-      </div>
+          <kbd v-if="!query" class="absolute right-4 rounded border border-chip px-1.5 font-mono text-[11px] text-faint">/</kbd>
+      </label>
 
       <div role="tablist" aria-label="Technologies" class="mt-4 flex gap-1 overflow-x-auto border-b border-line">
         <button
