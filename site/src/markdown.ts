@@ -1,6 +1,6 @@
 import hljs from 'highlight.js/lib/common';
 import MarkdownIt from 'markdown-it';
-import { frontmatter } from './catalog';
+import { frontmatter } from './frontmatter';
 
 const md: MarkdownIt = new MarkdownIt({
   html: false,
@@ -54,7 +54,7 @@ export function renderMarkdown(source: string, item: string, path: string): stri
 
       const [file, anchor] = href.split('#');
       const target = file ? resolvePath(path, file) : path;
-      child.attrSet('href', `#/item/${item}/${target}${anchor ? `::${anchor}` : ''}`);
+      child.attrSet('href', `/skills/${item}${target === 'SKILL.md' ? '' : `/${target}`}${anchor ? `#${anchor}` : ''}`);
     }
   }
 

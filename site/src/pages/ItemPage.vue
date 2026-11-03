@@ -84,14 +84,14 @@ watch(
   <div class="pt-12 md:pt-16">
     <nav aria-label="Breadcrumb">
       <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[13.5px]">
-        <li><a href="#/" class="link-muted">skills</a></li>
+        <li><a href="/" class="link-muted">skills</a></li>
         <li aria-hidden="true" class="text-chip">/</li>
         <li><a :href="`https://github.com/${owner}`" target="_blank" rel="noopener" class="link-muted">{{ owner }}</a></li>
         <li aria-hidden="true" class="text-chip">/</li>
-        <li><a href="#/" class="link-muted">{{ repoName }}</a></li>
+        <li><a href="/" class="link-muted">{{ repoName }}</a></li>
         <li aria-hidden="true" class="text-chip">/</li>
         <li>
-          <a v-if="!isMain" :href="`#/item/${item.name}`" class="link-muted">{{ item.name }}</a>
+          <a v-if="!isMain" :href="`/skills/${item.name}`" class="link-muted">{{ item.name }}</a>
           <span v-else class="text-fg" aria-current="page">{{ item.name }}</span>
         </li>
         <template v-if="!isMain">
@@ -146,7 +146,7 @@ watch(
         <section id="content" aria-label="Skill content" class="mt-10 scroll-mt-6">
           <div class="flex items-center justify-between gap-3">
             <p class="flex min-w-0 items-center gap-2">
-              <a v-if="!isMain" :href="`#/item/${item.name}`" class="link-muted inline-flex shrink-0 items-center gap-1 text-[13px]">
+              <a v-if="!isMain" :href="`/skills/${item.name}`" class="link-muted inline-flex shrink-0 items-center gap-1 text-[13px]">
                 <ArrowLeft class="size-3.5" /> Back to SKILL.md
               </a>
               <span v-else class="eyebrow">SKILL.md</span>
@@ -214,7 +214,7 @@ watch(
               <a
                 v-for="f in files"
                 :key="f.path"
-                :href="`#/item/${item.name}/${f.path}`"
+                :href="`/skills/${item.name}/${f.path}`"
                 class="truncate rounded-md px-2 py-1 font-mono text-[12px] transition-colors"
                 :class="f.path === file.path ? 'bg-surface text-fg' : 'text-muted hover:text-fg'"
                 :title="f.title"

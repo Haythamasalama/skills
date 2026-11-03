@@ -6,6 +6,7 @@ import CopyButton from '../components/CopyButton.vue';
 import FilterChips from '../components/FilterChips.vue';
 import { installCommands, REPO } from '../install';
 import { pickKey, picks } from '../picks';
+import { replaceUrl } from '../router';
 import { formatInstalls, type Listing, searchSkillsSh } from '../skillssh';
 
 const props = defineProps<{ tab: 'skills' | 'recommended' | 'skillssh'; q: string }>();
@@ -19,11 +20,11 @@ const withQuery = (to: string) => (query.value.trim() ? `${to}?${new URLSearchPa
 
 watch(() => props.q, q => q !== query.value.trim() && (query.value = q));
 
-// replaceState, not a new hash: typing must not fill the history or fire hashchange on every letter.
+// replaceState: typing must not add a history entry per letter.
 watch(query, () => {
-  const next = withQuery(location.hash.split('?')[0] || '#/');
+  const next = withQuery(location.pathname);
 
-  if (next !== location.hash) history.replaceState(history.state, '', next);
+  if (next !== location.pathname + location.search) replaceUrl(next);
 });
 
 const suggestions = ['laravel', 'vue', 'testing', 'design', 'git', 'security'];
@@ -93,7 +94,7 @@ const base = computed<Row[]>(() => {
       summary: item.summary,
       by: REPO,
       avatar: ownAvatar,
-      href: `#/item/${item.name}`,
+      href: `/skills/${item.name}`,
       external: false,
       from: REPO,
       command: installCommands(item)[0].text,
@@ -146,9 +147,9 @@ const hits = computed(() => (props.tab === 'skills' && terms.value.length ? sear
 const installAll = `npx skills add ${REPO}`;
 
 const tabs = [
-  { id: 'skills', label: 'My skills', to: '#/', count: allItems.length },
-  { id: 'recommended', label: 'Recommended', to: '#/recommended', count: recommended.length },
-  { id: 'skillssh', label: 'Explore', to: '#/explore', count: null },
+  { id: 'skills', label: 'My skills', to: '/', count: allItems.length },
+  { id: 'recommended', label: 'Recommended', to: '/recommended', count: recommended.length },
+  { id: 'skillssh', label: 'Explore', to: '/explore', count: null },
 ];
 
 const isPicked = (row: Row) => picks.has(pickKey(row));
@@ -195,7 +196,7 @@ const highlight = (snippet: string) => {
 <template>
   <div>
     <section class="pt-16 md:pt-[88px]">
-      <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[30px]">Skills</h1>
+      <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[30px]">Claude Code Skills</h1>
       <div class="mt-6 flex items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
         <span class="font-mono text-[13px] text-faint select-none">$</span>
         <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[13px] whitespace-nowrap text-fg">{{ installAll }}</code>
@@ -334,7 +335,7 @@ const highlight = (snippet: string) => {
 
       <p v-if="local && query.trim().length > 1" class="mt-4 text-[14px] text-muted">
         Not here?
-        <a :href="withQuery('#/explore')" class="link-muted text-fg">Search skills.sh for “{{ query.trim() }}”</a>
+        <a :href="withQuery('/explore')" class="link-muted text-fg">Search skills.sh for “{{ query.trim() }}”</a>
       </p>
 
       <div v-if="hits.length" class="mt-12">
@@ -343,7 +344,7 @@ const highlight = (snippet: string) => {
           <a
             v-for="h in hits"
             :key="h.item.name + h.file.path"
-            :href="`#/item/${h.item.name}/${h.file.path}`"
+            :href="`/skills/${h.item.name}/${h.file.path}`"
             class="flex flex-col gap-1 px-2 py-3 transition-colors hover:bg-raised"
           >
             <span class="font-mono text-xs text-faint"><span class="text-fg">{{ h.item.name }}</span> / {{ h.file.path }}</span>

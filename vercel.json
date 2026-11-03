@@ -4,7 +4,12 @@
   "installCommand": "npm ci --prefix site",
   "buildCommand": "npm run build --prefix site",
   "outputDirectory": "site/dist",
-  "rewrites": [{ "source": "/api/search", "destination": "https://skills.sh/api/search" }],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/api/search", "destination": "https://skills.sh/api/search" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

@@ -8,7 +8,7 @@ defineProps<{ path: string }>();
 
 <template>
   <header class="flex items-center justify-between gap-6 pt-4 md:pt-7">
-    <a href="#/" class="inline-flex min-h-11 items-center" aria-label="Skills, home">
+    <a href="/" class="inline-flex min-h-11 items-center" aria-label="Skills, home">
       <!-- Keyed by page, so the signature draws itself again on every page. -->
       <SignatureMark :key="`m${path}`" class="md:hidden" :width="72" />
       <SignatureMark :key="`d${path}`" class="hidden md:block" :width="80" />
