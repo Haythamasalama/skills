@@ -120,7 +120,7 @@ watch(
             <img v-if="file.url || svgSource" :src="file.url ?? svgSource" :alt="file.path" class="mx-auto my-8 max-h-80 max-w-[80%]" />
             <div
               v-if="file.path.endsWith('.md')"
-              class="prose-site prose max-w-none px-5 pt-1 pb-6 text-[15px] leading-[1.7] prose-headings:font-semibold prose-headings:tracking-[-0.01em] prose-headings:scroll-mt-6 prose-h1:text-[24px] prose-h2:text-[19px] prose-h3:text-[16px] prose-a:font-normal prose-a:underline-offset-4 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:border-line prose-table:text-[13.5px] md:px-7"
+              class="prose-site prose max-w-none p-6 md:p-8 [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-[15px] leading-[1.7] prose-headings:font-semibold prose-headings:tracking-[-0.01em] prose-headings:scroll-mt-6 prose-h1:text-[24px] prose-h2:text-[19px] prose-h3:text-[16px] prose-a:font-normal prose-a:underline-offset-4 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:border-line prose-table:text-[13.5px]"
               v-html="html"
             />
             <div v-else-if="file.content !== null" class="overflow-x-auto bg-raised text-[12.5px] leading-[1.6] [&_pre]:m-0 [&_pre]:p-5" v-html="html" />
