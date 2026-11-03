@@ -10,7 +10,7 @@
 | [vue-inertia](vue-inertia/README.md) | واجهات Vue مع Inertia، وفحص الواجهة |
 | [nuxt-ui](nuxt-ui/README.md) | مشاريع Nuxt UI |
 | [brand](brand/README.md) | هويتي: الشعار والألوان والخطوط والأسلوب |
-| [writing](writing/README.md) | النص العربي، المقالات التقنية، منشورات لينكدإن |
+| [writing](writing/README.md) | النص العربي والمقالات التقنية |
 | [deploy](deploy/README.md) | Docker والنشر على Coolify |
 | [git](git/README.md) | رسائل الـ commits |
 | [whatsapp](whatsapp/README.md) | منصة واتساب للأعمال |
