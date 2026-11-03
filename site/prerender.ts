@@ -1,11 +1,12 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import type { Plugin } from 'vite';
-import { frontmatter } from './src/frontmatter';
-import { renderMarkdown } from './src/markdown';
-import { summaries } from './src/recommended';
-import * as seo from './src/seo';
-import { socials } from './src/site';
+import { walk } from './skills-data.ts';
+import { frontmatter } from './src/frontmatter.ts';
+import { renderMarkdown } from './src/markdown.ts';
+import { summaries } from './src/recommended.ts';
+import * as seo from './src/seo.ts';
+import { socials } from './src/site.ts';
 
 const { AUTHOR, REPO_NAME, SITE_URL } = seo;
 const OG_IMAGE = `${SITE_URL}/og.png`;
@@ -59,14 +60,6 @@ const list = (rows: { href: string; name: string; summary: string }[]) =>
   `<ul class="mt-6 flex flex-col gap-4">${rows
     .map(r => `<li><a class="font-mono text-[15px] font-medium text-fg" href="${r.href}">${escape(r.name)}</a><br /><span class="text-[14px] text-muted">${escape(r.summary)}</span></li>`)
     .join('')}</ul>`;
-
-function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap(entry => {
-    const path = join(dir, entry);
-
-    return statSync(path).isDirectory() ? walk(path) : [path];
-  });
-}
 
 const firstHeading = (body: string, fallback: string) => body.match(/^#\s+(.+)$/m)?.[1]?.trim().replace(/[*`]/g, '') ?? fallback;
 

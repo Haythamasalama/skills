@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Check, Minus, Search } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import { allItems, avatarOf, CATEGORIES, inCategory, OWNER, recommended, search } from '../catalog';
+import { allItems, avatarOf, CATEGORIES, inCategory, OWNER, recommended } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
 import FilterChips from '../components/FilterChips.vue';
 import { installCommands, REPO } from '../install';
 import { pickKey, picks } from '../picks';
 import { replaceUrl } from '../router';
+import { type Hit, search } from '../search';
 import { formatInstalls, type Listing, searchSkillsSh } from '../skillssh';
 
 const props = defineProps<{ tab: 'skills' | 'recommended' | 'skillssh'; q: string }>();
@@ -142,7 +143,19 @@ const options = computed(() => [
   ...CATEGORIES.map(c => ({ label: c.label, count: searched.value.filter(row => inCategory(row.tags, c.id)).length })).filter(o => o.count),
 ]);
 
-const hits = computed(() => (props.tab === 'skills' && terms.value.length ? search(query.value, 8) : []));
+const hits = ref<Hit[]>([]);
+let searchRun = 0;
+
+watch(
+  [() => props.tab, query],
+  async () => {
+    const run = ++searchRun;
+    const found = props.tab === 'skills' && terms.value.length ? await search(query.value, 8) : [];
+
+    if (run === searchRun) hits.value = found;
+  },
+  { immediate: true },
+);
 
 const installAll = `npx skills add ${REPO}`;
 

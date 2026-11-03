@@ -1,17 +1,17 @@
-import { frontmatter } from './frontmatter';
+import metadata from 'virtual:skills-meta';
 import { summaries } from './recommended';
 
 declare const __REPO_PATH__: string;
 
 export const repoPath = __REPO_PATH__;
 
-const text = import.meta.glob<string>('../../skills/*/**/*.{md,mjs,js,ts,sh,py,json,css,html,php,vue,svg}', {
+// One chunk per file, so a visit downloads only the files it opens.
+const loaders = import.meta.glob<string>(['../../skills/*/**/*.{md,mjs,js,ts,sh,py,json,css,html,php,vue,svg}', '!../../skills/*/specs/**'], {
   query: '?raw',
   import: 'default',
-  eager: true,
 });
 
-const binary = import.meta.glob<string>('../../skills/*/**/*.{png,ico,jpg,jpeg,webp}', {
+const binary = import.meta.glob<string>(['../../skills/*/**/*.{png,ico,jpg,jpeg,webp}', '!../../skills/*/specs/**'], {
   query: '?url',
   import: 'default',
   eager: true,
@@ -22,7 +22,6 @@ const lock = import.meta.glob<string>('../../skills-lock.json', { query: '?raw',
 export interface RepoFile {
   path: string;
   title: string;
-  content: string | null;
   url: string | null;
   lines: number;
 }
@@ -50,64 +49,25 @@ export interface Recommended {
   command: string;
 }
 
-export interface Publisher {
-  owner: string;
-  repo: string;
-  url: string;
-  avatar: string | null;
-  skills: Recommended[];
+const fileKey = (name: string, path: string) => `../../skills/${name}/${path}`;
+
+export const allItems: Item[] = metadata.map(skill => ({
+  ...skill,
+  files: skill.files.map(file => ({ ...file, url: binary[fileKey(skill.name, file.path)] ?? null })),
+}));
+
+const items = new Map(allItems.map(item => [item.name, item]));
+const contents = new Map<string, string>();
+
+export const contentOf = (name: string, file: RepoFile) => contents.get(fileKey(name, file.path)) ?? null;
+
+export async function loadContent(name: string, file: RepoFile): Promise<string | null> {
+  const key = fileKey(name, file.path);
+
+  if (!contents.has(key) && loaders[key]) contents.set(key, await loaders[key]());
+
+  return contents.get(key) ?? null;
 }
-
-const KIND_TITLES: Record<string, string> = { sh: 'Shell script', py: 'Python script', mjs: 'Node script', js: 'Script', ts: 'Config', json: 'Data', css: 'Stylesheet', html: 'Template', svg: 'Image', png: 'Image', ico: 'Icon', php: 'PHP fixture', vue: 'Vue fixture' };
-
-function titleOf(path: string, content: string | null): string {
-  if (path === 'SKILL.md') return 'Overview';
-
-  const heading = content?.match(/^#\s+(.+)$/m)?.[1]?.trim();
-
-  if (heading && path.endsWith('.md')) return heading.replace(/[*`]/g, '');
-
-  return KIND_TITLES[path.split('.').pop() ?? ''] ?? 'File';
-}
-
-const items = new Map<string, Item>();
-
-function add(key: string, content: string | null, url: string | null) {
-  const [, name, ...rest] = key.replace(/^\.\.\/\.\.\//, '').split('/');
-  const path = rest.join('/');
-
-  if (!items.has(name)) {
-    items.set(name, { name, description: '', summary: '', tags: [], files: [], lines: 0 });
-  }
-
-  const item = items.get(name)!;
-  const lines = content === null ? 0 : content.split('\n').length;
-  item.files.push({ path, title: titleOf(path, content), content, url, lines });
-  item.lines += lines;
-
-  if (path === 'SKILL.md' && content !== null) {
-    const { data } = frontmatter(content);
-    item.description = data.description ?? '';
-    item.summary = data.summary ?? '';
-    item.tags = (data.tags ?? '').split(',').map(t => t.trim()).filter(Boolean);
-  }
-}
-
-for (const [key, content] of Object.entries(text)) {
-  add(key, content, null);
-}
-
-for (const [key, url] of Object.entries(binary)) {
-  add(key, null, url);
-}
-
-const order = (path: string) => (path === 'SKILL.md' ? 0 : !path.includes('/') ? 1 : path.startsWith('references/') ? 2 : 3);
-
-for (const item of items.values()) {
-  item.files.sort((a, b) => order(a.path) - order(b.path) || a.path.localeCompare(b.path));
-}
-
-export const allItems = [...items.values()].sort((a, b) => a.name.localeCompare(b.name));
 
 export const OWNER = 'haythamasalama';
 
@@ -171,77 +131,10 @@ export const recommended: Recommended[] = (() => {
   });
 })();
 
-export const publishers: Publisher[] = (() => {
-  const map = new Map<string, Publisher>();
-
-  for (const skill of recommended) {
-    if (!map.has(skill.source)) {
-      map.set(skill.source, {
-        owner: skill.owner,
-        repo: skill.repo,
-        url: skill.url,
-        avatar: skill.repo ? `https://github.com/${skill.owner}.png?size=64` : null,
-        skills: [],
-      });
-    }
-
-    map.get(skill.source)!.skills.push(skill);
-  }
-
-  return [...map.values()].sort((a, b) => a.owner.localeCompare(b.owner));
-})();
-
 export function findItem(name: string): Item | undefined {
   return items.get(name);
 }
 
 export function mainFile(item: Item): RepoFile {
   return item.files.find(f => f.path === 'SKILL.md') ?? item.files[0];
-}
-
-export interface Hit {
-  item: Item;
-  file: RepoFile;
-  score: number;
-  snippet: string;
-}
-
-export function search(query: string, limit = 40): Hit[] {
-  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-
-  if (terms.length === 0) {
-    return [];
-  }
-
-  const hits: Hit[] = [];
-
-  for (const item of allItems) {
-    for (const file of item.files) {
-      if (file.content === null) {
-        continue;
-      }
-
-      const haystack = file.content.toLowerCase();
-
-      if (!terms.every(t => haystack.includes(t) || item.name.includes(t))) {
-        continue;
-      }
-
-      let score = 0;
-
-      for (const t of terms) {
-        if (item.name.includes(t)) score += 20;
-        if (file.path.toLowerCase().includes(t)) score += 8;
-        if (item.description.toLowerCase().includes(t)) score += 5;
-        score += Math.min(haystack.split(t).length - 1, 10);
-      }
-
-      const at = Math.max(0, haystack.indexOf(terms[0]));
-      const start = Math.max(0, at - 70);
-      const snippet = (start > 0 ? '…' : '') + file.content.slice(start, at + 130).replace(/\s+/g, ' ').trim() + '…';
-      hits.push({ item, file, score, snippet });
-    }
-  }
-
-  return hits.sort((a, b) => b.score - a.score).slice(0, limit);
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowUpRight, ChevronDown } from 'lucide-vue-next';
-import { computed, nextTick, ref, watch } from 'vue';
-import { type Item, mainFile, repoPath } from '../catalog';
+import { computed, nextTick, ref, shallowRef, watch } from 'vue';
+import { contentOf, type Item, loadContent, mainFile, repoPath } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
 import { REPO } from '../install';
 import { renderCode, renderMarkdown } from '../markdown';
@@ -10,6 +10,8 @@ const props = defineProps<{ item: Item; path: string; anchor: string }>();
 
 const file = computed(() => props.item.files.find(f => f.path === props.path) ?? mainFile(props.item));
 const isMain = computed(() => file.value.path === 'SKILL.md');
+const content = shallowRef<string | null>(contentOf(props.item.name, file.value));
+const loading = computed(() => content.value === null && !file.value.url);
 
 // The description split into short points: the trigger phrases are dropped, the first sentence says when to use it.
 const summary = computed(() => {
@@ -41,13 +43,13 @@ const long = computed(() => isMain.value && file.value.lines > 60);
 const html = computed(() => {
   const f = file.value;
 
-  if (f.content === null) return '';
+  if (content.value === null) return '';
 
-  return f.path.endsWith('.md') ? renderMarkdown(f.content, props.item.name, f.path) : renderCode(f.content, f.path);
+  return f.path.endsWith('.md') ? renderMarkdown(content.value, props.item.name, f.path) : renderCode(content.value, f.path);
 });
 
 const svgSource = computed(() =>
-  file.value.path.endsWith('.svg') && file.value.content ? `data:image/svg+xml;utf8,${encodeURIComponent(file.value.content)}` : '',
+  file.value.path.endsWith('.svg') && content.value ? `data:image/svg+xml;utf8,${encodeURIComponent(content.value)}` : '',
 );
 
 const groups = computed(() => {
@@ -65,6 +67,19 @@ watch(
   () => [props.item.name, props.path, props.anchor],
   async ([name], old) => {
     expanded.value = !!props.anchor;
+
+    const opened = file.value;
+
+    content.value = contentOf(props.item.name, opened);
+
+    if (content.value === null) {
+      const loaded = await loadContent(props.item.name, opened);
+
+      if (file.value !== opened) return;
+
+      content.value = loaded;
+    }
+
     await nextTick();
 
     if (props.anchor) {
@@ -151,17 +166,20 @@ watch(
               </a>
               <span v-else class="eyebrow">SKILL.md</span>
             </p>
-            <CopyButton v-if="file.content !== null" :text="file.content" :label="file.path" />
+            <CopyButton v-if="content !== null" :text="content" :label="file.path" />
           </div>
 
           <div class="relative mt-3 overflow-hidden rounded-[14px] border border-line" :class="long && !expanded && 'max-h-[34rem]'">
             <img v-if="file.url || svgSource" :src="file.url ?? svgSource" :alt="file.path" class="mx-auto my-8 max-h-80 max-w-[80%]" />
+            <div v-if="loading" class="flex flex-col gap-3 p-6 motion-safe:animate-pulse md:p-8" aria-busy="true" aria-label="Loading the file">
+              <span v-for="width in [45, 90, 80, 95, 60, 85]" :key="width" class="h-3.5 rounded bg-chip" :style="{ width: `${width}%` }" />
+            </div>
             <div
-              v-if="file.path.endsWith('.md')"
+              v-else-if="file.path.endsWith('.md')"
               class="prose-site prose max-w-none p-6 md:p-8 [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-[15px] leading-[1.7] prose-headings:font-semibold prose-headings:tracking-[-0.01em] prose-headings:scroll-mt-6 prose-h1:text-[24px] prose-h2:text-[19px] prose-h3:text-[16px] prose-a:font-normal prose-a:underline-offset-4 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:border-line prose-table:text-[13.5px]"
               v-html="html"
             />
-            <div v-else-if="file.content !== null" class="overflow-x-auto bg-raised text-[12.5px] leading-[1.6] [&_pre]:m-0 [&_pre]:p-5" v-html="html" />
+            <div v-else-if="content !== null" class="overflow-x-auto bg-raised text-[12.5px] leading-[1.6] [&_pre]:m-0 [&_pre]:p-5" v-html="html" />
             <div v-if="long && !expanded" class="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-bg to-transparent" />
           </div>
           <button

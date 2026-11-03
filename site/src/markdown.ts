@@ -1,6 +1,6 @@
 import hljs from 'highlight.js/lib/common';
 import MarkdownIt from 'markdown-it';
-import { frontmatter } from './frontmatter';
+import { frontmatter } from './frontmatter.ts';
 
 const md: MarkdownIt = new MarkdownIt({
   html: false,
