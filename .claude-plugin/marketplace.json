@@ -1,0 +1,12 @@
+{
+  "name": "haythamasalama",
+  "description": "Agent skills for Laravel, Vue, Nuxt UI, shadcn-vue and Apple design",
+  "owner": { "name": "Haytham A. Salama" },
+  "plugins": [
+    {
+      "name": "skills",
+      "source": "./",
+      "description": "Laravel DDD, Inertia + Vue, Nuxt UI, shadcn-vue, Apple iOS 27 and macOS 27 design, and more"
+    }
+  ]
+}

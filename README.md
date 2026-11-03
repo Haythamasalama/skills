@@ -43,6 +43,23 @@ npx skills add haythamasalama/skills --skill laravel-ddd laravel-code-quality nu
 Run it in your project folder, and add `-g` to install for every project. You can also search the
 [website](https://skills.haythamasalama.me), tick the skills you want, and copy one command.
 
+### Claude Code plugin
+
+Claude Code can install every skill here as one plugin, then pull new and updated skills later:
+
+```bash
+claude plugin marketplace add haythamasalama/skills
+claude plugin install skills@haythamasalama
+
+# Later, to get new and updated skills
+claude plugin marketplace update haythamasalama
+claude plugin update skills@haythamasalama
+```
+
+Restart Claude Code after an update. To get updates automatically, open `/plugin`, go to **Marketplaces**, pick
+this one and select **Enable auto-update**. Skills installed this way carry the plugin's name, such as
+`skills:laravel-ddd`.
+
 ## What is a skill?
 
 A skill is a folder with a `SKILL.md`. Your agent reads its description, loads it when a task matches, and
