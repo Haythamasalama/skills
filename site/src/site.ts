@@ -5,16 +5,9 @@ export const site = { name: 'Haytham A. Salama', since: 2022 };
 
 export const REPO_URL = 'https://github.com/haythamasalama/skills';
 
-export const nav = [
-  { label: 'Skills', to: '#/', view: 'skills' },
-  { label: 'Recommended', to: '#/recommended', view: 'recommended' },
-];
-
-export const footer = [
-  { label: 'Skills', to: '#/' },
-  { label: 'Recommended', to: '#/recommended' },
-  { label: 'skills.sh', to: 'https://skills.sh' },
+export const links = [
   { label: 'haythamasalama.me', to: MAIN },
+  { label: 'skills.sh', to: 'https://skills.sh' },
 ];
 
 export const contact = { label: 'GitHub', to: REPO_URL };

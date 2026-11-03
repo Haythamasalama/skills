@@ -5,7 +5,6 @@ import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import ToolsBanner from './components/ToolsBanner.vue';
 import ItemPage from './pages/ItemPage.vue';
-import RecommendedPage from './pages/RecommendedPage.vue';
 import SkillsPage from './pages/SkillsPage.vue';
 
 const hash = ref(location.hash);
@@ -31,12 +30,11 @@ const route = computed(() => {
 <template>
   <div class="min-h-dvh">
     <div class="mx-auto max-w-[1040px] px-6">
-      <AppHeader :path="hash" :view="route.view === 'item' ? 'skills' : route.view" />
+      <AppHeader :path="hash" />
 
       <main id="main">
         <ItemPage v-if="route.view === 'item'" :item="route.item" :path="route.path" :anchor="route.anchor" />
-        <RecommendedPage v-else-if="route.view === 'recommended'" />
-        <SkillsPage v-else />
+        <SkillsPage v-else :tab="route.view === 'recommended' ? 'recommended' : 'skills'" />
       </main>
 
       <ToolsBanner />

@@ -1,3 +1,5 @@
+import { summaries } from './recommended';
+
 declare const __REPO_PATH__: string;
 
 export const repoPath = __REPO_PATH__;
@@ -27,6 +29,7 @@ export interface RepoFile {
 export interface Item {
   name: string;
   description: string;
+  summary: string;
   tags: string[];
   files: RepoFile[];
   lines: number;
@@ -34,6 +37,8 @@ export interface Item {
 
 export interface Recommended {
   name: string;
+  summary: string;
+  avatar: string | null;
   tags: string[];
   source: string;
   owner: string;
@@ -89,7 +94,7 @@ function add(key: string, content: string | null, url: string | null) {
   const path = rest.join('/');
 
   if (!items.has(name)) {
-    items.set(name, { name, description: '', tags: [], files: [], lines: 0 });
+    items.set(name, { name, description: '', summary: '', tags: [], files: [], lines: 0 });
   }
 
   const item = items.get(name)!;
@@ -100,6 +105,7 @@ function add(key: string, content: string | null, url: string | null) {
   if (path === 'SKILL.md' && content !== null) {
     const { data } = frontmatter(content);
     item.description = data.description ?? '';
+    item.summary = data.summary ?? '';
     item.tags = (data.tags ?? '').split(',').map(t => t.trim()).filter(Boolean);
   }
 }
@@ -119,6 +125,28 @@ for (const item of items.values()) {
 }
 
 export const allItems = [...items.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+export const OWNER = 'haythamasalama';
+
+// A site-hosted source has no GitHub owner; these are the owners behind the ones we list.
+const SITE_OWNERS: Record<string, string> = { 'ui.nuxt.com': 'nuxt' };
+
+export function avatarOf(source: string, wellKnown = false): string | null {
+  const owner = wellKnown ? SITE_OWNERS[source] : source.split('/')[0];
+
+  return owner ? `https://github.com/${owner}.png?size=64` : null;
+}
+
+export const CATEGORIES = [
+  { id: 'backend', label: 'Backend', tags: ['laravel', 'php'] },
+  { id: 'frontend', label: 'Frontend', tags: ['vue', 'nuxt', 'inertia', 'ui'] },
+  { id: 'design', label: 'Design', tags: ['design', 'apple', 'brand'] },
+  { id: 'ai', label: 'AI & agents', tags: ['ai'] },
+  { id: 'devops', label: 'DevOps', tags: ['deploy', 'docker', 'git', 'security'] },
+  { id: 'integrations', label: 'Integrations', tags: ['whatsapp', 'api'] },
+];
+
+export const inCategory = (tags: string[], id: string) => CATEGORIES.find(c => c.id === id)?.tags.some(t => tags.includes(t)) ?? false;
 
 // The lock file has no tags, so recommended skills are filed by name and source.
 function tagsFor(name: string, source: string): string[] {
@@ -145,6 +173,8 @@ export const recommended: Recommended[] = (() => {
 
     return {
       name,
+      summary: summaries[name] ?? '',
+      avatar: avatarOf(entry.source, wellKnown),
       tags: tagsFor(name, entry.source),
       source: entry.source,
       owner,
@@ -173,16 +203,6 @@ export const publishers: Publisher[] = (() => {
   }
 
   return [...map.values()].sort((a, b) => a.owner.localeCompare(b.owner));
-})();
-
-// Tabs are each skill's main technology (its first tag); a tab lists every skill tagged with it.
-export const allTags = (() => {
-  const all = [...allItems.map(i => i.tags), ...recommended.map(r => r.tags)];
-  const main = new Set(all.map(tags => tags[0]).filter(Boolean));
-
-  return [...main]
-    .map(tag => ({ tag, count: all.filter(tags => tags.includes(tag)).length }))
-    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 })();
 
 export function findItem(name: string): Item | undefined {

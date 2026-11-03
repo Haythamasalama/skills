@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Mail } from 'lucide-vue-next';
 import { siGithub, siMedium, siX } from 'simple-icons';
-import { footer, site, socials } from '../site';
+import { site, socials } from '../site';
 import linkedin from './linkedin.svg?raw';
 import ThemeToggle from './ThemeToggle.vue';
 
@@ -18,16 +18,6 @@ const paths: Record<string, { viewBox: string; d: string }> = {
   <footer class="mt-24 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-line pt-7 pb-10">
     <div class="flex flex-wrap items-center gap-x-5 text-[13px] text-faint">
       <p class="w-full sm:w-auto">© {{ site.since }}–{{ year }} {{ site.name }}</p>
-      <a
-        v-for="link in footer"
-        :key="link.label"
-        :href="link.to"
-        :target="link.to.startsWith('http') ? '_blank' : undefined"
-        :rel="link.to.startsWith('http') ? 'noopener' : undefined"
-        class="link-muted inline-flex min-h-11 items-center"
-      >
-        {{ link.label }}
-      </a>
     </div>
 
     <div class="-mr-3 flex items-center">

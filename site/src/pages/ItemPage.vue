@@ -11,16 +11,18 @@ const props = defineProps<{ item: Item; path: string; anchor: string }>();
 const file = computed(() => props.item.files.find(f => f.path === props.path) ?? mainFile(props.item));
 const isMain = computed(() => file.value.path === 'SKILL.md');
 
-// The frontmatter description, read as a summary: its first sentence leads, the rest follows.
+// The description split into short points: the trigger phrases are dropped, the first sentence says when to use it.
 const summary = computed(() => {
-  const text = props.item.description
-    .split(/\s(?:Also triggers|Triggers|Arabic triggers)\b/)[0]
-    .replace(/^Use when /, '')
-    .replace(/^./, c => c.toUpperCase())
-    .trim();
-  const cut = text.search(/ — |\. /);
+  const text = props.item.description.split(/\s(?:Also triggers|Triggers|Arabic triggers)\b/)[0].trim();
+  const sentences = text
+    .split(/(?<=\.)\s+(?=[A-Z])/)
+    .map(sentence => sentence.trim())
+    .filter(Boolean);
+  const points = sentences.map((sentence, i) =>
+    i === 0 && /^Use when /.test(sentence) ? `Use it when ${sentence.slice(9)}` : sentence,
+  );
 
-  return cut > 0 ? { lead: text.slice(0, cut).replace(/\.$/, '') + '.', rest: text.slice(cut + 2).trim() } : { lead: text, rest: '' };
+  return { lead: props.item.summary, points };
 });
 
 const [owner, repoName] = REPO.split('/');
@@ -130,12 +132,15 @@ watch(
           </div>
         </section>
 
-        <section v-if="isMain && summary.lead" aria-labelledby="summary" class="mt-10">
+        <section v-if="isMain && (summary.lead || summary.points.length)" aria-labelledby="summary" class="mt-10">
           <h2 id="summary" class="eyebrow">Summary</h2>
-          <p class="mt-3 text-[15.5px] leading-[1.7] text-soft">
-            <strong class="font-semibold text-fg">{{ summary.lead }}</strong>
-            {{ summary.rest }}
-          </p>
+          <p v-if="summary.lead" class="mt-3 text-[17px] leading-[1.6] font-medium text-fg">{{ summary.lead }}</p>
+          <ul class="mt-4 flex max-w-[75ch] flex-col gap-2.5 text-[15px] leading-[1.7] text-soft">
+            <li v-for="(point, i) in summary.points" :key="i" class="flex gap-3">
+              <span class="mt-[0.7em] size-1.5 shrink-0 rounded-full bg-chip" aria-hidden="true" />
+              <span>{{ point }}</span>
+            </li>
+          </ul>
         </section>
 
         <section id="content" aria-label="Skill content" class="mt-10 scroll-mt-6">
