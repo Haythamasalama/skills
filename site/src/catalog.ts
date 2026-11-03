@@ -34,6 +34,7 @@ export interface Item {
 
 export interface Recommended {
   name: string;
+  tags: string[];
   source: string;
   owner: string;
   repo: string;
@@ -119,14 +120,17 @@ for (const item of items.values()) {
 
 export const allItems = [...items.values()].sort((a, b) => a.name.localeCompare(b.name));
 
-// Tabs are each skill's main technology (its first tag); a tab lists every skill tagged with it.
-export const allTags = (() => {
-  const main = new Set(allItems.map(item => item.tags[0]).filter(Boolean));
+// The lock file has no tags, so recommended skills are filed by name and source.
+function tagsFor(name: string, source: string): string[] {
+  if (name.startsWith('laravel')) return ['laravel'];
+  if (name === 'nuxt-ui') return ['nuxt', 'vue', 'ui'];
+  if (name.startsWith('vue') || name === 'shadcn-vue') return ['vue'];
+  if (name === 'security-audit') return ['security'];
+  if (name === 'write-swift' || name === 'apple-design') return ['design', 'apple'];
+  if (source.startsWith('emilkowalski') || ['design-taste-frontend', 'frontend-design', 'impeccable'].includes(name)) return ['design'];
 
-  return [...main]
-    .map(tag => ({ tag, count: allItems.filter(item => item.tags.includes(tag)).length }))
-    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
-})();
+  return ['ai'];
+}
 
 export const recommended: Recommended[] = (() => {
   const raw = Object.values(lock)[0];
@@ -141,6 +145,7 @@ export const recommended: Recommended[] = (() => {
 
     return {
       name,
+      tags: tagsFor(name, entry.source),
       source: entry.source,
       owner,
       repo,
@@ -168,6 +173,16 @@ export const publishers: Publisher[] = (() => {
   }
 
   return [...map.values()].sort((a, b) => a.owner.localeCompare(b.owner));
+})();
+
+// Tabs are each skill's main technology (its first tag); a tab lists every skill tagged with it.
+export const allTags = (() => {
+  const all = [...allItems.map(i => i.tags), ...recommended.map(r => r.tags)];
+  const main = new Set(all.map(tags => tags[0]).filter(Boolean));
+
+  return [...main]
+    .map(tag => ({ tag, count: all.filter(tags => tags.includes(tag)).length }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 })();
 
 export function findItem(name: string): Item | undefined {

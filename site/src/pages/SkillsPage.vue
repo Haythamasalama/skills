@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Search } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { allItems, allTags, search } from '../catalog';
+import { allItems, allTags, recommended, search } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
 import { installCommands, REPO } from '../install';
 
@@ -10,7 +10,7 @@ const tag = ref(ALL);
 const query = ref('');
 const box = ref<HTMLInputElement>();
 
-const tabs = computed(() => [{ label: ALL, count: allItems.length }, ...allTags.map(t => ({ label: t.tag, count: t.count }))]);
+const tabs = computed(() => [{ label: ALL, count: allItems.length + recommended.length }, ...allTags.map(t => ({ label: t.tag, count: t.count }))]);
 
 const terms = computed(() => query.value.toLowerCase().split(/\s+/).filter(Boolean));
 
@@ -18,6 +18,12 @@ const rows = computed(() =>
   allItems
     .filter(item => tag.value === ALL || item.tags.includes(tag.value))
     .filter(item => terms.value.every(t => `${item.name} ${item.tags.join(' ')} ${item.description}`.toLowerCase().includes(t))),
+);
+
+const others = computed(() =>
+  recommended
+    .filter(skill => tag.value === ALL || skill.tags.includes(tag.value))
+    .filter(skill => terms.value.every(t => `${skill.name} ${skill.source} ${skill.tags.join(' ')}`.toLowerCase().includes(t))),
 );
 
 const hits = computed(() => (terms.value.length ? search(query.value, 8) : []));
@@ -113,7 +119,30 @@ const tryIt = `npx skills add ${REPO}`;
           </span>
         </a>
 
-        <p v-if="!rows.length && !hits.length" class="px-2 py-10 text-center text-[15px] text-muted">
+        <a
+          v-for="(skill, i) in others"
+          :key="skill.source + skill.name"
+          :href="skill.url"
+          target="_blank"
+          rel="noopener"
+          class="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-raised"
+        >
+          <span class="font-mono text-[13px] text-faint">{{ rows.length + i + 1 }}</span>
+          <span class="flex min-w-0 flex-col">
+            <span class="flex items-center gap-2">
+              <span class="font-mono text-[15px] font-medium text-fg">{{ skill.name }}</span>
+              <span class="rounded-[5px] border border-chip px-1.5 font-mono text-[9.5px] leading-4 tracking-[0.1em] text-faint uppercase">recommended</span>
+            </span>
+            <span class="truncate text-[13px] text-faint">
+              <span class="font-mono">{{ skill.tags.join(' · ') }}</span> — from <span class="font-mono">{{ skill.source }}</span>
+            </span>
+          </span>
+          <span @click.prevent.stop>
+            <CopyButton :text="skill.command" :label="`the install command for ${skill.name}`" />
+          </span>
+        </a>
+
+        <p v-if="!rows.length && !others.length && !hits.length" class="px-2 py-10 text-center text-[15px] text-muted">
           Nothing matches “{{ query }}”.
         </p>
       </div>
