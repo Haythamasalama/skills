@@ -1,5 +1,7 @@
 # Skills
 
+Browse and search them at [skills.haythamasalama.me](https://skills.haythamasalama.me).
+
 Agent skills for Claude Code and other coding agents. Each skill stands alone: install the ones you need
 into a project with the standard [skills CLI](https://skills.sh).
 
