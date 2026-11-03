@@ -4,8 +4,8 @@ Agent skills for Claude Code and other coding agents. Each skill stands alone: i
 into a project with the standard [skills CLI](https://skills.sh).
 
 ```bash
-npx skills add Haythamasalama/skills                          # pick from the list
-npx skills add Haythamasalama/skills --skill laravel-ddd      # one skill
+npx skills add haythamasalama/skills                          # pick from the list
+npx skills add haythamasalama/skills --skill laravel-ddd      # one skill
 ```
 
 ## Skills
@@ -14,14 +14,14 @@ npx skills add Haythamasalama/skills --skill laravel-ddd      # one skill
 |---|---|---|
 | [laravel-ddd](skills/laravel-ddd/SKILL.md) | laravel, php | A Domain-Driven Design layout for Laravel: Actions, DTOs, Contracts, Services, controllers, JSON API, tests |
 | [laravel-code-quality](skills/laravel-code-quality/SKILL.md) | laravel, php | Code style, security, sensitive operations, the anti-pattern catalogue and code review |
-| [vue-inertia](skills/vue-inertia/SKILL.md) | vue, inertia, laravel | A Laravel + Inertia + Vue 3 front-end blueprint: folders, day-one files, house components, forms, lists, theme, RTL |
+| [laravel-inertia-vue](skills/laravel-inertia-vue/SKILL.md) | vue, laravel, inertia | A Laravel + Inertia + Vue 3 front-end blueprint: folders, day-one files, house components, forms, lists, theme, RTL |
 | [shadcn-vue-kit](skills/shadcn-vue-kit/SKILL.md) | vue, ui | shadcn-vue setup with a ready theme, the component catalogue, wrappers, charts and RTL fixes |
 | [nuxt-ui-kit](skills/nuxt-ui-kit/SKILL.md) | nuxt, vue, ui | A Nuxt UI 4 blueprint with a copy-ready theme, dashboard shell, i18n and RTL, static sites and SEO |
 | [apple-macos-27-design](skills/apple-macos-27-design/SKILL.md) | design, apple | Exact values from Apple's macOS 27 UI Kit |
 | [apple-ios-27-design](skills/apple-ios-27-design/SKILL.md) | design, apple | Exact values from Apple's iOS 27 UI Kit |
 | [apple-screens](skills/apple-screens/SKILL.md) | design, apple | Drawn Mac windows and iPhone screens as HTML, rendered to PNG |
 | [liquid-glass-web](skills/liquid-glass-web/SKILL.md) | design, ui | Apple-style Liquid Glass for websites and landing pages |
-| [haytham-brand](skills/haytham-brand/SKILL.md) | design, brand | The author's personal brand: signature, colours, type and voice |
+| [haythamasalama-brand](skills/haythamasalama-brand/SKILL.md) | design, brand | The author's personal brand: signature, colours, type and voice |
 | [coolify-deploy](skills/coolify-deploy/SKILL.md) | deploy, docker | Dockerfiles, nginx and Coolify settings for SPA, prerendered and server apps |
 | [commit-messages](skills/commit-messages/SKILL.md) | git | Conventional Commits, branch names, pull requests and merging |
 | [whatsapp-business-platform](skills/whatsapp-business-platform/SKILL.md) | whatsapp, api | What Meta's WhatsApp Cloud API can do: webhooks, templates, limits and pricing |
