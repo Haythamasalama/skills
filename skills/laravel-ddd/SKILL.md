@@ -2,6 +2,7 @@
 name: laravel-ddd
 description: Use when building, reviewing or refactoring Laravel code organised as a Domain-Driven Design layout in src/Domain and src/Presentation — adding a domain or deciding where a file belongs; writing Actions (static handle()), DTOs (*Data classes, Filter/Create/Update data, sent keys), Contracts and Services, ServiceProvider bindings, Models with Entities/Scopes/Abilities/Traits, backed Enums, statuses and transitions, filter scopes and Eloquent queries; writing thin controllers, Form Requests, Inertia or Blade page responses, API Resources and the status/data JSON envelope; events, jobs, commands and observers; migrations (index and foreign-key policy) and Pest and architecture tests for this layout; or reviewing a diff for layer and boundary violations. Also triggers on "DDD", "domain layer", "bounded context", "where does this file go", "Action vs Service", "بنية الكود", "هيكلة المشروع", "طبقات", "طبقة الدومين", "الأكشن", "الكونتراكت", "DTO".
 metadata:
+  summary: "A Domain-Driven Design layout for Laravel: where every file goes and why."
   tags: laravel, php
 ---
 

@@ -2,6 +2,7 @@
 name: haythamasalama-brand
 description: "Use when making anything that carries Haytham A. Salama's name or personal identity: a web page, site or app theme, a Tailwind 4, Nuxt or Nuxt UI setup, a header or footer, a slide deck, social card, share image, YouTube thumbnail, cover, poster, README header, or text written in his voice in English or Arabic. Covers his name and title, the handwritten signature and its drawing animation, favicon and app icon, the exact colours (Ink, Paper, Iris, Azure, light and dark tokens, hex and OKLCH) and the 95/5 rule, typography (Geist, Geist Mono, Instrument Serif), layout, radius, motion, a copy-ready tokens CSS file and component templates that match his site, and tone of voice. Triggers: 'my brand', 'brand kit', 'personal site', 'my signature', 'social card', 'thumbnail', 'deck', 'الهوية', 'هويتي', 'البراند', 'تصميم', 'الشعار', 'التوقيع'."
 metadata:
+  summary: "Haytham A. Salama's brand kit: signature, colours, type and voice."
   tags: design, brand
 ---
 

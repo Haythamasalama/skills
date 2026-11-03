@@ -2,6 +2,7 @@
 name: apple-macos-27-design
 description: Use when designing, building, restyling or reviewing a Mac app or Mac-style UI so it matches Apple's own components, or when you need an exact macOS value. Holds the values from Apple's macOS 27 UI Kit (Apple Design Resources, Sketch v27.0.3, October 2026) — every component's sizes, corner radii, insets, colours for each state in light and dark, text styles, materials and Liquid Glass — for buttons, toolbars and titlebars, sidebars, windows, menus, pop-up buttons, segmented controls, toggles, sliders, fields, popovers and alerts. Also for drawing Mac UI in images for a website or App Store page. Triggers include "macOS 27 kit", "Apple's style", "match Apple's sidebar", "exact macOS colour", "Liquid Glass values", «ستايل آبل», «مقاسات الماك», «ألوان آبل», «مكونات الماك».
 metadata:
+  summary: "Exact values from Apple's macOS 27 UI Kit."
   tags: design, apple
 ---
 

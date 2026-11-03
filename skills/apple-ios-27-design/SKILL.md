@@ -2,6 +2,7 @@
 name: apple-ios-27-design
 description: Use when designing, building, restyling or reviewing an iPhone or iPad app or iOS-style UI so it matches Apple's own components, or when you need an exact iOS value. Holds the values from Apple's iOS and iPadOS 27 UI Kit (Apple Design Resources, Sketch v27.1.3) — every component's sizes, corner radii, insets, colours for each state in light and dark, text styles and Dynamic Type sizes, materials and Liquid Glass — for toolbars and navigation bars, tab bars, sidebars, sheets, popovers, buttons, menus, segmented controls, lists, text fields, keyboards, toggles, sliders, pickers, alerts, the status bar, Home Screen, Lock Screen and Control Center, including iPhone Duo. Also for drawing iPhone screens in images for a website or App Store page. Triggers include "iOS 27 kit", "iPhone tab bar size", "match Apple's toolbar", "exact iOS colour", "Liquid Glass values", «ستايل الآيفون», «مقاسات الآيفون», «ألوان iOS», «مكونات الآيفون».
 metadata:
+  summary: "Exact values from Apple's iOS 27 UI Kit."
   tags: design, apple
 ---
 

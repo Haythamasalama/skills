@@ -2,6 +2,7 @@
 name: coolify-deploy
 description: Use when containerising a web app (a Vite or Vue SPA, a Nuxt app built static or as a Node server) and shipping it to Coolify — copy-ready Dockerfiles, nginx config, .dockerignore and a local compose file, the Coolify build pack, port, environment variables and health check, a smoke test of the running container, publishing content by redeploying, a CI job that builds and tests the image, and debugging a failed or broken deployment (blank page after deploy, 404 on deep links, redirects to the wrong port, "No available server", a build that fails at npm ci or at the type check). Triggers include deploy, publish, release, push it live, Dockerfile, nginx, «انشر الموقع», «النشر على Coolify», «صفحة بيضاء بعد النشر», «دوكر».
 metadata:
+  summary: "Ship a web app to Coolify with Docker, nginx and health checks."
   tags: deploy, docker
 ---
 

@@ -2,6 +2,7 @@
 name: liquid-glass-web
 description: Use when a website or landing page should look like a native Mac or iOS app — Apple-style Liquid Glass for the web (translucent layers with a light rim over soft colour, glassmorphism done right), one token set per light and dark theme, a calm accent colour, drawn macOS windows instead of screenshots, a hero scene, native-feeling motion, and app icons with glass layers in the macOS 26 style. Also when light and dark mode look mixed or washed out, or when glass looks grey or flat. Triggers include "Liquid Glass website", "glassmorphism", "make the site feel like a Mac app", "dark mode looks mixed", «زجاج آبل للموقع», «ستايل ليكويد جلاس», «الموقع يبين باهت».
 metadata:
+  summary: "Apple-style Liquid Glass for websites and landing pages."
   tags: design, ui
 ---
 

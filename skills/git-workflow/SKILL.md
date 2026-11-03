@@ -2,6 +2,7 @@
 name: git-workflow
 description: Use when writing a commit message, staging or committing changes, splitting work into several commits, rewording a commit, or opening, titling, describing, updating or merging a pull request, in any repository. Covers the Conventional Commits 1.0.0 format rule by rule, choosing a type and scope, what belongs in the body, footers and breaking changes, the SemVer bump each type implies, how to split a diff into commits that revert cleanly, how to reword safely, PR titles and bodies that become the squash commit, linking issues, answering review comments, and the merge message. Triggers include "commit this", "write the commit message", "split this into commits", "reword the last commit", "open a PR", "write the PR description", "squash and merge", "reply to the review", «اعمل commit», «رسالة الكوميت», «قسّم الكوميتات», «افتح PR», «وصف الـ PR», «ادمج». Also triggers on "git commit", "conventional commits", "git workflow", "branch name", "pull request".
 metadata:
+  summary: "Conventional Commits, branch names, pull requests and merging."
   tags: git
 ---
 
