@@ -140,6 +140,8 @@ export function prerender(repo: string): Plugin {
           ],
         },
         { path: '/explore', seo: seo.explore, body: shell(h1(seo.explore.title)), schema: [], noindex: true },
+        // Vercel serves this with a real 404 status for unknown URLs; the app then shows the list on top of it.
+        { path: '/404', seo: seo.notFound, body: shell(h1(seo.notFound.title)), schema: [], noindex: true },
       ];
 
       for (const skill of skills) {
