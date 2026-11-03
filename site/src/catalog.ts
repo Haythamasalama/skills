@@ -2,16 +2,19 @@ declare const __REPO_PATH__: string;
 
 export const repoPath = __REPO_PATH__;
 
-const text = import.meta.glob<string>(
-  ['../../*/skills/**/*.{md,mjs,js,ts,sh,py,json,css,html,php,vue,svg}', '../../*/agents/*.md', '../../*/README.md', '!../../site/**'],
-  { query: '?raw', import: 'default', eager: true },
-);
+const text = import.meta.glob<string>('../../skills/*/**/*.{md,mjs,js,ts,sh,py,json,css,html,php,vue,svg}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
 
-const binary = import.meta.glob<string>(['../../*/skills/**/*.{png,ico,jpg,jpeg,webp}', '!../../site/**'], {
+const binary = import.meta.glob<string>('../../skills/*/**/*.{png,ico,jpg,jpeg,webp}', {
   query: '?url',
   import: 'default',
   eager: true,
 });
+
+const lock = import.meta.glob<string>('../../skills-lock.json', { query: '?raw', import: 'default', eager: true });
 
 export interface RepoFile {
   path: string;
@@ -21,44 +24,30 @@ export interface RepoFile {
   lines: number;
 }
 
-const KIND_TITLES: Record<string, string> = { sh: 'Shell script', py: 'Python script', mjs: 'Node script', js: 'Script', json: 'Data', css: 'Stylesheet', html: 'Template', svg: 'Image', png: 'Image', ico: 'Icon', php: 'PHP fixture', vue: 'Vue fixture' };
-
-function titleOf(path: string, content: string | null): string {
-  if (path === 'SKILL.md') return 'Overview';
-
-  const heading = content?.match(/^#\s+(.+)$/m)?.[1]?.trim();
-
-  if (heading && path.endsWith('.md')) return heading.replace(/[*`]/g, '');
-
-  return KIND_TITLES[path.split('.').pop() ?? ''] ?? 'File';
-}
-
 export interface Item {
-  kind: 'skill' | 'agent';
   name: string;
-  pack: string;
   description: string;
+  tags: string[];
   files: RepoFile[];
   lines: number;
 }
 
-export interface Companion {
+export interface Recommended {
   name: string;
-  kind: string;
-  command: string;
+  source: string;
+  owner: string;
+  repo: string;
   url: string;
-  what: string;
+  command: string;
 }
 
-export interface Pack {
-  name: string;
-  summary: string;
-  readme: string;
-  items: Item[];
-  companions: Companion[];
+export interface Publisher {
+  owner: string;
+  repo: string;
+  url: string;
+  avatar: string | null;
+  skills: Recommended[];
 }
-
-const companionFiles = import.meta.glob<string>('../../*/companions.txt', { query: '?raw', import: 'default', eager: true });
 
 export function frontmatter(source: string): { data: Record<string, string>; body: string } {
   const match = source.match(/^---\n([\s\S]*?)\n---\n?/);
@@ -70,7 +59,7 @@ export function frontmatter(source: string): { data: Record<string, string>; bod
   const data: Record<string, string> = {};
 
   for (const line of match[1].split('\n')) {
-    const pair = line.match(/^([a-zA-Z_-]+):\s*(.*)$/);
+    const pair = line.match(/^\s*([a-zA-Z_-]+):\s*(.*)$/);
 
     if (pair) {
       data[pair[1]] = pair[2].replace(/^["']|["']$/g, '');
@@ -80,46 +69,37 @@ export function frontmatter(source: string): { data: Record<string, string>; bod
   return { data, body: source.slice(match[0].length) };
 }
 
-const packs = new Map<string, Pack>();
-const items = new Map<string, Item>();
+const KIND_TITLES: Record<string, string> = { sh: 'Shell script', py: 'Python script', mjs: 'Node script', js: 'Script', ts: 'Config', json: 'Data', css: 'Stylesheet', html: 'Template', svg: 'Image', png: 'Image', ico: 'Icon', php: 'PHP fixture', vue: 'Vue fixture' };
 
-function pack(name: string): Pack {
-  if (!packs.has(name)) {
-    packs.set(name, { name, summary: '', readme: '', items: [], companions: [] });
-  }
+function titleOf(path: string, content: string | null): string {
+  if (path === 'SKILL.md') return 'Overview';
 
-  return packs.get(name)!;
+  const heading = content?.match(/^#\s+(.+)$/m)?.[1]?.trim();
+
+  if (heading && path.endsWith('.md')) return heading.replace(/[*`]/g, '');
+
+  return KIND_TITLES[path.split('.').pop() ?? ''] ?? 'File';
 }
 
+const items = new Map<string, Item>();
+
 function add(key: string, content: string | null, url: string | null) {
-  const parts = key.replace(/^\.\.\/\.\.\//, '').split('/');
-  const packName = parts[0];
-
-  if (parts[1] === 'README.md' && content !== null) {
-    const p = pack(packName);
-    p.readme = content;
-    p.summary = frontmatter(content).data.description ?? '';
-
-    return;
-  }
-
-  const kind = parts[1] === 'agents' ? 'agent' : 'skill';
-  const name = kind === 'agent' ? parts[2].replace(/\.md$/, '') : parts[2];
-  const path = kind === 'agent' ? `${name}.md` : parts.slice(3).join('/');
+  const [, name, ...rest] = key.replace(/^\.\.\/\.\.\//, '').split('/');
+  const path = rest.join('/');
 
   if (!items.has(name)) {
-    const item: Item = { kind, name, pack: packName, description: '', files: [], lines: 0 };
-    items.set(name, item);
-    pack(packName).items.push(item);
+    items.set(name, { name, description: '', tags: [], files: [], lines: 0 });
   }
 
   const item = items.get(name)!;
   const lines = content === null ? 0 : content.split('\n').length;
-  item.files.push({ path, title: kind === 'agent' ? 'Agent' : titleOf(path, content), content, url, lines });
+  item.files.push({ path, title: titleOf(path, content), content, url, lines });
   item.lines += lines;
 
-  if ((path === 'SKILL.md' || kind === 'agent') && content !== null) {
-    item.description = frontmatter(content).data.description ?? '';
+  if (path === 'SKILL.md' && content !== null) {
+    const { data } = frontmatter(content);
+    item.description = data.description ?? '';
+    item.tags = (data.tags ?? '').split(',').map(t => t.trim()).filter(Boolean);
   }
 }
 
@@ -131,40 +111,71 @@ for (const [key, url] of Object.entries(binary)) {
   add(key, null, url);
 }
 
-for (const [key, content] of Object.entries(companionFiles)) {
-  const name = key.replace(/^\.\.\/\.\.\//, '').split('/')[0];
-
-  if (!packs.has(name)) continue;
-
-  packs.get(name)!.companions = content
-    .split('\n')
-    .filter(line => line.trim() && !line.trim().startsWith('#'))
-    .map(line => {
-      const [cname, kind, command, url, what] = line.split('|').map(part => part.trim());
-
-      return { name: cname, kind, command, url, what };
-    });
-}
-
-const order = (path: string) => (path === 'SKILL.md' || path.endsWith('.md') && !path.includes('/') ? 0 : path.startsWith('references/') ? 1 : 2);
+const order = (path: string) => (path === 'SKILL.md' ? 0 : !path.includes('/') ? 1 : path.startsWith('references/') ? 2 : 3);
 
 for (const item of items.values()) {
   item.files.sort((a, b) => order(a.path) - order(b.path) || a.path.localeCompare(b.path));
 }
 
-for (const p of packs.values()) {
-  p.items.sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'skill' ? -1 : 1));
-}
+export const allItems = [...items.values()].sort((a, b) => a.name.localeCompare(b.name));
 
-export const allPacks = [...packs.values()].sort((a, b) => a.name.localeCompare(b.name));
-export const allItems = [...items.values()];
+// Tabs are each skill's main technology (its first tag); a tab lists every skill tagged with it.
+export const allTags = (() => {
+  const main = new Set(allItems.map(item => item.tags[0]).filter(Boolean));
+
+  return [...main]
+    .map(tag => ({ tag, count: allItems.filter(item => item.tags.includes(tag)).length }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+})();
+
+export const recommended: Recommended[] = (() => {
+  const raw = Object.values(lock)[0];
+
+  if (!raw) return [];
+
+  const entries = Object.entries(JSON.parse(raw).skills ?? {}) as [string, Record<string, string>][];
+
+  return entries.map(([name, entry]) => {
+    const wellKnown = entry.sourceType === 'well-known';
+    const [owner, repo = ''] = entry.source.split('/');
+
+    return {
+      name,
+      source: entry.source,
+      owner,
+      repo,
+      url: wellKnown ? entry.sourceUrl : `https://github.com/${entry.source}`,
+      command: wellKnown ? `npx skills add ${entry.sourceUrl}` : `npx skills add ${entry.source} --skill ${name}`,
+    };
+  });
+})();
+
+export const publishers: Publisher[] = (() => {
+  const map = new Map<string, Publisher>();
+
+  for (const skill of recommended) {
+    if (!map.has(skill.source)) {
+      map.set(skill.source, {
+        owner: skill.owner,
+        repo: skill.repo,
+        url: skill.url,
+        avatar: skill.repo ? `https://github.com/${skill.owner}.png?size=64` : null,
+        skills: [],
+      });
+    }
+
+    map.get(skill.source)!.skills.push(skill);
+  }
+
+  return [...map.values()].sort((a, b) => a.owner.localeCompare(b.owner));
+})();
 
 export function findItem(name: string): Item | undefined {
   return items.get(name);
 }
 
 export function mainFile(item: Item): RepoFile {
-  return item.files.find(f => f.path === 'SKILL.md' || f.path === `${item.name}.md`) ?? item.files[0];
+  return item.files.find(f => f.path === 'SKILL.md') ?? item.files[0];
 }
 
 export interface Hit {

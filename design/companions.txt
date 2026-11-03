@@ -1,3 +1,0 @@
-# name | kind | install (run in the project root) | docs | what it adds
-impeccable | community | npx skills add pbakaus/impeccable -a claude-code -y | https://github.com/pbakaus/impeccable | design, critique, polish and audit commands for any front end
-ui-taste | community | npx skills add https://uizze.sh/ -a claude-code -y | https://www.skills.sh/site/uizze.sh/ui-taste | a workflow for layout choices, visual hierarchy and UI polish on web and iOS

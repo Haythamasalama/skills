@@ -1,27 +1,23 @@
 <script setup lang="ts">
 import { Search } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { allItems, allPacks, repoPath, search } from '../catalog';
+import { allItems, allTags, search } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
-import { installCommands } from '../install';
+import { installCommands, REPO } from '../install';
 
 const ALL = 'All';
-const pack = ref(ALL);
+const tag = ref(ALL);
 const query = ref('');
 const box = ref<HTMLInputElement>();
 
-const tabs = computed(() => [
-  { label: ALL, count: allItems.length },
-  ...allPacks.map(p => ({ label: p.name, count: p.items.length })),
-]);
+const tabs = computed(() => [{ label: ALL, count: allItems.length }, ...allTags.map(t => ({ label: t.tag, count: t.count }))]);
 
 const terms = computed(() => query.value.toLowerCase().split(/\s+/).filter(Boolean));
 
 const rows = computed(() =>
-  allPacks
-    .flatMap(p => p.items)
-    .filter(item => pack.value === ALL || item.pack === pack.value)
-    .filter(item => terms.value.every(t => `${item.name} ${item.pack} ${item.description}`.toLowerCase().includes(t))),
+  allItems
+    .filter(item => tag.value === ALL || item.tags.includes(tag.value))
+    .filter(item => terms.value.every(t => `${item.name} ${item.tags.join(' ')} ${item.description}`.toLowerCase().includes(t))),
 );
 
 const hits = computed(() => (terms.value.length ? search(query.value, 8) : []));
@@ -45,7 +41,7 @@ const highlight = (snippet: string) => {
   return pattern ? escaped.replace(new RegExp(`(${pattern})`, 'gi'), '<mark class="rounded-sm bg-iris-500/25 text-fg">$1</mark>') : escaped;
 };
 
-const tryIt = `sh ${repoPath}/scripts/install.sh <pack or skill>`;
+const tryIt = `npx skills add ${REPO}`;
 </script>
 
 <template>
@@ -53,7 +49,7 @@ const tryIt = `sh ${repoPath}/scripts/install.sh <pack or skill>`;
     <section class="pt-16 md:pt-[88px]">
       <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[30px]">Skills</h1>
       <p class="mt-3 max-w-[60ch] text-[17px] leading-[1.7] text-soft">
-        Playbooks for Claude Code. Each one works on its own and installs into a project with one command.
+        Playbooks for Claude Code, each one standalone. Install one, or pick from the list, with the standard skills CLI.
       </p>
 
       <div class="mt-6 flex max-w-2xl items-center gap-2 rounded-[14px] border border-line bg-raised py-1 pr-2 pl-4">
@@ -81,16 +77,16 @@ const tryIt = `sh ${repoPath}/scripts/install.sh <pack or skill>`;
         </label>
       </div>
 
-      <div role="tablist" aria-label="Packs" class="mt-4 flex gap-1 overflow-x-auto border-b border-line">
+      <div role="tablist" aria-label="Technologies" class="mt-4 flex gap-1 overflow-x-auto border-b border-line">
         <button
           v-for="t in tabs"
           :key="t.label"
           type="button"
           role="tab"
-          :aria-selected="pack === t.label"
+          :aria-selected="tag === t.label"
           class="-mb-px shrink-0 cursor-pointer border-b px-3 py-2 text-[13px] transition-colors"
-          :class="pack === t.label ? 'border-fg text-fg' : 'border-transparent text-muted hover:text-fg'"
-          @click="pack = t.label"
+          :class="tag === t.label ? 'border-fg text-fg' : 'border-transparent text-muted hover:text-fg'"
+          @click="tag = t.label"
         >
           {{ t.label }} <span class="font-mono text-[11px] text-faint">{{ t.count }}</span>
         </button>
@@ -111,7 +107,7 @@ const tryIt = `sh ${repoPath}/scripts/install.sh <pack or skill>`;
           <span class="flex min-w-0 flex-col">
             <span class="font-mono text-[15px] font-medium text-fg">{{ item.name }}</span>
             <span class="truncate text-[13px] text-faint">
-              <span class="font-mono">{{ item.pack }}</span> · {{ summary(item.description) }}
+              <span class="font-mono">{{ item.tags.join(' · ') }}</span> — {{ summary(item.description) }}
             </span>
           </span>
           <span @click.prevent.stop>

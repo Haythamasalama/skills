@@ -1,34 +1,27 @@
 # How this repo is written
 
 Every skill here must help in **any** project, on any machine, and must work when it is the only skill
-installed. The `skill-publisher` agent follows this file.
+installed. The layout follows the [Agent Skills](https://agentskills.io) format used by the official
+skill repos, so the standard CLI installs straight from this repo: `npx skills add Haythamasalama/skills`.
 
 ## Layout
 
 ```
-<pack>/                 one subject: laravel, vue-inertia, whatsapp, …
-  README.md             frontmatter `description:` (English, one line, shown on the site), then in
-                        Arabic: one line on the pack and a table of its skills and agents
-  skills/<name>/
-    SKILL.md            required: frontmatter + the short version
-    references/*.md     optional: one topic per file, linked from SKILL.md
-    scripts/            optional: helpers that work anywhere
-    assets/             optional: templates (HTML, JSON, …)
-  agents/<name>.md      optional: Claude Code subagents for this subject
-  companions.txt        optional: official and community skills for the same stack, one per line:
-                        name | official or community | install command | docs URL | what it adds
-scripts/                install.sh, check.sh, privacy-scan.sh (repo tools, never installed)
+skills/<name>/
+  SKILL.md            required: frontmatter + the short version
+  references/*.md     optional: one topic per file, linked from SKILL.md
+  scripts/            optional: helpers that work anywhere
+  assets/             optional: templates and copy-ready files
+skills-lock.json      official and community skills we recommend, in the CLI's own lock format
+scripts/              check.sh, privacy-scan.sh, site.sh (repo tools, never installed)
+site/                 the local page that lists the skills
 ```
 
-- `<pack>` and `<name>`: lowercase kebab-case, say the subject, never a project or client name.
-- Skill and agent names are unique across the whole repo: they land in the same `.claude/skills` and
-  `.claude/agents` folders of a project. When two packs need a similar skill, prefix it with the pack
-  (for example `<pack>-review`).
-- Official and community skills are never copied in: a pack lists them in `companions.txt`, and
-  `install.sh … --with-companions` installs them from their source. A repo skill never takes the name
-  of an official one (`shadcn-vue-kit` beside the official `shadcn-vue`).
-- A project gets skills with `sh scripts/install.sh <pack|skill>… --to <project>`; they are copied into
-  `<project>/.claude/`. Only `tooling` goes to `~/.claude` (`--global`).
+- `<name>`: lowercase kebab-case, says the subject, never a project or client name.
+- Skills from others are never copied in. Add them to `skills-lock.json` by installing them once with
+  `npx skills add <source> --skill <name>` in a scratch project and copying its lock entry. A skill of
+  ours never takes the name of one in the lock file (`shadcn-vue-kit` beside the official `shadcn-vue`).
+- Group skills with tags, not folders: `metadata.tags` in the frontmatter (see below).
 
 ## Every skill stands alone
 
@@ -36,15 +29,17 @@ scripts/                install.sh, check.sh, privacy-scan.sh (repo tools, never
   A skill may be installed without any other one, so a pointer to it would lead nowhere.
 - When a skill needs a fact that another skill also holds, write the part it needs into this skill.
   Inside one skill, one fact lives in one place; across skills, repeating is expected.
-- A pack groups skills by subject; it does not make them depend on each other.
 - `sh scripts/check.sh` enforces this. Mark a deliberate line with `skills-check: allow`.
 
 ## SKILL.md
 
 ```yaml
 ---
-name: <name>            # same as the folder
-description: Use when … # one paragraph: when to load it, what it covers, trigger phrases (English + a few Arabic)
+name: <name>                # same as the folder
+description: "Use when …"   # one paragraph: when to load it, what it covers, trigger phrases (English + a few Arabic);
+                            # quote it when it contains ": "
+metadata:
+  tags: laravel, php        # technologies, lowercase, most specific first; the site's tabs come from these
 ---
 ```
 

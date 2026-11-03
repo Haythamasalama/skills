@@ -4,7 +4,7 @@ set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TERMS_FILE="${SKILLS_PRIVATE_TERMS:-$HOME/.config/skills/private-terms.txt}"
-TARGETS="$(ls -d "$ROOT"/*/skills "$ROOT"/*/agents 2>/dev/null | tr "\n" " ") $ROOT/README.md $ROOT/CONVENTIONS.md $ROOT/third-party.md"
+TARGETS="$ROOT/skills $ROOT/README.md $ROOT/CONVENTIONS.md $ROOT/skills-lock.json"
 found=0
 
 check() {

@@ -1,36 +1,53 @@
-# مهاراتي
+# Skills
 
-مهارات لـ Claude Code مرتبة بحزم حسب الموضوع. كل مهارة مكتوبة بطريقة عامة (بدون أسماء شركات أو عملاء أو بيانات خاصة)، وكل وحدة بتشتغل لحالها: بتقدر تنزّل مهارة وحدة بدون ما تحتاج غيرها.
-
-## الحزم
-
-| الحزمة | شو فيها |
-|---|---|
-| [laravel](laravel/README.md) | كود Laravel بطريقة DDD، وجودة الكود والأمان |
-| [vue-inertia](vue-inertia/README.md) | واجهات Vue مع Inertia، وفحص الواجهة |
-| [nuxt-ui](nuxt-ui/README.md) | مشاريع Nuxt UI مع الثيم والمكونات جاهزة |
-| [design](design/README.md) | قيم تصميم آبل (macOS 27 و iOS 27)، رسم شاشات ماك وآيفون، و Liquid Glass للويب |
-| [brand](brand/README.md) | هويتي: الشعار والألوان والخطوط والأسلوب |
-| [deploy](deploy/README.md) | Docker والنشر على Coolify |
-| [git](git/README.md) | رسائل الـ commits |
-| [whatsapp](whatsapp/README.md) | منصة واتساب للأعمال |
-| [tooling](tooling/README.md) | أدوات الريبو نفسه (بتنزل على الجهاز كله) |
-
-## تنزيل مهارات بمشروع
+Agent skills for Claude Code and other coding agents. Each skill stands alone: install the ones you need
+into a project with the standard [skills CLI](https://skills.sh).
 
 ```bash
-sh scripts/install.sh --list
-sh scripts/install.sh laravel vue-inertia --to ~/path/to/project
-sh scripts/install.sh laravel-ddd --to ~/path/to/project
+npx skills add Haythamasalama/skills                          # pick from the list
+npx skills add Haythamasalama/skills --skill laravel-ddd      # one skill
 ```
 
-بتنتسخ لمجلد `.claude/` جوا المشروع. كل نسخة فيها ملف `.skills-repo`، فإذا شغّلت الأمر مرة ثانية بيحدّث اللي نزل من هون، وما بيلمس مهارات ثانية بنفس الاسم إلا مع `--force`.
+## Skills
 
-المهارات اللي نزّلتها من ناس ثانيين مش منسوخة هون. قائمتها مع طريقة تنزيلها بملف [third-party.md](third-party.md).
+| Skill | Tags | What it covers |
+|---|---|---|
+| [laravel-ddd](skills/laravel-ddd/SKILL.md) | laravel, php | A Domain-Driven Design layout for Laravel: Actions, DTOs, Contracts, Services, controllers, JSON API, tests |
+| [laravel-code-quality](skills/laravel-code-quality/SKILL.md) | laravel, php | Code style, security, sensitive operations, the anti-pattern catalogue and code review |
+| [vue-inertia](skills/vue-inertia/SKILL.md) | vue, inertia, laravel | A Laravel + Inertia + Vue 3 front-end blueprint: folders, day-one files, house components, forms, lists, theme, RTL |
+| [shadcn-vue-kit](skills/shadcn-vue-kit/SKILL.md) | vue, ui | shadcn-vue setup with a ready theme, the component catalogue, wrappers, charts and RTL fixes |
+| [nuxt-ui-kit](skills/nuxt-ui-kit/SKILL.md) | nuxt, vue, ui | A Nuxt UI 4 blueprint with a copy-ready theme, dashboard shell, i18n and RTL, static sites and SEO |
+| [apple-macos-27-design](skills/apple-macos-27-design/SKILL.md) | design, apple | Exact values from Apple's macOS 27 UI Kit |
+| [apple-ios-27-design](skills/apple-ios-27-design/SKILL.md) | design, apple | Exact values from Apple's iOS 27 UI Kit |
+| [apple-screens](skills/apple-screens/SKILL.md) | design, apple | Drawn Mac windows and iPhone screens as HTML, rendered to PNG |
+| [liquid-glass-web](skills/liquid-glass-web/SKILL.md) | design, ui | Apple-style Liquid Glass for websites and landing pages |
+| [haytham-brand](skills/haytham-brand/SKILL.md) | design, brand | The author's personal brand: signature, colours, type and voice |
+| [coolify-deploy](skills/coolify-deploy/SKILL.md) | deploy, docker | Dockerfiles, nginx and Coolify settings for SPA, prerendered and server apps |
+| [commit-messages](skills/commit-messages/SKILL.md) | git | Conventional Commits, branch names, pull requests and merging |
+| [whatsapp-business-platform](skills/whatsapp-business-platform/SKILL.md) | whatsapp, api | What Meta's WhatsApp Cloud API can do: webhooks, templates, limits and pricing |
 
-## إضافة أو تعديل مهارة
+## Recommended skills from others
 
-القواعد بملف [CONVENTIONS.md](CONVENTIONS.md). قبل أي commit لازم الاثنين ينجحوا:
+[skills-lock.json](skills-lock.json) lists official and community skills that work well with these
+(shadcn-vue, Nuxt UI, Laravel best practices, Vue, a security audit, design and planning). To install
+all of them in a project, copy the file into the project root and run:
+
+```bash
+npx skills experimental_install
+```
+
+Laravel's own Boost package adds more Laravel skills and an MCP server:
+`composer require laravel/boost --dev && php artisan boost:install`.
+
+## Browse locally
+
+```bash
+sh scripts/site.sh     # http://localhost:4321
+```
+
+## Contributing
+
+Read [CONVENTIONS.md](CONVENTIONS.md). Before every commit both checks must pass:
 
 ```bash
 sh scripts/check.sh

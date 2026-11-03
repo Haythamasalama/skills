@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { allPacks, findItem } from './catalog';
+import { findItem } from './catalog';
 import SignatureMark from './components/SignatureMark.vue';
 import ThemeToggle from './components/ThemeToggle.vue';
 import ItemPage from './pages/ItemPage.vue';
-import MapPage from './pages/MapPage.vue';
+import RecommendedPage from './pages/RecommendedPage.vue';
 import SkillsPage from './pages/SkillsPage.vue';
 
 const hash = ref(location.hash);
@@ -13,22 +13,21 @@ const onHash = () => (hash.value = location.hash);
 onMounted(() => addEventListener('hashchange', onHash));
 onUnmounted(() => removeEventListener('hashchange', onHash));
 
-// Routes: #/ · #/map · #/pack/<name> · #/item/<name>[/<file>][::<anchor>]
+// Routes: #/ · #/recommended · #/item/<name>[/<file>][::<anchor>]
 const route = computed(() => {
   const [path, anchor = ''] = decodeURIComponent(hash.value.replace(/^#\/?/, '')).split('::');
   const [kind, name, ...rest] = path.split('/');
   const item = kind === 'item' ? findItem(name) : undefined;
 
   if (item) return { view: 'item' as const, item, path: rest.join('/'), anchor };
-  if (kind === 'pack' && allPacks.some(p => p.name === name)) return { view: 'pack' as const, pack: name };
-  if (kind === 'map') return { view: 'map' as const };
+  if (kind === 'recommended') return { view: 'recommended' as const };
 
   return { view: 'skills' as const };
 });
 
 const nav = [
   { label: 'Skills', to: '#/', current: () => route.value.view === 'skills' || route.value.view === 'item' },
-  { label: 'Map', to: '#/map', current: () => route.value.view === 'map' || route.value.view === 'pack' },
+  { label: 'Recommended', to: '#/recommended', current: () => route.value.view === 'recommended' },
 ];
 </script>
 
@@ -64,14 +63,13 @@ const nav = [
 
       <main id="main">
         <ItemPage v-if="route.view === 'item'" :item="route.item" :path="route.path" :anchor="route.anchor" />
-        <MapPage v-else-if="route.view === 'pack'" :key="route.pack" :only="route.pack" />
-        <MapPage v-else-if="route.view === 'map'" />
+        <RecommendedPage v-else-if="route.view === 'recommended'" />
         <SkillsPage v-else />
       </main>
 
       <footer class="mt-24 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-line pt-7 pb-10">
         <p class="text-[13px] text-faint">
-          Haytham A. Salama · skills for Claude Code · runs locally with <code class="font-mono">sh scripts/site.sh</code>
+          Haytham A. Salama · skills for Claude Code · install with <code class="font-mono">npx skills add</code>
         </p>
         <div class="-mr-3 flex items-center">
           <ThemeToggle />

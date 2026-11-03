@@ -9,37 +9,35 @@ problems=0
 fail() { echo "$1"; problems=$((problems + 1)); }
 
 frontmatter() {
-  awk -v key="$2" 'NR==1&&/^---/{f=1;next} f&&/^---/{exit} f&&$0~"^"key":"{sub("^"key": *",""); print; exit}' "$1"
+  awk -v key="$2" 'NR==1&&/^---/{f=1;next} f&&/^---/{exit} f&&$0~"^ *"key":"{sub("^ *"key": *",""); print; exit}' "$1"
 }
 
 all_names=""
-for pack in "$ROOT"/*/; do
-  pack_name="$(basename "$pack")"
-  [ -d "$pack/skills" ] || [ -d "$pack/agents" ] || continue
-  [ -f "$pack/README.md" ] || fail "$pack_name: missing README.md"
-  [ ! -f "$pack/README.md" ] || [ -n "$(frontmatter "$pack/README.md" description)" ] || fail "$pack_name: README.md has no frontmatter description"
-  for skill in "$pack"/skills/*/; do
-    [ -d "$skill" ] || continue
-    all_names="$all_names $(basename "$skill")"
-  done
-  for agent in "$pack"/agents/*.md; do
-    [ -f "$agent" ] || continue
-    all_names="$all_names $(basename "$agent" .md)"
-  done
+for skill in "$ROOT"/skills/*/; do
+  all_names="$all_names $(basename "$skill")"
 done
 
-dupes="$(printf '%s\n' $all_names | sort | uniq -d)"
-[ -z "$dupes" ] || fail "names used more than once: $(echo $dupes)"
+# A skill of ours must not take the name of a recommended one, or installing both overwrites one.
+if [ -f "$ROOT/skills-lock.json" ]; then
+  for name in $all_names; do
+    grep -q "\"$name\": {" "$ROOT/skills-lock.json" && fail "skills/$name: same name as a skill in skills-lock.json"
+  done
+fi
 
-for skill in "$ROOT"/*/skills/*/; do
+for skill in "$ROOT"/skills/*/; do
   name="$(basename "$skill")"
-  rel="${skill#"$ROOT"/}"
+  rel="skills/$name"
   file="$skill/SKILL.md"
   if [ ! -f "$file" ]; then fail "$rel: missing SKILL.md"; continue; fi
   [ "$(frontmatter "$file" name)" = "$name" ] || fail "$rel: frontmatter name is not \"$name\""
   [ -n "$(frontmatter "$file" description)" ] || fail "$rel: frontmatter description is empty"
+  case "$(frontmatter "$file" description)" in
+    \"*|\'*) ;;
+    *": "*) fail "$rel: description has an unquoted \": \", which breaks YAML; wrap it in double quotes" ;;
+  esac
+  [ -n "$(frontmatter "$file" tags)" ] || fail "$rel: frontmatter metadata.tags is empty"
   lines=$(wc -l < "$file")
-  [ "$lines" -le 250 ] || fail "$rel""SKILL.md: $lines lines (limit 250)"
+  [ "$lines" -le 250 ] || fail "$rel/SKILL.md: $lines lines (limit 250)"
   for ref in "$skill"/references/*.md; do
     [ -f "$ref" ] || continue
     lines=$(wc -l < "$ref")
@@ -52,17 +50,11 @@ for skill in "$ROOT"/*/skills/*/; do
 $hits"
   for other in $all_names; do
     [ "$other" = "$name" ] && continue
-    # A library can share a skill's name (shadcn-vue), so only references to it as a skill count.
+    # A library can share a skill's name, so only references to it as a skill count.
     hits=$(grep -rniE --include='*.md' -e "(^|[^a-z0-9-])$other[\`*\]]*( \(?the\)?)? skill|skills?[\`*:]* +(the )?[\`*\[]*$other([^a-z0-9-]|\$)|/$other/" "$skill" | grep -v "skills-check: allow")
     [ -z "$hits" ] || fail "$rel: mentions the skill \"$other\":
 $(echo "$hits" | sed "s|$ROOT/||" | head -5)"
   done
-done
-
-for agent in "$ROOT"/*/agents/*.md; do
-  [ -f "$agent" ] || continue
-  name="$(basename "$agent" .md)"
-  [ "$(frontmatter "$agent" name)" = "$name" ] || fail "${agent#"$ROOT"/}: frontmatter name is not \"$name\""
 done
 
 if [ "$problems" -eq 0 ]; then

@@ -1,7 +1,0 @@
-# name | kind | install (run in the project root) | docs | what it adds
-laravel-boost | official | composer require laravel/boost --dev && php artisan boost:install | https://laravel.com/docs/boost | pest-testing and one skill per installed package (Inertia, Tailwind, Wayfinder, Pennant, …), plus the Boost MCP server
-laravel-best-practices | official | npx skills add https://github.com/laravel/boost --skill laravel-best-practices -a claude-code -y | https://www.skills.sh/laravel/boost/laravel-best-practices | Laravel's own best-practice rules: match the codebase first, then one rule file per concern
-laravel-database-optimization | community | npx skills add https://github.com/asyrafhussin/agent-skills --skill laravel-database-optimization -a claude-code -y | https://www.skills.sh/asyrafhussin/agent-skills/laravel-database-optimization | 33 rules on queries, indexes, caching, large data sets, locking, zero-downtime migrations and slow-query debugging
-laravel-verification | community | npx skills add https://github.com/affaan-m/ecc --skill laravel-verification -a claude-code -y | https://www.skills.sh/affaan-m/ecc/laravel-verification | a pre-PR and pre-deploy loop: environment, lint and static analysis, tests and coverage, security, migrations, build, queues
-# Alternative, not installed by default because it uses the same folder name as the official one above:
-# laravel-best-practices (asyrafhussin/agent-skills) | npx skills add https://github.com/asyrafhussin/agent-skills --skill laravel-best-practices

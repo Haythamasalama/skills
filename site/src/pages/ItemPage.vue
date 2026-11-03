@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-vue-next';
 import { computed, nextTick, ref, watch } from 'vue';
-import { allPacks, type Item, mainFile } from '../catalog';
-import CompanionList from '../components/CompanionList.vue';
+import { type Item, mainFile } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
 import FileExplorer from '../components/FileExplorer.vue';
-import PackTile from '../components/PackTile.vue';
+import TagTile from '../components/TagTile.vue';
 import { installCommands } from '../install';
 import { renderCode, renderMarkdown } from '../markdown';
 
@@ -16,7 +15,6 @@ const index = computed(() => props.item.files.indexOf(file.value));
 const previous = computed(() => props.item.files[index.value - 1]);
 const next = computed(() => props.item.files[index.value + 1]);
 const commands = computed(() => installCommands(props.item));
-const companions = computed(() => allPacks.find(p => p.name === props.item.pack)?.companions ?? []);
 const showAll = ref(false);
 
 const crumbs = computed(() => file.value.path.split('/'));
@@ -64,10 +62,10 @@ watch(
       </a>
 
       <div class="mt-6 flex items-start gap-4">
-        <PackTile :pack="item.pack" :agent="item.kind === 'agent'" :size="48" />
+        <TagTile :tags="item.tags" :size="48" />
         <div class="min-w-0">
           <p class="eyebrow">
-            <a :href="`#/pack/${item.pack}`" class="hover:text-fg">{{ item.pack }}</a> · {{ item.kind }} ·
+            {{ item.tags.join(' · ') }} ·
             {{ item.files.length }} files · {{ item.lines.toLocaleString('en-US') }} lines
           </p>
           <h1 class="mt-1 font-mono text-[26px] leading-tight font-medium tracking-[-0.01em] [overflow-wrap:anywhere] md:text-[30px]">
@@ -93,11 +91,6 @@ watch(
       </div>
     </section>
 
-    <section v-if="companions.length" aria-labelledby="companions" class="mt-10">
-      <h2 id="companions" class="eyebrow">Works well with</h2>
-      <p class="mt-2 text-[14px] text-muted">Official and community skills for the same stack. Add <code class="font-mono text-fg">--with-companions</code> to the install command to install them too.</p>
-      <CompanionList class="mt-4" :companions="companions" />
-    </section>
 
     <section id="reader" aria-label="Files" class="mt-12 grid scroll-mt-4 gap-6 md:grid-cols-[250px_minmax(0,1fr)]">
       <aside class="hidden md:block">
