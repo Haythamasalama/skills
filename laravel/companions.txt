@@ -1,0 +1,2 @@
+# name | kind | install (run in the project root) | docs | what it adds
+laravel-boost | official | composer require laravel/boost --dev && php artisan boost:install | https://laravel.com/docs/boost | pest-testing and one skill per installed package (Inertia, Tailwind, Wayfinder, Pennant, …), plus the Boost MCP server

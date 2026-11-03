@@ -15,6 +15,8 @@ installed. The `skill-publisher` agent follows this file.
     scripts/            optional: helpers that work anywhere
     assets/             optional: templates (HTML, JSON, …)
   agents/<name>.md      optional: Claude Code subagents for this subject
+  companions.txt        optional: official and community skills for the same stack, one per line:
+                        name | official or community | install command | docs URL | what it adds
 scripts/                install.sh, check.sh, privacy-scan.sh (repo tools, never installed)
 ```
 
@@ -22,6 +24,9 @@ scripts/                install.sh, check.sh, privacy-scan.sh (repo tools, never
 - Skill and agent names are unique across the whole repo: they land in the same `.claude/skills` and
   `.claude/agents` folders of a project. When two packs need a similar skill, prefix it with the pack
   (for example `<pack>-review`).
+- Official and community skills are never copied in: a pack lists them in `companions.txt`, and
+  `install.sh … --with-companions` installs them from their source. A repo skill never takes the name
+  of an official one (`shadcn-vue-kit` beside the official `shadcn-vue`).
 - A project gets skills with `sh scripts/install.sh <pack|skill>… --to <project>`; they are copied into
   `<project>/.claude/`. Only `tooling` goes to `~/.claude` (`--global`).
 

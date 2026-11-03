@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { allItems, allPacks, type Item } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
+import CompanionList from '../components/CompanionList.vue';
 import PackTile from '../components/PackTile.vue';
 import PageHeader from '../components/PageHeader.vue';
 import { packCommand } from '../install';
@@ -48,6 +49,11 @@ const folders = (item: Item) => {
       <code class="min-w-0 flex-auto overflow-x-auto font-mono text-[12.5px] whitespace-nowrap text-fg">{{ packCommand(pack.name) }}</code>
       <CopyButton :text="packCommand(pack.name)" :label="`the install command for ${pack.name}`" />
     </div>
+
+    <section v-if="pack && pack.companions.length" aria-labelledby="companions" class="mt-10">
+      <h2 id="companions" class="eyebrow">Works well with</h2>
+      <CompanionList class="mt-4" :companions="pack.companions" />
+    </section>
 
     <section aria-label="Packs and skills" class="mt-12 flex flex-col gap-12">
       <div v-for="p in packs" :key="p.name" class="grid gap-x-8 gap-y-4 md:grid-cols-[200px_1fr]">

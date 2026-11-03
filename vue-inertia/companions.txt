@@ -1,0 +1,3 @@
+# name | kind | install (run in the project root) | docs | what it adds
+shadcn-vue | official | npx skills add unovue/shadcn-vue -a claude-code -y | https://www.shadcn-vue.com/docs/skills | the CLI, theming, registry and MCP reference, aware of the project's components.json
+laravel-boost | official | composer require laravel/boost --dev && php artisan boost:install | https://laravel.com/docs/boost | inertia-vue-development, wayfinder-development and tailwindcss-development skills, plus the Boost MCP server

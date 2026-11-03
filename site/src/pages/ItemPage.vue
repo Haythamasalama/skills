@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-vue-next';
 import { computed, nextTick, ref, watch } from 'vue';
-import { type Item, mainFile } from '../catalog';
+import { allPacks, type Item, mainFile } from '../catalog';
+import CompanionList from '../components/CompanionList.vue';
 import CopyButton from '../components/CopyButton.vue';
 import FileExplorer from '../components/FileExplorer.vue';
 import PackTile from '../components/PackTile.vue';
@@ -15,6 +16,7 @@ const index = computed(() => props.item.files.indexOf(file.value));
 const previous = computed(() => props.item.files[index.value - 1]);
 const next = computed(() => props.item.files[index.value + 1]);
 const commands = computed(() => installCommands(props.item));
+const companions = computed(() => allPacks.find(p => p.name === props.item.pack)?.companions ?? []);
 const showAll = ref(false);
 
 const crumbs = computed(() => file.value.path.split('/'));
@@ -89,6 +91,12 @@ watch(
           </div>
         </div>
       </div>
+    </section>
+
+    <section v-if="companions.length" aria-labelledby="companions" class="mt-10">
+      <h2 id="companions" class="eyebrow">Works well with</h2>
+      <p class="mt-2 text-[14px] text-muted">Official and community skills for the same stack. Add <code class="font-mono text-fg">--with-companions</code> to the install command to install them too.</p>
+      <CompanionList class="mt-4" :companions="companions" />
     </section>
 
     <section id="reader" aria-label="Files" class="mt-12 grid scroll-mt-4 gap-6 md:grid-cols-[250px_minmax(0,1fr)]">

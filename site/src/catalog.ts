@@ -42,12 +42,23 @@ export interface Item {
   lines: number;
 }
 
+export interface Companion {
+  name: string;
+  kind: string;
+  command: string;
+  url: string;
+  what: string;
+}
+
 export interface Pack {
   name: string;
   summary: string;
   readme: string;
   items: Item[];
+  companions: Companion[];
 }
+
+const companionFiles = import.meta.glob<string>('../../*/companions.txt', { query: '?raw', import: 'default', eager: true });
 
 export function frontmatter(source: string): { data: Record<string, string>; body: string } {
   const match = source.match(/^---\n([\s\S]*?)\n---\n?/);
@@ -74,7 +85,7 @@ const items = new Map<string, Item>();
 
 function pack(name: string): Pack {
   if (!packs.has(name)) {
-    packs.set(name, { name, summary: '', readme: '', items: [] });
+    packs.set(name, { name, summary: '', readme: '', items: [], companions: [] });
   }
 
   return packs.get(name)!;
@@ -118,6 +129,21 @@ for (const [key, content] of Object.entries(text)) {
 
 for (const [key, url] of Object.entries(binary)) {
   add(key, null, url);
+}
+
+for (const [key, content] of Object.entries(companionFiles)) {
+  const name = key.replace(/^\.\.\/\.\.\//, '').split('/')[0];
+
+  if (!packs.has(name)) continue;
+
+  packs.get(name)!.companions = content
+    .split('\n')
+    .filter(line => line.trim() && !line.trim().startsWith('#'))
+    .map(line => {
+      const [cname, kind, command, url, what] = line.split('|').map(part => part.trim());
+
+      return { name: cname, kind, command, url, what };
+    });
 }
 
 const order = (path: string) => (path === 'SKILL.md' || path.endsWith('.md') && !path.includes('/') ? 0 : path.startsWith('references/') ? 1 : 2);

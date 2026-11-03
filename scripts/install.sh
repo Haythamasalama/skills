@@ -5,6 +5,10 @@
 #   sh scripts/install.sh laravel                    # a whole pack, into the current folder
 #   sh scripts/install.sh laravel-ddd shadcn-vue --to ~/code/app
 #   sh scripts/install.sh tooling --global
+#   sh scripts/install.sh vue-inertia --to ~/code/app --with-companions
+#
+# A pack's companions.txt lists official and community skills that work with it. They are printed
+# after the install; --with-companions also runs their install commands in the target folder.
 #
 # A copy carries a .skills-repo file; only folders that have it are replaced on the next install.
 set -eu
@@ -12,9 +16,10 @@ set -eu
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TARGET="$PWD"
 FORCE=0
+COMPANIONS=0
 NAMES=""
 
-usage() { sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 
 packs() {
   for dir in "$ROOT"/*/; do
@@ -44,6 +49,7 @@ while [ $# -gt 0 ]; do
     --to) TARGET="${2:?--to needs a folder}"; shift ;;
     --global) TARGET="$HOME" ;;
     --force) FORCE=1 ;;
+    --with-companions) COMPANIONS=1 ;;
     -h|--help) usage ;;
     -*) echo "unknown option: $1" >&2; usage 1 ;;
     *) NAMES="$NAMES $1" ;;
@@ -108,5 +114,26 @@ for name in $NAMES; do
   done
   [ -n "$found" ] || { echo "not found: $name (see --list)" >&2; exit 1; }
 done
+
+COMPANION_FILES=""
+for name in $NAMES; do
+  for pack in $(packs); do
+    if [ "$pack" = "$name" ] || [ -f "$ROOT/$pack/skills/$name/SKILL.md" ] || [ -f "$ROOT/$pack/agents/$name.md" ]; then
+      [ -f "$ROOT/$pack/companions.txt" ] && COMPANION_FILES="$COMPANION_FILES $ROOT/$pack/companions.txt"
+    fi
+  done
+done
+
+# One line per companion, even when two packs list the same one.
+[ -z "$COMPANION_FILES" ] || cat $COMPANION_FILES | grep -vE '^[[:space:]]*(#|$)' | awk -F'|' '!seen[$1]++' |
+  while IFS='|' read -r cname ckind ccmd curl cwhat; do
+    cname=$(echo "$cname" | xargs); ckind=$(echo "$ckind" | xargs); ccmd=$(echo "$ccmd" | sed 's/^ *//;s/ *$//')
+    if [ "$COMPANIONS" -eq 1 ] && [ "$TARGET" != "$HOME" ]; then
+      echo "companion $cname ($ckind): $ccmd"
+      (cd "$TARGET" && sh -c "$ccmd") || echo "companion $cname failed; run it yourself in $TARGET"
+    else
+      printf 'companion %-16s %-9s %s\n' "$cname" "$ckind" "$ccmd"
+    fi
+  done
 
 echo "done: $DEST"
