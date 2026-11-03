@@ -1,20 +1,21 @@
 # Queries
 
-**Read when:** writing an Eloquent query inside an Action, a filter scope, or a list endpoint.
+**Read when:** writing an Eloquent query inside an Action or a scope, or building a list, count or
+dropdown endpoint.
 **Owns:** where queries live, the `whereByType` / `whereLikeText` macros, eager loading, counting,
-polymorphic existence checks, chunking, column selection.
-**See also:** [models-scopes-abilities-enums.md](models-scopes-abilities-enums.md) ·
-[core-kernel.md](core-kernel.md) · generic query performance: the Laravel best-practices skill
+polymorphic existence checks, chunking, column selection, raw SQL.
 
 ## TL;DR
 
-- Queries live in Actions and scopes. Never in Services, controllers, Blade, Resources or DTOs.
-- Every list query for an entity goes through its one `scopeFilterBy()`.
+- Queries live in Actions and model scopes. Never in Services, controllers, views, Resources or DTOs.
+- Every list query for an entity goes through its one `scopeFilterBy()` ([models.md](models.md#the-filter-trait)).
 - `whereByType` for one-or-many values; `whereLikeText` for text search. Never a hand-written `LIKE`.
-- Eager-load with `with()` / `withCount()` on the query that runs; nothing may lazy-load during rendering.
+- A translated `name` has no column: `searchTranslation()` / `orderByTranslation()`.
+- Eager-load with `with()` / `withCount()` on the query that runs; nothing lazy-loads while rendering.
 - Count with `count()`, test with `exists()`. Never load rows to count them.
 - Pass explicit types to `whereHasMorph()`; a bare `whereHas()` on a `morphTo` scans the table first.
 - `chunkById()` or `cursor()` past about a thousand rows. Select only the columns you need, always with `id`.
+- Every value in raw SQL travels as a binding.
 
 ## One path per entity
 
@@ -26,11 +27,24 @@ if ($request->status) {
 }
 return $query->paginate();
 
-// ✅ the controller builds a DTO; the Action runs the scope
+// ✅ the controller builds a DTO; the list Action runs the scope
 $invoices = $this->invoices->getInvoices(FilterInvoiceData::fromArray($request->validated()))->pagination();
 ```
 
-A new filter is then one DTO property plus one `when()` line.
+```php
+/** @extends GetDataAbstract<Invoice> */
+final class GetInvoices extends GetDataAbstract
+{
+    public function query(): Builder
+    {
+        return Invoice::query()->filterBy($this->data);
+    }
+}
+```
+
+A new filter is then one DTO property plus one `when()` line. Sorting, paging and column selection come
+from the `FilterData` base and are applied by `GetDataAbstract` ([core-kernel.md](core-kernel.md)), so the
+scope never handles them.
 
 ## The macros
 
@@ -42,7 +56,7 @@ if (is_array($filters->status)) {
     $query->where('status', $filters->status);
 }
 
-// ✅
+// ✅ scalar, array, enum case or null, one call
 $query->when($filters?->status, fn (Builder $q) => $q->whereByType('status', $filters->status));
 ```
 
@@ -54,9 +68,25 @@ $query->where('name', 'like', "%{$filters->name}%");
 $query->whereLikeText('name', $filters->name);
 ```
 
-Macros are helper classes with one static `handle()` in `Domain\Core\Helpers`, registered in
-`CoreServiceProvider::boot()`. Add a new cross-cutting query utility the same way: the helper holds the
-logic (and its tests), the provider holds one line. See [core-kernel.md](core-kernel.md).
+- `whereByType` already handles `string|array|null`, so a filter that may receive either needs no branch of
+  its own. Why the macro: the next time a column starts accepting a list, every hand-written branch is a
+  place that was not updated.
+- Never hand-write `LIKE`, inside a scope or anywhere else. Why: a user searching `100%` must not match
+  every row.
+- The macros are helper classes in `Domain\Core\Helpers` registered in the Core provider. A new
+  cross-cutting query utility is added the same way: the helper holds the logic and its tests, the provider
+  holds one line ([core-kernel.md](core-kernel.md)).
+
+## Translated columns
+
+```php
+->when($filters?->search, fn (Builder $q) => $q->searchTranslation('name', $filters->search))
+->when($filters?->sort_by_name, fn (Builder $q) => $q->orderByTranslation('name'))
+```
+
+An entity whose name lives in a `translations` table has no `name` column; `where('name')` and
+`orderBy('name')` fail, and a hand join duplicates rows. The trait and its rules:
+[models.md](models.md#translated-names).
 
 ## Eager loading
 
@@ -66,16 +96,19 @@ foreach (Invoice::all() as $invoice) {
     echo $invoice->customer->name, $invoice->lines->count();
 }
 
-// ✅
+// ✅ the caller declares what it needs
 $invoices = $this->invoices->getInvoices($filters, withRelations: ['customer'], withCount: ['lines'])->pagination();
 ```
 
-- The caller states what it needs through `$withRelations` / `$withCount`; the Service forwards them.
-- Inertia props and API Resources serialize everything you hand them. A model with unloaded relations
+- `Get{Entity}s` takes `$withRelations` and `$withCount`, and the Service **forwards** them to `for()`.
+  Why: a Service that declares them but calls `GetInvoices::for($data)` drops them, and every caller N+1s
+  while the signature looks right ([contracts-and-services.md](contracts-and-services.md)).
+- Inertia props and API Resources serialize everything handed to them. A model with unloaded relations
   lazy-loads per row during serialization. Load first, then pass.
-- In Resources, guard relations with `$this->whenLoaded('customer')`.
+- In Resources, guard relations with `$this->whenLoaded('customer')` ([json-api.md](json-api.md)).
 - Turn on `Model::preventLazyLoading(! app()->isProduction())` so a missing eager load fails in
   development instead of slowing production.
+- Never query from a view.
 
 ## Counting and existence
 
@@ -88,7 +121,8 @@ $open = $this->invoices->getInvoices($filters)->count();
 $any = $this->invoices->getInvoices($filters)->exists();
 ```
 
-This matters most on hot paths: menu badges, dashboard tiles, anything that runs on every page.
+Same for `isEmpty()` / `isNotEmpty()` on a loaded collection. This matters most on hot paths: menu badges,
+dashboard tiles, anything that runs on every page.
 
 ## Polymorphic existence
 
@@ -100,7 +134,8 @@ Attachment::query()->whereHas('attachable');
 Attachment::query()->whereHasMorph('attachable', Attachment::ATTACHABLE_TYPES);
 ```
 
-Same for `whereDoesntHave()` on a `morphTo`.
+Same for `whereDoesntHave()` on a `morphTo`. The type list is a constant on the model that owns the
+`morphTo` ([models.md](models.md#entities)).
 
 ## Large result sets
 
@@ -118,7 +153,8 @@ foreach (Invoice::query()->filterBy($filters)->cursor() as $invoice) {
 }
 ```
 
-Use `chunkById()` over `chunk()` when the loop changes the rows, or offsets shift and rows are skipped.
+Use `chunkById()` over `chunk()` when the loop changes the rows. Why: `chunk()` pages by offset, and an
+update that moves rows out of the filter makes the next page skip some.
 
 ## Selecting columns
 
@@ -130,21 +166,24 @@ Product::query()->filterBy($filters)->get();
 Product::query()->filterBy($filters)->select(['id', 'name'])->get();
 ```
 
-Always include the primary key; relations and later `find()` calls need it. Dropdown and autocomplete
-endpoints are hot and should always project.
+- Always include the primary key. Why: relations, `find()` and route generation need it, and a missing key
+  makes Eloquent reload the row.
+- Dropdown and autocomplete endpoints are hot and always project.
+- For a large column that list queries should never load by default, use the hidden-columns scope instead
+  of projecting at every call site ([models.md](models.md#heavy-columns)).
 
 ## Relationships across domains
 
-Declare relations on the entity and follow Laravel's key conventions (`customer_id`). A relation to another
-domain's entity is fine for eager loading and display, but querying or writing through it from outside
-the owning domain is still a boundary breach; go through that domain's Contract.
+A relation to another domain's entity is fine for eager loading and display. Querying or writing through it
+from outside the owning domain is a boundary breach; go through that domain's Contract
+([architecture.md](architecture.md)).
 
 ## Raw SQL
 
 Only fixed SQL text is ever concatenated. Every value travels as a binding: `selectRaw('... = ?', [$v])`,
 `DB::update($sql, $bindings)`. `DB::raw()` cannot carry bindings, so a raw piece that needs a value means
-running the whole statement with bindings. A bulk `CASE` update follows the same rule: the `WHEN ? THEN ?` pieces are
-fixed text, and every id and value goes into the bindings array.
+running the whole statement with bindings. A bulk `CASE` update follows the same rule: the `WHEN ? THEN ?`
+pieces are fixed text, and every id and value goes into the bindings array.
 
 ## Verify
 
@@ -158,6 +197,9 @@ grep -rnE "whereHas\('[a-z_]*able'" src/
 # Hand-written LIKE
 grep -rnE "'like'|\"like\"|LIKE '%" src/Domain/
 
-# Queries in Blade views
-grep -rnE "::(where|find|all|query)\(" resources/views/ src/Presentation/*/Views/ 2>/dev/null
+# Queries outside Actions and scopes
+grep -rnE "::(query|where|find|create)\(" src/Domain/*/Services/ src/Presentation/
+
+# Queries in views
+grep -rnE "::(where|find|all|query)\(" resources/views/ 2>/dev/null
 ```

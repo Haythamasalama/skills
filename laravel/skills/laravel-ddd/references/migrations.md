@@ -1,9 +1,8 @@
 # Migrations
 
 **Read when:** writing or reviewing a file in `database/migrations/`.
-**Owns:** syntax, the index policy, foreign keys, naming, `down()`, changing columns, data migrations.
-**See also:** [models-scopes-abilities-enums.md](models-scopes-abilities-enums.md) · runtime query
-performance: [queries.md](queries.md)
+**Owns:** migration syntax, the index policy, foreign keys, naming, `down()`, changing columns, data
+migrations, seeded reference rows, append-only tables, migration safety.
 
 ## TL;DR
 
@@ -14,6 +13,8 @@ performance: [queries.md](queries.md)
 - **Never custom-name** an index or constraint; let Laravel name it.
 - Every `up()` has a `down()` that reverses it.
 - Changing a column restates every attribute it already had.
+- Data steps use `DB::table()`, never Eloquent models, and chunk large tables.
+- Reference rows that code depends on (lookup rows, settings keys) are seeded in a migration.
 
 ## Shape
 
@@ -45,11 +46,15 @@ return new class extends Migration
 };
 ```
 
-- `foreignIdFor()` over a hand-wired `unsignedBigInteger` + `foreign()`.
+- `foreignIdFor()` over a hand-wired `unsignedBigInteger` + `foreign()`. `ulid()` / `uuid()` when the key
+  is public.
 - Choose the delete behaviour on every foreign key (`cascadeOnDelete`, `nullOnDelete`, `restrictOnDelete`).
   Seeded lookup rows that enums point at want `SET NULL` or `CASCADE`, so deleting a retired row cleans up.
 - Money as integer minor units (or `decimal`), never `float`.
-- Generated with `php artisan make:migration`; this is one of the stock generators that is correct here.
+- A status column holds the enum's backing value: `unsignedTinyInteger` for an `int` enum, a `string` sized
+  to the longest value for a `string` enum ([enums-and-states.md](enums-and-states.md#enum-shape)).
+- A translated name or description gets no column ([models.md](models.md#translated-names)).
+- Generate with `php artisan make:migration`; this is one stock generator that is correct in this layout.
 
 ## No speculative indexes
 
@@ -66,7 +71,7 @@ $table->string('phone');
 ```
 
 Why: every index slows each write and takes space; an index nobody queries is pure cost. When a query does
-need one, add it in its own migration and say which query in the PR, not in a comment.
+need one, add it in its own migration and name the query in the PR description, not in a comment.
 
 ## Foreign keys are indexed
 
@@ -93,8 +98,9 @@ $table->unique('number');
 $table->dropUnique(['number']);
 ```
 
-Why: hand-picked names drift between environments and break `up()` / `down()` symmetry. Drop by column
-list so Laravel derives the same name it created.
+Applies to `index()`, `unique()`, `foreign()`, `constrained()` and every `drop*()`. Why: hand-picked names
+drift between environments and break `up()` / `down()` symmetry. Drop by column list so Laravel derives
+the same name it created.
 
 ## `down()`
 
@@ -116,10 +122,37 @@ $table->string('notes', 2000)->nullable()->default(null)->change();
 ## Data migrations
 
 - Keep schema and data changes in separate migrations when the data step can fail on real rows.
-- Use the query builder (`DB::table()`), not Eloquent models, inside migrations; a model's casts, scopes or
-  observers may change later and break an old migration.
-- Process large tables in chunks (`chunkById`).
-- Removing an enum case whose value is a seeded row id: the same PR deletes the row in a migration.
+- Use the query builder (`DB::table()`), not Eloquent models, inside migrations. Why: a model's casts,
+  scopes or observers change later and break an old migration that still has to run on a fresh database.
+- Write morph types as the stored string (the morph-map alias or the class name as text), not
+  `Model::class` resolved through a model that may be renamed.
+- Process large tables in chunks (`chunkById`), and make the step safe to re-run (`upsert`, `insertOrIgnore`,
+  or a `whereNull` guard).
+
+### Moving a column into translations
+
+1. One migration copies each row's value into a `translations` row for the language it was written in
+   (`DB::table('translations')->upsert(...)` in chunks, keyed on type + id + language), then drops the column.
+   `down()` adds the column back, copies that language's name into it and deletes the translation rows.
+2. In the same change: the entity uses the translations trait and the column leaves `$fillable`; request,
+   DTO and Actions take an array keyed by language; the filter scope switches to the translation scopes
+   ([models.md](models.md#translated-names)).
+3. Find every reader that used the column in a fixed language (exports, messages, payloads to other
+   systems) and give each an explicit language.
+
+## Seeded reference rows
+
+Rows the code depends on by value (lookup rows an enum points at, settings keys, permissions) are seeded in
+a migration, not a seeder. Why: seeders run only where someone remembers to run them; migrations run
+everywhere, in order.
+
+- Insert with `upsert` on the natural key, so a re-run or a row that already exists is harmless.
+- Seed every language of a translated title in the same migration.
+- A seeded value cast to an enum must match a case that exists, or the model throws on hydration the first
+  time the row is read.
+- Removing an enum case whose value is a seeded row id: the same change deletes the row, relying on
+  `SET NULL` / `CASCADE` foreign keys ([enums-and-states.md](enums-and-states.md#retiring-a-case)).
+- If the values are cached (a settings map), clear that cache key at the end of `up()` and `down()`.
 
 ## Append-only tables
 
@@ -132,7 +165,7 @@ database user with only `INSERT` and `SELECT` on that table.
 
 - Run `php artisan migrate`. Never `migrate:fresh`, `migrate:refresh` or `db:wipe` against a database that
   holds data you care about, and never as a way to "prepare" a test run.
-- Tests run on their own database, forced in `phpunit.xml`; see [testing.md](testing.md).
+- Tests run on their own database, forced in `phpunit.xml` ([testing.md](testing.md)).
 
 ## Verify
 
@@ -148,4 +181,7 @@ grep -rnE "->(index|unique|foreign|primary)\([^)]*,\s*'" database/migrations/
 
 # Migrations without a down()
 grep -rL "function down" database/migrations/*.php
+
+# Eloquent models used inside migrations (review each)
+grep -rnE "Models\\\\Entities\\\\[A-Za-z]+::(query|where|create|all)" database/migrations/
 ```
