@@ -1,11 +1,11 @@
 ---
-name: whatsapp-business-platform
-description: Use when a question or a task touches Meta's WhatsApp Business Platform (Cloud API, Business Management API, Graph API for WhatsApp) in any project — what the API can read or do, what needs webhooks, sending messages and templates, template rules and limits, analytics and costs, phone number quality and messaging limits, Flows, calling, groups, marketing messages, pricing changes, webhook fields and setup, or what a shared-inbox or CRM product built on the API needs. Answers "can we do X with the WhatsApp API?", "does this need a webhook?", "شو بنقدر نعمل بالواتساب API", "الويب هوك", "القوالب", "حد الرسائل", "التكلفة".
+name: whatsapp-business-manager
+description: Use when a question or a task touches Meta's WhatsApp Business Platform (Cloud API, Business Management API, Graph API for WhatsApp) in any project — what the API can read or do, what needs webhooks, sending messages and templates, template rules and limits, analytics and costs, phone number quality and messaging limits, Flows, calling, groups, marketing messages, pricing changes, webhook fields and setup, or what a shared-inbox or CRM product built on the API needs. Answers "can we do X with the WhatsApp API?", "does this need a webhook?", "شو بنقدر نعمل بالواتساب API", "الويب هوك", "القوالب", "حد الرسائل", "التكلفة". Also triggers on "WhatsApp Business Manager", "WhatsApp Manager", «واتساب بزنس مانجر».
 metadata:
   tags: whatsapp, api
 ---
 
-# WhatsApp Business Platform
+# WhatsApp Business Manager
 
 **Read when:** planning, building or answering anything on the WhatsApp Business APIs.
 **Owns:** the capability catalog, the webhook-vs-polling split, and the limits and dates that change

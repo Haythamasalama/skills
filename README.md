@@ -24,7 +24,7 @@ npx skills add haythamasalama/skills --skill laravel-ddd      # one skill
 | [haythamasalama-brand](skills/haythamasalama-brand/SKILL.md) | design, brand | The author's personal brand: signature, colours, type and voice |
 | [coolify-deploy](skills/coolify-deploy/SKILL.md) | deploy, docker | Dockerfiles, nginx and Coolify settings for SPA, prerendered and server apps |
 | [commit-messages](skills/commit-messages/SKILL.md) | git | Conventional Commits, branch names, pull requests and merging |
-| [whatsapp-business-platform](skills/whatsapp-business-platform/SKILL.md) | whatsapp, api | What Meta's WhatsApp Cloud API can do: webhooks, templates, limits and pricing |
+| [whatsapp-business-manager](skills/whatsapp-business-manager/SKILL.md) | whatsapp, api | What Meta's WhatsApp Cloud API can do: webhooks, templates, limits and pricing |
 
 ## Recommended skills from others
 
