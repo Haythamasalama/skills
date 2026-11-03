@@ -44,6 +44,8 @@ export interface Recommended {
   owner: string;
   repo: string;
   url: string;
+  /** What `npx skills add` takes: owner/repo, or the site's URL for a site-hosted source. */
+  from: string;
   command: string;
 }
 
@@ -142,7 +144,8 @@ export const CATEGORIES = [
   { id: 'frontend', label: 'Frontend', tags: ['vue', 'nuxt', 'inertia', 'ui'] },
   { id: 'design', label: 'Design', tags: ['design', 'apple', 'brand'] },
   { id: 'ai', label: 'AI & agents', tags: ['ai'] },
-  { id: 'devops', label: 'DevOps', tags: ['deploy', 'docker', 'git', 'security'] },
+  { id: 'devops', label: 'DevOps', tags: ['deploy', 'docker', 'git'] },
+  { id: 'security', label: 'Security', tags: ['security'] },
   { id: 'integrations', label: 'Integrations', tags: ['whatsapp', 'api'] },
 ];
 
@@ -170,6 +173,7 @@ export const recommended: Recommended[] = (() => {
   return entries.map(([name, entry]) => {
     const wellKnown = entry.sourceType === 'well-known';
     const [owner, repo = ''] = entry.source.split('/');
+    const from = wellKnown ? entry.sourceUrl : entry.source;
 
     return {
       name,
@@ -180,7 +184,8 @@ export const recommended: Recommended[] = (() => {
       owner,
       repo,
       url: wellKnown ? entry.sourceUrl : `https://github.com/${entry.source}`,
-      command: wellKnown ? `npx skills add ${entry.sourceUrl}` : `npx skills add ${entry.source} --skill ${name}`,
+      from,
+      command: `npx skills add ${from} --skill ${name}`,
     };
   });
 })();

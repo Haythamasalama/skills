@@ -6,6 +6,9 @@ import { defineConfig } from 'vite';
 
 const repo = resolve(import.meta.dirname, '..');
 
+// Production gets the same proxy from the rewrite in vercel.json.
+const proxy = { '/api': { target: 'https://skills.sh', changeOrigin: true } };
+
 export default defineConfig(({ command }) => ({
   plugins: [vue(), tailwindcss()],
   define: {
@@ -15,5 +18,7 @@ export default defineConfig(({ command }) => ({
   server: {
     port: 4321,
     fs: { allow: [repo] },
+    proxy,
   },
+  preview: { proxy },
 }));

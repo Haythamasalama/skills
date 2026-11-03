@@ -18,6 +18,7 @@ export const summaries: Record<string, string> = {
   'find-animation-opportunities': "Find places in a UI that should animate, and reject those that shouldn't.",
   'find-skills': 'Discover and install agent skills for a task.',
   'frontend-design': 'Distinctive, intentional visual design for new or reshaped UI.',
+  'grill-me': 'A /grill-me command that starts the grilling interview.',
   grilling: 'Stress-test a plan or idea with relentless questions.',
   impeccable: 'Design, critique, polish and audit any front-end interface.',
   'improve-animations': 'Audit the motion in a codebase and plan the fixes.',
