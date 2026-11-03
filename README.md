@@ -1,38 +1,38 @@
 # مهاراتي
 
-مهارات عامة لـ Claude Code بستعملها بكل مشاريعي. كل مهارة مكتوبة بطريقة عامة: ما فيها أسماء شركات أو عملاء، ولا بيانات خاصة.
+مهارات لـ Claude Code مرتبة بحزم حسب الموضوع. كل مهارة مكتوبة بطريقة عامة (بدون أسماء شركات أو عملاء أو بيانات خاصة)، وكل وحدة بتشتغل لحالها: بتقدر تنزّل مهارة وحدة بدون ما تحتاج غيرها.
 
-## التثبيت على أي جهاز
+## الحزم
+
+| الحزمة | شو فيها |
+|---|---|
+| [laravel](laravel/README.md) | كود Laravel بطريقة DDD، وجودة الكود والأمان |
+| [vue-inertia](vue-inertia/README.md) | واجهات Vue مع Inertia، وفحص الواجهة |
+| [nuxt-ui](nuxt-ui/README.md) | مشاريع Nuxt UI |
+| [brand](brand/README.md) | هويتي: الشعار والألوان والخطوط والأسلوب |
+| [writing](writing/README.md) | النص العربي، المقالات التقنية، منشورات لينكدإن |
+| [deploy](deploy/README.md) | Docker والنشر على Coolify |
+| [git](git/README.md) | رسائل الـ commits |
+| [whatsapp](whatsapp/README.md) | منصة واتساب للأعمال |
+| [tooling](tooling/README.md) | أدوات الريبو نفسه (بتنزل على الجهاز كله) |
+
+## تنزيل مهارات بمشروع
 
 ```bash
-gh repo clone Haythamasalama/skills ~/Desktop/projects/skills
-sh ~/Desktop/projects/skills/install.sh
+sh scripts/install.sh --list
+sh scripts/install.sh laravel vue-inertia --to ~/path/to/project
+sh scripts/install.sh laravel-ddd --to ~/path/to/project
 ```
 
-السكربت بيربط كل مهارة بمجلد `~/.claude/skills`، وكل وكيل بمجلد `~/.claude/agents`، فبتشتغل بكل المشاريع مباشرة. تشغيله أكثر من مرة آمن.
+بتنتسخ لمجلد `.claude/` جوا المشروع. كل نسخة فيها ملف `.skills-repo`، فإذا شغّلت الأمر مرة ثانية بيحدّث اللي نزل من هون، وما بيلمس مهارات ثانية بنفس الاسم إلا مع `--force`.
 
 المهارات اللي نزّلتها من ناس ثانيين مش منسوخة هون. قائمتها مع طريقة تنزيلها بملف [third-party.md](third-party.md).
 
-## المهارات
+## إضافة أو تعديل مهارة
 
-| المهارة | شو بتعمل |
-|---|---|
-| [whatsapp-business-platform](skills/whatsapp-business-platform/SKILL.md) | كل إمكانيات واتساب للأعمال من Meta: شو بنقدر نعمل بدون إشعارات فورية، وشو بدها إشعارات، والحدود والأسعار والتواريخ المهمة |
-| [linkedin-posts](skills/linkedin-posts/SKILL.md) | كتابة ونشر منشورات لينكدإن وثريدات تويتر بأسلوبي، مع الصورة وخطوات النشر |
-| [nuxt-ui](skills/nuxt-ui/SKILL.md) | بناء لوحات تحكم ومواقع بـ Nuxt UI: الألوان، المكونات، العربي والإنجليزي، والمشاكل المعروفة وحلولها |
-| [haytham-brand](skills/haytham-brand/SKILL.md) | هويتي: الاسم، الشعار، الألوان، الخطوط، وأسلوب الكتابة |
-| [laravel-ddd](skills/laravel-ddd/SKILL.md) | طريقة تقسيم كود Laravel لطبقات (Actions و DTOs و Contracts و Services) مع قوالب جاهزة |
-| [laravel-code-quality](skills/laravel-code-quality/SKILL.md) | قواعد جودة الكود والأخطاء الشائعة والأمان والمراجعة |
-| [laravel-multitenancy](skills/laravel-multitenancy/SKILL.md) | تطبيقات SaaS لأكثر من عميل على Laravel |
-| [admin-ui](skills/admin-ui/SKILL.md) | لوحات الإدارة بـ Inertia و Vue و shadcn-vue |
-| [ui-review](skills/ui-review/SKILL.md) | فحص الواجهة بالمتصفح: كل صفحة بالوضع الفاتح والغامق وباللغتين |
-| [arabic-copy](skills/arabic-copy/SKILL.md) | كتابة ومراجعة النصوص العربية للمواقع والمنتجات |
-| [commit-messages](skills/commit-messages/SKILL.md) | كتابة رسائل حفظ الكود وتقسيم الشغل |
-| [coolify-deploy](skills/coolify-deploy/SKILL.md) | تجهيز التطبيق بـ Docker ونشره على Coolify |
-| [tech-articles](skills/tech-articles/SKILL.md) | كتابة مقالات تقنية وقصص المشاريع، والرسومات، وتحويلها لمنشورات |
+القواعد بملف [CONVENTIONS.md](CONVENTIONS.md). قبل أي commit لازم الاثنين ينجحوا:
 
-## إضافة مهارة جديدة
-
-اطلب من Claude بأي مشروع: "حوّل هاد لمهارة". الوكيل [skill-publisher](agents/skill-publisher.md) بيكتبها بطريقة عامة حسب [CONVENTIONS.md](CONVENTIONS.md)، وبيفحص الخصوصية، وبيربطها بجهازك، وبيرفعها هون.
-
-قبل أي رفع: `sh scripts/privacy-scan.sh` لازم يطبع `clean`.
+```bash
+sh scripts/check.sh
+sh scripts/privacy-scan.sh
+```

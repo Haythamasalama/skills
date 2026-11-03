@@ -1,5 +1,5 @@
 ---
-name: admin-ui
+name: vue-inertia
 description: Use when building or editing an admin panel or back-office screen on Inertia + Vue 3 + TypeScript + shadcn-vue + Tailwind 4 (usually with a Laravel back end) — pages, layouts, forms, tables, filters, row actions, dialogs, toasts, status badges, design tokens, dark mode, icons, motion, and Arabic/RTL support. Trigger for work under resources/js/pages, components or layouts, for anything a controller renders with Inertia::render, when an arrow points the wrong way in Arabic, when a control needs an icon or an animation, or when deciding whether a new UI library is warranted. Arabic triggers: «لوحة التحكم», «صفحة إدارة», «اتجاه RTL», «نموذج إدخال».
 ---
 

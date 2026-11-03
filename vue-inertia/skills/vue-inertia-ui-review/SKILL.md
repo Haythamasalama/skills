@@ -1,5 +1,5 @@
 ---
-name: ui-review
+name: vue-inertia-ui-review
 description: Use when a web app's UI must be verified visually in a real browser, after any change to a component, stylesheet, route, theme, translation or content, and whenever someone asks whether something looks right, works on mobile, works in dark mode, reads right in Arabic/RTL, or prints or exports to PDF correctly. Covers screenshotting every page in light and dark and in both languages, exercising interactive parts, checking routing and deep links, print and PDF output, what to look for, and how to report. Triggers include "does this look right", "check it in the browser", "screenshot the pages", «راجع الواجهة», «شكلها صح؟», «الوضع الليلي», «اتجاه RTL».
 ---
 
