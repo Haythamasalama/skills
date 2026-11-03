@@ -27,7 +27,7 @@ sh ~/Desktop/projects/skills/install.sh
 | [admin-ui](skills/admin-ui/SKILL.md) | لوحات الإدارة بـ Inertia و Vue و shadcn-vue |
 | [ui-review](skills/ui-review/SKILL.md) | فحص الواجهة بالمتصفح: كل صفحة بالوضع الفاتح والغامق وباللغتين |
 | [arabic-copy](skills/arabic-copy/SKILL.md) | كتابة ومراجعة النصوص العربية للمواقع والمنتجات |
-| [commit-messages](skills/commit-messages/SKILL.md) | كتابة رسائل حفظ الكود وتقسيم الشغل |
+| [commit-messages](skills/commit-messages/SKILL.md) | كتابة رسائل الكوميت حسب Conventional Commits، وتقسيم الشغل، وفتح الـ PR ووصفه والرد على المراجعات والدمج |
 | [coolify-deploy](skills/coolify-deploy/SKILL.md) | تجهيز التطبيق بـ Docker ونشره على Coolify |
 | [tech-articles](skills/tech-articles/SKILL.md) | كتابة مقالات تقنية وقصص المشاريع، والرسومات، وتحويلها لمنشورات |
 
