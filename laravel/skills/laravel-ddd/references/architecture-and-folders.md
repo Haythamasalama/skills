@@ -3,8 +3,7 @@
 **Read when:** adding a domain, placing a new file, or making one domain talk to another.
 **Owns:** the PSR-4 layout, the domain and presentation trees, boundaries, cross-domain communication,
 console commands, jobs and observers, and how DDD files are created.
-**See also:** [core-kernel.md](core-kernel.md) · [contracts-and-services.md](contracts-and-services.md) ·
-[anti-patterns.md](../../laravel-code-quality/references/anti-patterns.md)
+**See also:** [core-kernel.md](core-kernel.md) · [contracts-and-services.md](contracts-and-services.md)
 
 ## TL;DR
 
@@ -186,7 +185,7 @@ When every row hangs off a tenant:
 - Middleware resolves the tenant once per request through the tenant's Contract and leaves it on the
   request; a base-controller trait reads it back (`$this->currentTenant()`).
 - A stranger gets **404**, a member without the permission gets **403**
-  ([why](../../laravel-code-quality/references/security.md#multi-tenant-apps)).
+  (a 403 on another tenant's record confirms that it exists).
 - Every `Filter{Entity}Data` over tenant data declares its scoping property, and the controller pins it
   after the spread. See [dtos.md](dtos.md) and [controllers-requests-api.md](controllers-requests-api.md).
 - Laravel passes route parameters to a controller **by position, not by name**. If middleware consumed

@@ -3,8 +3,7 @@
 **Read when:** writing a controller, a Form Request, an API Resource or route, or choosing a status code.
 **Owns:** thin controllers, Contract injection, validation at the boundary, building DTOs from requests,
 page vs JSON responses, the `status`/`data` envelope, status codes, Resources, file responses.
-**See also:** [dtos.md](dtos.md) · [presentation-inertia-vue.md](presentation-inertia-vue.md) ·
-security rules: the code-quality skill's [security.md](../../laravel-code-quality/references/security.md)
+**See also:** [dtos.md](dtos.md)
 
 ## TL;DR
 
@@ -100,8 +99,7 @@ and for the strict vs lenient filter variants.
 
 Every route sits inside the authenticated group; a route declared after the group closes runs with no
 login. A route that returns a file (PDF, export, download) checks the permission of the page that links it,
-at the top of the method, before any lookup. Details and anti-patterns: the code-quality skill's
-[security.md](../../laravel-code-quality/references/security.md).
+at the top of the method, before any lookup.
 
 ## Page responses (server-rendered or Inertia)
 
@@ -117,7 +115,7 @@ Returning a page from a write breaks POST/redirect/GET: refreshing re-submits th
 - Option 1: always the resource index.
 - Option 2: `to_route('…show', …)` after a create, the index after a delete, `back()` after an in-place edit.
 
-Pick one per project. Inertia-specific page rules: [presentation-inertia-vue.md](presentation-inertia-vue.md).
+Pick one per project.
 
 ## Route-model binding (variant)
 

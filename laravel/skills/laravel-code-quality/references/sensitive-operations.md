@@ -4,8 +4,7 @@
 a fresh password, writes an audit trail, exposes personal data, or touches a high-risk external resource.
 **Owns:** once-only execution, idempotent decisions, separation of duties, approvals and overrides,
 step-up confirmation, append-only audit logs, masking and bounded output, credentials and least privilege.
-**See also:** [security.md](security.md) · lifecycles and transitions:
-[laravel-ddd](../../laravel-ddd/references/models-scopes-abilities-enums.md)
+**See also:** [security.md](security.md)
 
 ## TL;DR
 
@@ -133,8 +132,7 @@ gate exists so a second person looks.
 ## High-risk resources and credentials
 
 - One domain touches the resource, behind one transport-agnostic Contract (scalars and DTOs in and out).
-  Everything else asks that domain. See the layout skill's
-  [architecture-and-folders.md](../../laravel-ddd/references/architecture-and-folders.md).
+  Everything else asks that domain.
 - Credentials are encrypted at rest, decrypted only inside that domain for one operation, never returned,
   logged, serialized or echoed in an error, and never in static config when they are per-customer.
 - Least privilege at the resource itself: a read-only credential for reads, a scoped one for writes, no

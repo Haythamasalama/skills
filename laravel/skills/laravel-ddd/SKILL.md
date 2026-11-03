@@ -1,6 +1,6 @@
 ---
 name: laravel-ddd
-description: Use when building, reviewing or refactoring Laravel code organised as a Domain-Driven Design layout in src/Domain and src/Presentation — adding a domain or deciding where a file belongs; writing Actions (static handle()), DTOs (*Data classes, Filter/Create/Update data), Contracts and Services, ServiceProvider bindings, Models with Entities/Scopes/Abilities/Traits, backed Enums, filter scopes and Eloquent queries; writing thin controllers, Form Requests, API Resources and the status/data JSON response envelope; building Inertia + Vue pages on top of this layout (props, forms, URL state, permissions, list and detail screens); writing migrations (index and foreign-key policy) and Pest tests for this layout; or reviewing a diff for layer and boundary violations. Also triggers on "DDD", "domain layer", "bounded context", "where does this file go", "Action vs Service", "بنية الكود", "هيكلة المشروع", "طبقات", "طبقة الدومين", "الأكشن", "الكونتراكت", "DTO".
+description: Use when building, reviewing or refactoring Laravel code organised as a Domain-Driven Design layout in src/Domain and src/Presentation — adding a domain or deciding where a file belongs; writing Actions (static handle()), DTOs (*Data classes, Filter/Create/Update data), Contracts and Services, ServiceProvider bindings, Models with Entities/Scopes/Abilities/Traits, backed Enums, filter scopes and Eloquent queries; writing thin controllers, Form Requests, API Resources and the status/data JSON response envelope; returning Inertia or server-rendered pages from controllers; writing migrations (index and foreign-key policy) and Pest tests for this layout; or reviewing a diff for layer and boundary violations. Also triggers on "DDD", "domain layer", "bounded context", "where does this file go", "Action vs Service", "بنية الكود", "هيكلة المشروع", "طبقات", "طبقة الدومين", "الأكشن", "الكونتراكت", "DTO".
 ---
 
 # Laravel DDD layout
@@ -9,10 +9,8 @@ description: Use when building, reviewing or refactoring Laravel code organised 
 `src/Presentation/{Panel}/`, or setting up that layout in a new app.
 **Owns:** the folder map, the layer rules (Controller → Contract → Service → Action → Model), the shared
 kernel they rely on, and the review list of known mistakes.
-**See also:** the [laravel-code-quality](../laravel-code-quality/SKILL.md) skill for style, comments,
-security, sensitive operations, the numbered anti-pattern catalogue and review format. Generic Laravel
-guidance (query performance, caching, queues) and Pest syntax come from their own skills; this skill wins
-where they disagree on the topics below.
+This skill covers where code goes and how layers talk. Where generic Laravel guidance disagrees on the
+topics below, this skill wins.
 
 Written for PHP 8.4 and Laravel 12 (checked 2026-10-27).
 
@@ -156,12 +154,8 @@ project and write it down. Each reference file explains the trade-off.
 | An Entity, casts, attributes, scopes, Abilities, Enums | [models-scopes-abilities-enums.md](references/models-scopes-abilities-enums.md) |
 | A filter scope, eager loading, counting, chunking | [queries.md](references/queries.md) |
 | A controller, Form Request, Resource, the JSON envelope, status codes | [controllers-requests-api.md](references/controllers-requests-api.md) |
-| Inertia + Vue pages: props, forms, state, types, naming, permissions | [presentation-inertia-vue.md](references/presentation-inertia-vue.md) |
-| Lists, detail pages, deletes, toasts, dialogs, theming, UI copy | [presentation-ui-screens.md](references/presentation-ui-screens.md) |
 | A migration | [migrations.md](references/migrations.md) |
 | A test for this layout | [testing.md](references/testing.md) |
-| Formatting, comments, conditionals, security, review | [laravel-code-quality](../laravel-code-quality/SKILL.md) |
-| Checking a known mistake by number | [anti-patterns.md](../laravel-code-quality/references/anti-patterns.md) |
 
 ## Review checklist
 

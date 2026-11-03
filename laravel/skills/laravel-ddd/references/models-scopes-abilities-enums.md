@@ -219,8 +219,9 @@ Model a lifecycle explicitly: a status enum, a transition enum or table of allow
 conditions per transition. Change status only through the Action that performs a transition, never with a
 bare `->update(['status' => ...])` from a controller or another domain. Why: the guard, the side effects
 and the audit entry then run every time. A transition that must happen at most once claims the row with a
-conditional update; see the code-quality skill's
-[sensitive-operations.md](../../laravel-code-quality/references/sensitive-operations.md).
+conditional update and stops when no row changed:
+`Invoice::whereKey($id)->where('status', Status::Pending)->update(['status' => Status::Issuing])` returns 0
+for the second caller. Why: a check-then-update lets two concurrent requests both pass the check.
 
 ## Enums
 

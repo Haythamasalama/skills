@@ -1,10 +1,8 @@
 # Anti-patterns
 
 **Read when:** reviewing a diff, or checking whether a shape is a known mistake.
-**Owns:** the numbered catalogue with severity, the harm, and the fix. Code examples live in the topic
-files each group links to.
-**See also:** [review-output.md](review-output.md) · [security.md](security.md) ·
-layer rules: [laravel-ddd](../../laravel-ddd/SKILL.md)
+**Owns:** the numbered catalogue with severity, the harm, and the fix.
+**See also:** [review-output.md](review-output.md) · [security.md](security.md)
 
 Numbers are stable ids for review comments ("see #40"). Never renumber or reuse one; a new entry takes the
 next free number, wherever it is listed.
@@ -19,10 +17,6 @@ Scope a review to what the change touched. These checks also find old code; that
 a reason to fail an unrelated change.
 
 ## Domain boundaries and layers
-
-Details: [architecture-and-folders.md](../../laravel-ddd/references/architecture-and-folders.md) ·
-[actions.md](../../laravel-ddd/references/actions.md) ·
-[contracts-and-services.md](../../laravel-ddd/references/contracts-and-services.md)
 
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
@@ -51,8 +45,6 @@ Details: [architecture-and-folders.md](../../laravel-ddd/references/architecture
 
 ## Data and DTOs
 
-Details: [dtos.md](../../laravel-ddd/references/dtos.md) · [core-kernel.md](../../laravel-ddd/references/core-kernel.md)
-
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
 | 23 | 🔴 | Transport class not ending in `Data` (`InvoiceDTO`, `InvoiceLine`) | nobody can tell it is a DTO | rename class, file and imports |
@@ -71,9 +63,6 @@ Details: [dtos.md](../../laravel-ddd/references/dtos.md) · [core-kernel.md](../
 
 ## Queries
 
-Details: [queries.md](../../laravel-ddd/references/queries.md) ·
-[models-scopes-abilities-enums.md](../../laravel-ddd/references/models-scopes-abilities-enums.md)
-
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
 | 36 | 🟢 | `is_array() ? whereIn : where` by hand | the same branch rewritten, sometimes wrong | `whereByType()` |
@@ -87,8 +76,6 @@ Details: [queries.md](../../laravel-ddd/references/queries.md) ·
 
 ## Enums
 
-Details: [models-scopes-abilities-enums.md](../../laravel-ddd/references/models-scopes-abilities-enums.md)
-
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
 | 44 | 🔴 | `Enum::from()` on a route param, query string or request value | a retired or invalid value is a 500 | `fromOrAbort()` / `tryFrom() ?? abort(404)` |
@@ -97,8 +84,6 @@ Details: [models-scopes-abilities-enums.md](../../laravel-ddd/references/models-
 | 47 | 🟡 | Removing a case whose value is a seeded row id, without deleting the row | orphan rows; `from()` throws on render | same change ships a delete migration |
 
 ## Style
-
-Details: [code-style-and-comments.md](code-style-and-comments.md) · [conditionals.md](conditionals.md)
 
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
@@ -109,8 +94,6 @@ Details: [code-style-and-comments.md](code-style-and-comments.md) · [conditiona
 | 52 | 🟢 | Hard-coded morph class string, or `(new Model)->getMorphClass()` | typos and needless instantiation | `Model::class`, or the morph map alias |
 
 ## Security and routes
-
-Details: [security.md](security.md) · [sensitive-operations.md](sensitive-operations.md)
 
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
@@ -132,8 +115,6 @@ Details: [security.md](security.md) · [sensitive-operations.md](sensitive-opera
 
 ## API
 
-Details: [controllers-requests-api.md](../../laravel-ddd/references/controllers-requests-api.md)
-
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|
 | 68 | 🔴 | `response()->json()`, an array or a bare Resource from an API controller | breaks the envelope contract clients rely on | `res()->data(...)`, typed `: ResponseBuilder` |
@@ -143,9 +124,6 @@ Details: [controllers-requests-api.md](../../laravel-ddd/references/controllers-
 | 72 | 🟡 | A library's `stream()` / `download()` printing a file itself | bypasses Laravel; typed methods throw after sending | render to a string, return a `Response` with headers |
 
 ## Presentation
-
-Details: [presentation-inertia-vue.md](../../laravel-ddd/references/presentation-inertia-vue.md) ·
-[presentation-ui-screens.md](../../laravel-ddd/references/presentation-ui-screens.md)
 
 | # | Sev | Anti-pattern | Why it hurts | Fix |
 |---|---|---|---|---|

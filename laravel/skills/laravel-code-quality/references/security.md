@@ -4,8 +4,7 @@
 a public link, or anything that handles secrets.
 **Owns:** fail-closed authorization, route protection, validation and mass assignment, raw SQL bindings,
 XSS, secrets and config, rate-limit keys, public document links.
-**See also:** [sensitive-operations.md](sensitive-operations.md) · [anti-patterns.md](anti-patterns.md) ·
-controllers and Form Requests: [laravel-ddd](../../laravel-ddd/references/controllers-requests-api.md)
+**See also:** [sensitive-operations.md](sensitive-operations.md) · [anti-patterns.md](anti-patterns.md)
 
 ## TL;DR
 

@@ -9,8 +9,6 @@ description: Use when writing, reviewing or cleaning up Laravel PHP (and its Ine
 permissions, raw SQL, secrets, audit trails or once-only operations.
 **Owns:** style and comments, conditionals, security rules, sensitive-operation patterns, the anti-pattern
 catalogue (stable numbers), the review report format, branch and PR conventions.
-**See also:** the [laravel-ddd](../laravel-ddd/SKILL.md) skill for where code goes and how layers talk;
-the [commit-messages](../commit-messages/SKILL.md) skill for commit message format.
 
 Written for PHP 8.4 and Laravel 12 (checked 2026-10-28). Match the codebase first: these are defaults for
 new code, not a reason to rewrite working code in an unrelated change.
@@ -51,7 +49,6 @@ new code, not a reason to rewrite working code in an unrelated change.
 | Checking a diff against known mistakes (numbered, with severity) | [anti-patterns.md](references/anti-patterns.md) |
 | Writing up a review | [review-output.md](references/review-output.md) |
 | Branch names, commit scopes, PR body, what never to commit | [git-and-prs.md](references/git-and-prs.md) |
-| Layers, Actions, DTOs, Contracts, controllers, migrations, tests | [laravel-ddd](../laravel-ddd/SKILL.md) |
 
 ## Severity, in one line each
 

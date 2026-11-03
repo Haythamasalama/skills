@@ -143,8 +143,8 @@ the owning domain is still a boundary breach; go through that domain's Contract.
 
 Only fixed SQL text is ever concatenated. Every value travels as a binding: `selectRaw('... = ?', [$v])`,
 `DB::update($sql, $bindings)`. `DB::raw()` cannot carry bindings, so a raw piece that needs a value means
-running the whole statement with bindings. The full rule, with a bound bulk `CASE` update, is anti-pattern
-#40 in the code-quality skill's [anti-patterns.md](../../laravel-code-quality/references/anti-patterns.md).
+running the whole statement with bindings. A bulk `CASE` update follows the same rule: the `WHEN ? THEN ?` pieces are
+fixed text, and every id and value goes into the bindings array.
 
 ## Verify
 

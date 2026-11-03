@@ -3,8 +3,7 @@
 **Read when:** writing or reviewing any PHP, and always before a commit (the comment check).
 **Owns:** formatting, one-line signatures, the comment and PHPDoc policy, naming, types, `readonly`,
 imports, morph type values, private methods over single-use classes.
-**See also:** [conditionals.md](conditionals.md) · [anti-patterns.md](anti-patterns.md) ·
-layer rules: the [laravel-ddd](../../laravel-ddd/SKILL.md) skill
+**See also:** [conditionals.md](conditionals.md) · [anti-patterns.md](anti-patterns.md)
 
 ## TL;DR
 
@@ -145,7 +144,7 @@ An `array` parameter without a shape is a review finding; usually it should be a
 
 - Names say what a thing is or does: `isRegisteredForDiscounts`, not `discount()`.
 - Booleans read as questions: `isLocked`, `hasLines`, `wasUnlinked`.
-- Suffixes follow the layout skill: Actions have none, DTOs end in `Data`, interfaces in `Contract`,
+- Suffixes in a DDD layout: Actions have none, DTOs end in `Data`, interfaces in `Contract`,
   implementations in `Service`.
 
 ## Types

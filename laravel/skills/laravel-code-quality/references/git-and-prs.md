@@ -1,15 +1,13 @@
 # Branches, commit scopes and pull requests
 
 **Read when:** naming a branch, choosing a commit scope in a DDD Laravel repo, opening a PR, or staging files.
-**Owns:** branch names, the layer-based scope list, PR titles and body, squash merging, what never to commit.
-**See also:** commit message format, types, bodies and splitting: the [commit-messages](../../commit-messages/SKILL.md) skill;
-PR titles, bodies, review replies and merging: its [pull-requests](../../commit-messages/references/pull-requests.md) reference
+**Owns:** branch names, the layer-based scope list, the commit line, the PR body, squash merging, what
+never to commit.
 
 ## TL;DR
 
 - Branch: `<type>/<scope>-<short-description>`, lowercase kebab-case.
-- Commit format, types, body, splitting and when to commit: the [commit-messages](../../commit-messages/SKILL.md) skill. A PR
-  title uses the same `<type>(<scope>): <description>` line.
+- Commit and PR title: `<type>(<scope>): <description>` (Conventional Commits), imperative, no period.
 - Scopes name the layer that changed (`domain-actions`, `api-controllers`, `migrations`).
 - Squash-merge; the PR title becomes the commit subject, so get it right before merging.
 - Stage named files, never `git add -A` / `git add .`. Never commit `.env*`, keys, credentials or dumps.
@@ -30,10 +28,19 @@ fix/domain-actions-invoice-total-rounding
 refactor/domain-services-delegate-to-actions
 ```
 
+## The commit line
+
+Types: `feat` (new behaviour), `fix` (a bug), `refactor` (same behaviour, new shape), `perf`, `test`,
+`docs`, `style` (formatting only), `chore`, `ci`, `build`, `revert`. A breaking change adds `!` after the
+scope and a `BREAKING CHANGE:` footer. The body says why, not what the diff already shows.
+
+One commit is one reason to change: a migration and the Action that needs it go together, an unrelated
+rename goes in its own commit. Why: each commit then reverts cleanly on its own.
+
 ## Scopes by layer
 
-Pick the most specific scope that fits, after reading the history for the scopes the repo already
-uses ([how](../../commit-messages/SKILL.md#before-you-write)).
+Pick the most specific scope that fits. Read `git log --oneline -30` first and reuse the scopes the repo
+already has.
 
 | Layer | Scopes |
 |---|---|
@@ -54,9 +61,21 @@ test(domain-actions): cover IssueInvoice rollback paths
 
 ## PR body
 
-The template, linking issues, review replies and the squash merge message:
-[pull-requests.md](../../commit-messages/references/pull-requests.md). In a Laravel repo, add to "How it
-was checked" the Pint run and the test command you used.
+```
+## Why
+One or two sentences: the problem, or the issue it closes (Closes #12).
+
+## What changed
+- The behaviour that changed, by area. Not a file list.
+
+## How it was checked
+- vendor/bin/pint --dirty
+- php artisan test --filter=Invoice
+- What you clicked through by hand, if anything.
+```
+
+Answer every review comment, either with the commit that fixes it or with the reason it stays. When
+squash-merging, edit the final message so it reads as one clean commit, not a list of "fix review" lines.
 
 ## What never goes in a commit
 
@@ -73,4 +92,4 @@ committed, rotate it; deleting it in a later commit does not remove it from hist
 1. `vendor/bin/pint --dirty`, then the affected tests.
 2. Review the diff, including the comment check in
    [code-style-and-comments.md](code-style-and-comments.md).
-3. Split into commits per [commit-messages](../../commit-messages/SKILL.md#splitting-work).
+3. Split into one commit per reason to change.
