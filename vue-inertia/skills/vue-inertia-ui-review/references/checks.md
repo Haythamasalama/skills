@@ -14,7 +14,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
 page.on('pageerror', (e) => console.log('pageerror:', e.message));
 page.on('console', (m) => m.type() === 'error' && console.log('console:', m.text()));
-await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:8000/', { waitUntil: 'networkidle' });
 await page.screenshot({ path: '/tmp/shots/home-dark.png', fullPage: true });
 ```
 
@@ -73,26 +73,48 @@ restores state, and that the last step's action does what it says.
 
 ## Routing
 
+Laravel owns every URL, so a deep link or a refresh is a normal request: no history fallback is
+involved. What can still go wrong is which page answers and whether navigation stays inside Inertia.
+
 ```js
 for (const path of [
-  '/deep/nested/route',        // deep link: 200 and the right view
-  '/old-url', '/old/thing/1',  // retired: 301 to the new place
-  '/nope',                     // 404 view
+  '/customers/1/edit',          // deep link: 200 and the right component
+  '/customers/999999',          // missing record: the app's 404 page, not a stack trace
+  '/nope',                      // unknown path: 404 page
 ]) {
-  await page.goto(`http://127.0.0.1:4173${path}`);
-  console.log(path, '->', await page.evaluate(() => location.pathname + location.hash));
+  const response = await page.goto(`http://127.0.0.1:8000${path}`);
+  const component = await page.evaluate(() => JSON.parse(document.getElementById('app')?.dataset.page ?? '{}').component);
+  console.log(path, response.status(), component);
 }
 ```
 
-From the shell, for the server side of the same checks:
+`component` is the name passed to `Inertia::render`. With SSR or a newer Inertia the initial page may
+live in a `<script type="application/json">` instead of `data-page`; read it from there.
 
-```bash
-curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" http://127.0.0.1:8080/old-url
-curl -sI http://127.0.0.1:8080/index.html | grep -i cache-control
+A full page load where an Inertia visit was expected (a hand-written `<a href>`) shows up as a new
+`document` request:
+
+```js
+const documents = [];
+page.on('request', r => r.resourceType() === 'document' && documents.push(r.url()));
+await page.getByRole('link', { name: 'Customers' }).click();
+await page.waitForLoadState('networkidle');
+console.log('full loads after the first:', documents.length);   // expect 0
 ```
 
-A preview server and the production web server can disagree: the history fallback and redirects
-often live only in the server config. Check against the container too (see `coolify-deploy`).
+From the shell, the server side of the same checks:
+
+```bash
+php artisan route:list --method=GET --except-vendor     # every page worth shooting
+curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" http://127.0.0.1:8000/customers
+```
+
+## Writes, validation and toasts
+
+- Submit each form empty once: every error renders under its own field (client and server), and the
+  submit does not look dead. An error on a hidden tab lights that tab.
+- Submit it valid: the page redirects and one toast reports the outcome. No toast on a plain GET.
+- Open each confirm dialog: it names the record, the confirm button is destructive, Escape closes it.
 
 ## Language and direction
 
@@ -130,7 +152,7 @@ console.log(await page.evaluate(() => {
 ### Render the PDF
 
 ```js
-await page.goto('http://127.0.0.1:4173/printable/page', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:8000/printable/page', { waitUntil: 'networkidle' });
 await page.pdf({
   path: '/tmp/shots/page.pdf',
   format: 'A4',

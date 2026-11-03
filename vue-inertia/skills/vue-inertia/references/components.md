@@ -31,8 +31,8 @@ a chip `<span>`, a native `<select>`, a div-with-a-width progress bar or a lone 
 | a menu | `DropdownMenu`, items inside a `DropdownMenuGroup` |
 | a searchable list | `Command`, in a `Dialog` or `Popover` when it is a picker |
 | progressive disclosure | `Accordion` (many rows) or `Collapsible` (one) |
-| a toast | `toast()` from vue-sonner, but see the flash rule in SKILL.md |
-| a chart | `ChartContainer` + Unovis (see `charts.md`) |
+| a toast | `toast()` from vue-sonner, but only from the flash listener (SKILL.md) |
+| a chart | `ChartContainer` + Unovis (shadcn-vue's `chart`) |
 
 ## Composition rules the registry expects
 
@@ -73,7 +73,7 @@ inline.
 - **`gap-*` on a flex or grid.** Never `space-x-*` / `space-y-*`.
 - **`size-*` when width and height match:** `size-8`, not `w-8 h-8`.
 - **`truncate`**, not the three-property longhand. (But a record's value is never truncated; see
-  `forms-and-lists.md`.)
+  `forms.md`.)
 - **`class` is for layout:** width, margin, grid placement. Not for restyling a component's
   colours or type; that is what variants and tokens are for.
 - **`cn()` for conditional classes**, not a template-literal ternary.

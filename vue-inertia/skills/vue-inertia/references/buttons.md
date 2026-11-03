@@ -119,12 +119,12 @@ Inertia navigation is `<Link>`, so take the look from `buttonVariants()` rather 
 `<Button>` in a link:
 
 ```vue
-<Link :href="admin.customers.create().url" :class="buttonVariants()">
+<Link :href="customers.create().url" :class="buttonVariants()">
     <PlusIcon />
     {{ t('pages.new_customer') }}
 </Link>
 
-<Link :href="admin.customers.edit(id).url" :class="buttonVariants({ variant: 'ghost', size: 'icon-sm' })" :title="t('common.edit')" :aria-label="t('common.edit')">
+<Link :href="customers.edit(id).url" :class="buttonVariants({ variant: 'ghost', size: 'icon-sm' })" :title="t('common.edit')" :aria-label="t('common.edit')">
     <PencilIcon />
 </Link>
 ```

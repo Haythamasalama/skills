@@ -1,11 +1,9 @@
 # Presentation with Inertia and Vue
 
-**Read when:** the panel renders Inertia + Vue 3 + TypeScript pages instead of Blade or a JSON API.
+**Read when:** the app renders Inertia + Vue 3 + TypeScript pages instead of Blade or a JSON API.
 **Owns:** the data flow (props in, forms out), shared props, state placement, form validation, types,
 naming, permission checks in templates.
-**See also:** [presentation-ui-screens.md](presentation-ui-screens.md) ·
-[controllers-requests-api.md](controllers-requests-api.md) · generic Vue and Inertia mechanics: their
-own skills
+**See also:** [screens.md](screens.md) · [forms.md](forms.md)
 
 ## TL;DR
 

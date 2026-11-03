@@ -2,11 +2,10 @@
 
 **Read when:** building or reviewing a list, a detail page, a form, a delete, a toast or a confirm dialog,
 or choosing colours, components and on-screen wording, in a component-library front end (shadcn-vue
-style, Tailwind tokens). Most rules also hold for Blade panels.
+style, Tailwind tokens). Most rules also hold for Blade pages.
 **Owns:** where each verb goes, list and table shape, status chips, confirmations, toasts, theming,
 wrapping vendored components, UI copy.
-**See also:** [presentation-inertia-vue.md](presentation-inertia-vue.md) ·
-[controllers-requests-api.md](controllers-requests-api.md)
+**See also:** [inertia-pages.md](inertia-pages.md) · [forms.md](forms.md) · [buttons.md](buttons.md)
 
 ## TL;DR
 
@@ -78,7 +77,7 @@ aside    fact cards: what it is · who it belongs to · its outcome
 
 - Edit is its own route when the form has more than three fields or the record has a URL worth sharing.
   A modal fits one field and one decision (rename, confirm, pick from a short list).
-- The submit button says the verb ("Save changes", "Send invoice"), never "Submit".
+- The submit button says the verb alone ("Save", "Send"), never "Submit".
 - Disable submit while processing, and on edit forms while nothing has changed.
 
 ## Delete
@@ -86,7 +85,7 @@ aside    fact cards: what it is · who it belongs to · its outcome
 1. A row's third icon (red), or the last `⋯` item on a show page.
 2. Behind a confirm dialog that names the record, says in one sentence what goes with it, and has a
    destructive confirm button.
-3. Behind the same permission the server enforces (and a fresh password for back-office deletes, if the
+3. Behind the same permission the server enforces (and a fresh password for internal-tool deletes, if the
    app has step-up auth).
 4. **Typed confirmation** (type the name or handle) when the delete takes other records with it. A dialog
    that Enter dismisses is not a guard.
@@ -99,7 +98,7 @@ After a delete: redirect to the index and flash a toast naming what went.
 
 ### Toasts follow the flash
 
-Mount the toaster once in the layout and watch the shared `flash` prop there; `success` → success toast,
+Register one listener on the Inertia router at boot (see SKILL.md); `success` → success toast,
 `error` → error toast. Do not fire an optimistic toast from a component: a toast appears only because the
 server confirmed the outcome. Toasts are transient; never use one to confirm a destructive action or to
 carry something the user must act on.
@@ -117,29 +116,12 @@ dialog is the deliberate-intent gate; the server still re-checks permission.
 
 ## Components
 
-| Folder | Holds | Rule |
-|---|---|---|
-| `components/ui/` | generated library primitives (Button, Dialog, Table) | vendored: only the library's CLI writes here |
-| `components/{feature}/` | the app's compositions (StatusChip, InvoiceTotals) | all customisation lives here |
-
-- Restyle through theme tokens or a wrapper, never by editing a primitive. Why: the next library update or
-  diff then shows only real upstream changes.
-- Variants through `cva` merged with `cn()` (clsx + tailwind-merge). Never string-concatenate classes or
-  branch on booleans in the template for styling.
-- Accessibility, focus and keyboard behaviour come from the primitive layer (Reka UI / Radix); wrap it,
-  never rebuild it.
-- Add a new primitive with the library CLI only when the building block is missing; otherwise compose.
-- One icon set, tree-shaken named imports, sized and coloured with utility classes and tokens; the same
-  icon for the same concept everywhere.
+What to build each piece from, the house wrappers and the vendored folder: [components.md](components.md).
 
 ## Theming
 
-- **Semantic tokens only**: `bg-background`, `text-foreground`, `bg-card`, `text-muted-foreground`,
-  `bg-primary`, `text-destructive`, `border-border`, `ring-ring`. No hex, no arbitrary colour classes.
-  Why: a literal colour cannot follow the theme and breaks one mode.
-- Dark mode is a class on the root that swaps the CSS variables. Fix a dark-mode problem with a token (or a
-  per-theme token value), not a `dark:` patch.
-- Token values live in one stylesheet (`:root` and `.dark`), each with its reasoning beside it.
+Tokens, palette, fonts and dark mode: [theme.md](theme.md). What is specific to screens:
+
 - Status tones are a fixed vocabulary (`ok`, `warn`, `danger`, `idle`, `info`), filled chips, one hue per
   meaning, and the icon plus the word tell statuses apart; colour alone never carries a status.
 - "Finished" (paid, closed) reads as `ok`, not grey: to someone working a queue it means "needs nobody".

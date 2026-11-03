@@ -1,4 +1,4 @@
-# Forms, record pages, lists and toasts
+# Forms, record pages and lists
 
 ## Forms
 
@@ -22,7 +22,7 @@ function submit() {
         return;
     }
 
-    form.post(admin.customers.store().url);
+    form.post(customers.store().url);
 }
 ```
 
@@ -142,18 +142,3 @@ const { filters, active, reset } = useListFilters({
   filter silently does nothing.
 - The table wrapper owns the card, the empty row and the pagination footer, so every list looks the
   same.
-
-## Toasts
-
-`lib/flash.ts` listens to the Inertia router once, at boot:
-
-- a GET stays silent;
-- **every write reports**: the controller's flashed `success` or `error`, or a generic outcome;
-- failures come from the router's `error`, `httpException` and `networkError` events (the
-  Inertia 3 names; Inertia 2 called the last two `invalid` and `exception`).
-
-Pages never call `toast()` for the result of a request. They let the controller flash.
-
-vue-sonner's stylesheet sets its own font stack and is imported unlayered, so a `font-sans` class on
-`<Toaster>` loses. Put the toaster back on `--font-sans` with an unlayered override (see
-`theme.md`).

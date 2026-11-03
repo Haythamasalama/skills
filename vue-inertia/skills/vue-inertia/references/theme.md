@@ -34,7 +34,7 @@ light and white in dark.)
 - The accent is **deeper in light than in dark**: the same hue cannot carry white text on a white
   page and dark text on a black one, so `--primary-foreground` inverts with it.
 - `--chart-1 … --chart-5` are five steps of the same hue, defined in `:root` and again in `.dark`,
-  so a series reads on both themes (see `charts.md`).
+  so a series reads on both themes.
 
 ## Radius
 

@@ -3,8 +3,8 @@
 // with page errors, console errors, failed requests and horizontal overflow
 // reported per shot. Writes PNGs and summary.json to --out.
 //
-//   node shoot.mjs --base http://127.0.0.1:4173 / /about /pricing
-//   node shoot.mjs --base http://127.0.0.1:4173 --langs en,ar --lang-via prefix / /about
+//   node shoot.mjs --base http://127.0.0.1:8000 / /login
+//   node shoot.mjs --base http://127.0.0.1:8000 --langs en,ar --lang-via cookie:locale --storage-state state.json /dashboard /customers
 //   node shoot.mjs --base … --langs en,ar --lang-via storage:locale --theme-storage theme /
 //   node shoot.mjs --base … --print /invoice/1    # also a print-media screenshot and a PDF
 //
@@ -20,6 +20,7 @@
 //   --wait MS               extra settle time after load (default 300)
 //   --executable PATH       a preinstalled Chromium (or set CHROMIUM_PATH)
 //   --print                 also emulate print: a screenshot and an A4 PDF per path
+//   --storage-state FILE    cookies saved by login.mjs, for pages behind a login
 //
 // Needs `playwright` or `playwright-core` resolvable from the current directory:
 //   npm i -D playwright-core --no-save
@@ -39,7 +40,8 @@ const opts = {
   ignore: '',
   wait: '300',
   executable: process.env.CHROMIUM_PATH ?? '',
-  print: false
+  print: false,
+  storageState: ''
 };
 const paths = [];
 const argv = process.argv.slice(2);
@@ -128,7 +130,8 @@ for (const theme of themes) {
     for (const lang of langs) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
-        colorScheme: theme
+        colorScheme: theme,
+        ...(opts.storageState ? { storageState: opts.storageState } : {})
       });
       const storage = [];
 

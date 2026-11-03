@@ -60,7 +60,7 @@ Two guards are non-negotiable:
 
 - **Hand-written `translateX` or `left` mirrors wrongly under RTL.** Prefer direction-agnostic
   transforms (opacity, `translateY`, scale), or gate on `[dir]`.
-- Admin screens need little motion: overlays from the registry already animate. Don't add motion
+- Working screens (lists, forms, records) need little motion: overlays from the registry already animate. Don't add motion
   to tables or forms for its own sake.
 
 ## Adding an animation library

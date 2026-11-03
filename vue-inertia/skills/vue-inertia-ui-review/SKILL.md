@@ -1,119 +1,123 @@
 ---
 name: vue-inertia-ui-review
-description: Use when a web app's UI must be verified visually in a real browser, after any change to a component, stylesheet, route, theme, translation or content, and whenever someone asks whether something looks right, works on mobile, works in dark mode, reads right in Arabic/RTL, or prints or exports to PDF correctly. Covers screenshotting every page in light and dark and in both languages, exercising interactive parts, checking routing and deep links, print and PDF output, what to look for, and how to report. Triggers include "does this look right", "check it in the browser", "screenshot the pages", «راجع الواجهة», «شكلها صح؟», «الوضع الليلي», «اتجاه RTL».
+description: Use when the UI of a Laravel + Inertia + Vue app must be verified in a real browser, after any change to a page, component, stylesheet, route, theme, translation or form, and whenever someone asks whether something looks right, works on mobile, works in dark mode, reads right in Arabic/RTL, or prints to PDF correctly. Covers serving the app, signing in as a seeded test user, screenshotting every page in light and dark and in each language, checking that navigation stays inside Inertia, forms, validation errors, flash toasts and confirm dialogs, print output, and how to report. Triggers include "does this look right", "check it in the browser", "screenshot the pages", «راجع الواجهة», «شكلها صح؟», «الوضع الليلي», «اتجاه RTL».
 ---
 
-# Visual verification
+# Visual review for Vue + Inertia
 
-A green build proves the code compiles. It proves nothing about whether the page looks right,
-whether English inside Arabic renders left to right, whether dark mode is styled, or whether the
-PDF export holds what it should. Those need a real browser and someone reading the screenshots.
+**Read when:** a front-end change is about to be called done, or someone asks how a screen looks.
+**Owns:** serving and signing in, the screenshot matrix, what to look for, Inertia-specific checks
+(navigation, forms, toasts), print, and the report.
+
+A green build and a passing type check prove the code compiles. They prove nothing about whether
+the page looks right, whether a Latin value inside Arabic renders left to right, whether dark mode
+is styled, or whether a form shows its errors. Those need a real browser and someone reading the
+screenshots.
 
 ## TL;DR
 
-- Build, serve the built app (a preview server, not only the dev server), then shoot every page
-  at desktop and mobile width, in light and dark, in each language.
+- Build the assets, serve the app, sign in as a seeded test user, then shoot every page at desktop
+  and mobile width, in light and dark, in each language.
 - **Read every screenshot.** Taking them is not checking them.
-- Treat any `pageerror` or unexpected console error as real. Note the expected ones (a font host
-  the sandbox blocks) once, and ignore only those.
-- Exercise the interactive parts by hand: they break most and show least in a diff.
-- Check deep links, redirects for retired URLs, and the 404 page.
-- If the app prints or exports PDF, render it: no chrome, complete print-only content, light
-  palette, nothing split across pages, no overlays.
+- Treat any `pageerror` or unexpected console error as real. Name expected noise (a blocked font
+  host) once, and ignore only that.
+- Click through the interactive parts: forms empty and valid, dialogs, filters, tabs, menus.
+- Navigation between pages stays inside Inertia: no full page load after the first.
 - Report with the images. Say what you checked and what still looks off, not only what passed.
 
-## Pick the browser
-
-Use whatever real browser the environment provides: a browser MCP, a browser CLI, or a Playwright
-script. `scripts/shoot.mjs` is a ready script for the screenshot matrix:
+## Serve and sign in
 
 ```bash
-npm run build
-(nohup npx vite preview --host 127.0.0.1 --port 4173 > /tmp/preview.log 2>&1 &) ; sleep 5
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:4173/
+npm run build                        # Laravel serves the built assets from public/build
+php artisan migrate:fresh --seed     # local database only: a known test user and sample rows
+(nohup php artisan serve --host 127.0.0.1 --port 8000 > /tmp/serve.log 2>&1 &) ; sleep 3
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/login
 
-npm i -D playwright-core --no-save        # if the project has no Playwright
-node <skill>/scripts/shoot.mjs --base http://127.0.0.1:4173 --out /tmp/shots \
-  --langs en,ar --lang-via prefix --viewports desktop=1280x900,mobile=390x844 \
-  / /about /pricing /some/deep/link
+npm i -D playwright-core --no-save   # if the project has no Playwright
+UI_REVIEW_PASSWORD=password node <skill>/scripts/login.mjs \
+  --base http://127.0.0.1:8000 --email test@example.com --out /tmp/state.json
+```
+
+- Use the test user the project's seeders create, never a real account. Starter kits seed
+  `test@example.com`; read `database/seeders/DatabaseSeeder.php` for the password.
+- `composer run dev` also works (it starts Vite in dev mode). Shoot the built assets at least once
+  before calling it done: a missing import or a CSS order problem can show only in the build.
+- Never run `migrate:fresh` against anything but a local database.
+
+## The screenshot matrix
+
+```bash
+php artisan route:list --method=GET --except-vendor   # the pages worth shooting
+
+node <skill>/scripts/shoot.mjs --base http://127.0.0.1:8000 --out /tmp/shots \
+  --storage-state /tmp/state.json --viewports desktop=1280x900,mobile=390x844 \
+  /dashboard /customers /customers/1 /customers/1/edit /settings/profile
 ```
 
 It writes one PNG per path × viewport × theme × language plus `summary.json`, and flags HTTP
 errors, page and console errors, failed requests, horizontal overflow, an empty body, and a wrong
-`lang`/`dir` on `<html>`. Run `node shoot.mjs` with no arguments for the options (language via URL
-prefix, query, localStorage or cookie; a theme stored in localStorage; `--print` for PDF).
+`lang`/`dir` on `<html>`. Run it with no arguments for all options.
 
-Environment gotchas that cost time:
+**Two languages.** Laravel keeps the locale in the session or in an encrypted cookie, so a plain
+cookie set from outside is ignored. Switch the language the way a user does (the menu, or the app's
+locale route) after signing in, save one state file per language, and run the matrix once per state.
+If the app reads the language from a query or the URL prefix, `--langs en,ar --lang-via query:lang`
+or `--lang-via prefix` does it in one run.
 
-- **A preinstalled Chromium:** if one exists, pass `--executable` (or `CHROMIUM_PATH`) and don't run
-  `playwright install`, which downloads browsers.
-- **`playwright-core` installed with `--no-save` is CommonJS.** From an ES module in a scratch
-  folder, import it by absolute path or through `createRequire`, as the script does.
-- **Never `pkill` the preview server from inside a tool's shell call.** It can kill the shell too
-  (exit 144). Start it with `nohup` and leave it running.
-- **Write scripts and screenshots to a scratch folder, not the repo.**
-- **Serve over HTTP.** Many browser tools block `file://`, and an app often won't mount there.
+**Theme.** The script emulates `prefers-color-scheme`. If the app saves a choice in localStorage
+(starter kits use `appearance`), add `--theme-storage appearance` so the saved choice does not win.
 
-## Pages, light and dark
+Environment gotchas:
 
-Shoot each page at 1280×900 and 390×844, plus 1920×1080 if the app is shown on a TV or a big
-screen. Emulate `prefers-color-scheme: dark` for the dark pass. If the app defaults to the system
-preference, dark mode is what many visitors see first: an unstyled surface there is a bug.
+- A preinstalled Chromium: pass `--executable` (or `CHROMIUM_PATH`); don't run `playwright install`.
+- `playwright-core` installed with `--no-save` is CommonJS; the scripts load it through `createRequire`.
+- Never `pkill` the server from inside a tool's shell call; it can kill the shell. Leave it running.
+- Write scripts, state files and screenshots to a scratch folder, never the repo.
 
-Look for:
+## What to look for
 
-- **Empty grey boxes:** a broken image path, or an image component missing its fallback.
-- **Scrambled mixed-direction text:** `there are / there is` printed as `there is / there are`, or
-  punctuation on the wrong end. The run is missing its `lang` + `dir` isolation.
-- **Mirrored-wrong spacing in RTL:** a `left-`/`right-`/`ml-`/`pr-` utility that should be
-  `start`/`end`.
-- **Arrows and chevrons pointing the wrong way in RTL**, and poppers or drawers opening on the
-  wrong side.
-- **Horizontal scroll** at mobile width.
-- **Unreadable contrast** in either theme; text, borders or icons that vanish in dark.
-- **Leftover English** in the Arabic pass, including `placeholder`, `aria-label`, `title` and
-  `alt`, which a screenshot doesn't show. The `arabic-copy` skill has a sweep script for this.
+- **Empty grey boxes:** a broken image path, or an avatar missing its fallback.
+- **Scrambled mixed-direction text:** a URL, phone or key inside Arabic printed in the wrong order.
+  The value is missing `dir="ltr"`.
+- **Mirrored-wrong spacing in RTL:** a `left-`/`right-`/`ml-`/`pr-` class that should be `start`/`end`.
+- **Arrows and chevrons pointing the wrong way in RTL**, and dropdowns or drawers opening on the
+  wrong side (a missing `ConfigProvider :dir` in the layout).
+- **Horizontal scroll** at mobile width; a table that should scroll inside its card.
+- **Unreadable contrast** in either theme; borders or icons that vanish in dark.
+- **Leftover English** in the Arabic pass, including `placeholder`, `aria-label`, `title` and `alt`,
+  which a screenshot doesn't show:
 
-## Interactive parts
+  ```js
+  await page.evaluate(() => [...document.querySelectorAll('[placeholder],[aria-label],[title],[alt]')]
+    .flatMap(el => ['placeholder', 'aria-label', 'title', 'alt'].map(a => el.getAttribute(a)))
+    .filter(v => v && /[A-Za-z]{3,}/.test(v) && !/[؀-ۿ]/.test(v)));
+  ```
 
-Walk every widget until each state has been seen: open, closed, selected, correct, wrong,
-disabled, empty, loading, error. Confirm right answers or valid input go green, wrong ones red,
-and the feedback text matches the choice. Patterns and snippets:
-[references/checks.md](references/checks.md#interactive-parts).
+- **Raw translation keys** (`customers.fields.name`) where a sentence should be.
 
-- **Hold a DOM handle** when a control changes its own label. A text-based locator re-resolves
-  once the label changes and clicks the wrong thing.
-- Disabled-but-graded options must stay readable (full opacity) when they carry the result.
-- A button that must stay disabled until a condition holds: check both sides of the condition.
+## Inertia-specific checks
 
-## Routing
+- **Navigation stays inside Inertia.** Clicking a link must not reload the document; a full load
+  means a hand-written `<a href>` instead of `<Link>`.
+- **`<html lang dir>` changes when the language changes**, without a reload.
+- **Forms:** submit empty, then valid. Errors render under their fields; an error on a hidden tab
+  lights the tab; a valid submit redirects and shows one toast. A GET shows none.
+- **Confirm dialogs** name the record and use a destructive button; Escape closes them.
+- **The page title** (`<Head :title>`) is set on every page, including detail pages.
+- **Permissions:** sign in as a user without a permission once; the action is absent, not disabled.
 
-- Deep links and refreshes on nested routes return 200. With history-mode routing, the web server
-  fallback is what makes that work.
-- Retired URLs that people were given redirect where they should, with a real 301 from the server.
-- An unknown path lands on the 404 view, not a blank page.
+Snippets for each: [references/checks.md](references/checks.md).
 
 ## Print and PDF
 
-If the app prints or exports PDF, that is a real output target. Render it:
-
-- open any dropdown or dialog first, then emulate print: **overlays rendered through a portal on
-  `<body>` sit outside any `.no-print` ancestor** and survive into print unless hidden explicitly;
-- no header, footer, nav or buttons survive;
-- print-only content (a teacher's copy, an answer key, a flat version of a step player) is there
-  and complete;
-- the light palette is used even when the site was in dark mode;
-- cards and tables are not split across page breaks;
-- no animation is left mid-state.
-
-Snippets: [references/checks.md](references/checks.md#print-and-pdf).
+If the app prints or exports PDF, render it (`shoot.mjs --print`): no nav or buttons survive, open
+overlays are hidden, the light palette is used even from dark mode, and cards and tables are not
+split across pages. Details: [references/checks.md](references/checks.md#print-and-pdf).
 
 ## Reporting
 
-- Send the screenshots and the PDF to the user. They judge a design faster from an image than from
-  a description.
-- Say plainly what you checked (pages, widths, themes, languages, states) and anything that still
-  looks off.
+- Send the screenshots to the user. They judge a screen faster from an image than from a description.
+- Say plainly what you checked (pages, widths, themes, languages, states) and what still looks off.
 - Separate real errors from expected environment noise, and name the noise once.
-- Say what you could not check (no browser, blocked network, no seed data) instead of implying it
-  passed.
+- Say what you could not check (no browser, no seed data, a page behind a permission you lacked)
+  instead of implying it passed.
