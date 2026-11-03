@@ -1,5 +1,5 @@
 ---
-name: nuxt-ui
+name: nuxt-ui-kit
 description: "Use when starting or changing a Nuxt 4 app or site built with Nuxt UI 4 and Tailwind CSS 4: a new project from a ready blueprint (folder tree, day-one files, layouts, error page, house components and composables, naming), the theme (copy-ready main.css and app.config.ts with a calm green palette, tokens, dark mode, Arabic and Latin fonts), a dashboard shell, tables, forms, modals and slideovers, tabs, empty states, toasts, charts, Arabic and English with right-to-left layout, static generation for GitHub Pages, SEO and JSON-LD, a landing or docs page, or a Nuxt, Nitro or Tailwind error from that stack. Triggers: 'Nuxt UI', 'new Nuxt project', 'UTable', 'UModal', 'UDashboard', 'app.config', 'dark mode', 'RTL', 'dashboard', 'landing page', 'nuxt generate', 'GitHub Pages', 'مشروع Nuxt جديد', 'لوحة تحكم', 'واجهة', 'صفحة هبوط', 'عربي RTL'."
 ---
 
