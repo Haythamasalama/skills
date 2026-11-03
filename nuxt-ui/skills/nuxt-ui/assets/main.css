@@ -1,0 +1,60 @@
+/* app/assets/css/main.css: the whole theme. Copy as is; swap the palette with references/theme.md. */
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* static: Nuxt UI reads these through var() at runtime, and plain @theme drops variables no class uses. */
+@theme static {
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-sage-50: #f1f8f4;
+  --color-sage-100: #ddefe5;
+  --color-sage-200: #bddfcc;
+  --color-sage-300: #91c8aa;
+  --color-sage-400: #62ab85;
+  --color-sage-500: #418f69;
+  --color-sage-600: #317455;
+  --color-sage-700: #295d46;
+  --color-sage-800: #234b3a;
+  --color-sage-900: #1e3e31;
+  --color-sage-950: #0f231b;
+}
+
+:root {
+  --ui-radius: 0.375rem;
+  --ui-primary: var(--ui-color-primary-600);
+  --ui-border: #ececec;
+  --ui-bg-muted: #f8f8f7;
+
+  /* Chart marks need more chroma than the soft UI accent to stay distinct for colour-blind readers. */
+  --chart-bar: #2f9468;
+  --chart-track: #e6f2eb;
+  /* Second and third series of a stacked chart: blue and amber stay apart from green for every reader. */
+  --chart-2: #3a6fc4;
+  --chart-3: #c98a1b;
+}
+
+.dark {
+  --ui-primary: var(--ui-color-primary-400);
+  --ui-border: var(--ui-color-neutral-800);
+  --ui-bg-muted: #121212;
+
+  --chart-bar: #46a77a;
+  --chart-track: #1c2a23;
+  --chart-2: #6b98e0;
+  --chart-3: #dca545;
+}
+
+/* Icons that point along the reading direction mirror in Arabic. Add new directional icons here. */
+[dir="rtl"] .iconify.i-lucide\:send,
+[dir="rtl"] .iconify.i-lucide\:external-link,
+[dir="rtl"] .iconify.i-lucide\:chevron-left,
+[dir="rtl"] .iconify.i-lucide\:chevron-right {
+  transform: scaleX(-1);
+}
+
+/* The page is bg-muted, so overscroll and short pages must not show a white strip under it. */
+html,
+body {
+  background-color: var(--ui-bg-muted);
+}
