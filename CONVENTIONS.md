@@ -13,6 +13,7 @@ skills/<name>/
   scripts/            optional: helpers that work anywhere
   assets/             optional: templates and copy-ready files
 skills-lock.json      official and community skills we recommend, in the CLI's own lock format
+.claude-plugin/       the Claude Code marketplace; it loads all of skills/, so a new skill needs no edit here
 scripts/              check.sh, privacy-scan.sh, site.sh (repo tools, never installed)
 site/                 the local page that lists the skills
 ```
