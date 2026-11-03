@@ -57,6 +57,20 @@ $(echo "$hits" | sed "s|$ROOT/||" | head -5)"
   done
 done
 
+# The README is the repo's front page, so it must list every skill, and its badges must match the counts.
+readme="$ROOT/README.md"
+for name in $all_names; do
+  grep -q "](skills/$name)" "$readme" || fail "README.md: skill \"$name\" is not listed"
+done
+lock_names=$(sed -n 's/^    "\([^"]*\)": {$/\1/p' "$ROOT/skills-lock.json")
+for name in $lock_names; do
+  grep -q "\[$name\](" "$readme" || fail "README.md: recommended skill \"$name\" is not listed"
+done
+own_count=$(echo $all_names | wc -w | tr -d ' ')
+lock_count=$(echo $lock_names | wc -w | tr -d ' ')
+grep -q "badge/skills-$own_count-" "$readme" || fail "README.md: the skills badge should say $own_count"
+grep -q "badge/recommended-$lock_count-" "$readme" || fail "README.md: the recommended badge should say $lock_count"
+
 if [ "$problems" -eq 0 ]; then
   echo ok
 else
