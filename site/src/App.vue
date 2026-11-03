@@ -31,7 +31,7 @@ const route = computed(() => {
 <template>
   <div class="min-h-dvh">
     <div class="mx-auto max-w-[1040px] px-6">
-      <AppHeader :path="hash" />
+      <AppHeader :path="hash" :view="route.view === 'item' ? 'skills' : route.view" />
 
       <main id="main">
         <ItemPage v-if="route.view === 'item'" :item="route.item" :path="route.path" :anchor="route.anchor" />

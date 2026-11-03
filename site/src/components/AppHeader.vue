@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Mail } from 'lucide-vue-next';
+import { ArrowUpRight } from 'lucide-vue-next';
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { contact, nav } from '../site';
 import SignatureMark from './SignatureMark.vue';
 
-const props = defineProps<{ path: string }>();
+const props = defineProps<{ path: string; view: string }>();
 
 const menuOpen = ref(false);
 
@@ -28,7 +28,7 @@ onBeforeUnmount(() => {
 <template>
   <header>
     <div class="relative z-50 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-4 md:pt-7">
-      <a href="https://haythamasalama.me" class="inline-flex min-h-11 items-center" aria-label="Haytham A. Salama, home">
+      <a href="#/" class="inline-flex min-h-11 items-center" aria-label="Skills, home">
         <!-- Keyed by page, so the signature draws itself again on every page. -->
         <SignatureMark :key="`m${path}`" class="md:hidden" :width="72" />
         <SignatureMark :key="`d${path}`" class="hidden md:block" :width="80" />
@@ -40,16 +40,18 @@ onBeforeUnmount(() => {
           :key="item.label"
           :href="item.to"
           class="link-muted inline-flex min-h-11 items-center"
-          :class="item.current && '!text-fg'"
-          :aria-current="item.current ? 'page' : undefined"
+          :class="item.view === view && '!text-fg'"
+          :aria-current="item.view === view ? 'page' : undefined"
         >
           {{ item.label }}
         </a>
         <a
           :href="contact.to"
-          class="inline-flex min-h-9 items-center rounded-full border border-chip px-3.5 text-fg transition-colors hover:bg-surface"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex min-h-9 items-center gap-1 rounded-full border border-chip px-3.5 text-fg transition-colors hover:bg-surface"
         >
-          {{ contact.label }}
+          {{ contact.label }} <ArrowUpRight class="size-3.5 text-faint" />
         </a>
       </nav>
 
@@ -90,8 +92,8 @@ onBeforeUnmount(() => {
             :key="item.label"
             :href="item.to"
             class="menu-item link-muted flex min-h-11 items-center"
-            :class="item.current && '!text-fg'"
-            :aria-current="item.current ? 'page' : undefined"
+            :class="item.view === view && '!text-fg'"
+            :aria-current="item.view === view ? 'page' : undefined"
             :style="{ '--i': index }"
             @click="menuOpen = false"
           >
@@ -99,12 +101,14 @@ onBeforeUnmount(() => {
           </a>
           <a
             :href="contact.to"
+            target="_blank"
+            rel="noopener"
             class="menu-item mt-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-chip text-sm text-fg transition-colors hover:bg-surface"
             :style="{ '--i': nav.length }"
             @click="menuOpen = false"
           >
-            <Mail class="size-4" />
             {{ contact.label }}
+            <ArrowUpRight class="size-4 text-faint" />
           </a>
         </nav>
       </div>

@@ -3,7 +3,6 @@ import { ArrowUpRight, ChevronDown, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { type Publisher, publishers, type Recommended, recommended } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
-import SkillsNav from '../components/SkillsNav.vue';
 
 const ALL_COMMAND = 'npx skills experimental_install';
 
@@ -28,7 +27,6 @@ const label = computed(() =>
   <div>
     <section class="pt-16 md:pt-[88px]">
       <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[30px]">Recommended</h1>
-      <SkillsNav current="recommended" />
       <p class="mt-3 max-w-[60ch] text-[17px] leading-[1.7] text-soft">
         Skills from the people who build the tools, and a few from the community. They are listed in
         <code class="font-mono text-[15px] text-fg">skills-lock.json</code> and installed from their own source.

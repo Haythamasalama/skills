@@ -1,25 +1,23 @@
-// The personal site's navigation, footer and socials, so this subdomain reads as part of it.
+// Navigation, footer and socials for the skills site. It shares the personal site's look, not its pages.
 export const MAIN = 'https://haythamasalama.me';
 
 export const site = { name: 'Haytham A. Salama', since: 2022 };
 
+export const REPO_URL = 'https://github.com/haythamasalama/skills';
+
 export const nav = [
-  { label: 'About', to: `${MAIN}/about` },
-  { label: 'Work', to: `${MAIN}/work` },
-  { label: 'Open Source', to: `${MAIN}/open-source` },
-  { label: 'Blog', to: `${MAIN}/articles` },
-  { label: 'Skills', to: '#/', current: true },
+  { label: 'Skills', to: '#/', view: 'skills' },
+  { label: 'Recommended', to: '#/recommended', view: 'recommended' },
 ];
 
 export const footer = [
-  { label: 'Snippets', to: `${MAIN}/snippets` },
-  { label: 'Tools', to: `${MAIN}/tools` },
-  { label: 'Uses', to: `${MAIN}/uses` },
-  { label: 'Brand', to: `${MAIN}/brand` },
   { label: 'Skills', to: '#/' },
+  { label: 'Recommended', to: '#/recommended' },
+  { label: 'skills.sh', to: 'https://skills.sh' },
+  { label: 'haythamasalama.me', to: MAIN },
 ];
 
-export const contact = { label: 'Contact', to: 'mailto:haythamasalama@gmail.com' };
+export const contact = { label: 'GitHub', to: REPO_URL };
 
 export const socials = [
   { label: 'GitHub', to: 'https://github.com/haythamasalama', icon: 'github', size: 18 },
