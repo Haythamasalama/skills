@@ -6,7 +6,7 @@ description: Use when a question or a task touches Meta's WhatsApp Business Plat
 # WhatsApp Business Platform
 
 **Read when:** planning or answering anything about the WhatsApp Business APIs.
-**Owns:** the capability catalog (researched from Meta's docs on 2026-10-27), the webhook-vs-polling
+**Owns:** the capability catalog (checked against Meta's docs 2026-11-03), the webhook-vs-polling
 split, and the limits and dates that change designs.
 
 ## Answer fast
@@ -16,8 +16,10 @@ split, and the limits and dates that change designs.
    webhook) or **needs webhooks**.
 3. Facts change often. For anything you will build on, re-check the doc page: append `.md` to any page
    under `https://developers.facebook.com/documentation/business-messaging/whatsapp/` for a short
-   version, and `…/whatsapp/llms.txt` lists every page. The changelog stops at 2026-05-12; later changes
-   live only on topic pages.
+   version, and `…/whatsapp/llms.txt` lists every page. The main changelog stops at 2026-05-12; later
+   changes live on topic pages and in their own changelogs (Marketing Messages API, BSUIDs, Flows,
+   Calling) (checked 2026-11-03).
+4. Current Graph API version: v26.0, released 2026-07-29; v25.0 expires 2028-07-29 (checked 2026-11-03).
 
 ## The five facts that decide most designs
 
@@ -33,12 +35,15 @@ split, and the limits and dates that change designs.
    steals its messages; a second app on the same WABA is the safer route (not confirmed by the docs —
    test first), or forward from the system that already receives them.
 4. **Pricing (per delivered message since 2025-07-01):** from 2026-10-01 service messages and in-window
-   utility messages are charged, with 1,000 free service messages per number per month.
+   utility messages are charged, with 1,000 free service messages per number per month; without a
+   payment method, service messages stop after the free tier (checked 2026-11-03).
    **Marketing on Cloud API ends 2027-10-13** (new WABAs from 2027-04-13 can't send it); marketing moves
-   to the Marketing Messages API.
+   to the Marketing Messages API (checked 2026-11-03).
 5. **Deprecated fields to avoid:** `messaging_limit_tier` → use
    `whatsapp_business_manager_messaging_limit` (limits are per business portfolio since 2025-10-07);
-   `conversation_analytics` → `pricing_analytics`; Flows Metrics API (2026-04-30).
+   `conversation_analytics` → `pricing_analytics`; Flows Metrics API (2026-04-30); `billable` in status
+   pricing → use `pricing.type` + `pricing.category`; the two-step PIN is being phased out for eligible
+   numbers (checked 2026-11-03).
 
 ## Where each topic lives
 
@@ -47,7 +52,7 @@ split, and the limits and dates that change designs.
 | WABA and portfolio fields, health status, activity log, users, credit line; phone numbers (fields, register, PIN, display name, OBA, username, settings); business profile; analytics (`analytics`, `pricing_analytics`, `template_analytics`, template comparison, calls, groups); templates (list, create, edit, delete, archive, unpause, library, migrate, groups); what no API gives | [references/management-and-analytics.md](references/management-and-analytics.md) |
 | Sending: the 24-hour window, every message type, media, template types (authentication, coupon, limited-time offer, carousel), TTL, throughput, Flows, Marketing Messages API, Calling, Groups, commerce and payments, QR codes, block users, ice breakers, BSUIDs and usernames | [references/sending-and-features.md](references/sending-and-features.md) |
 | Webhooks: every field and the feature it enables, inbound message types, statuses with pricing and errors, setup (verify, signature, retries, overrides, mTLS), data only webhooks give | [references/webhooks.md](references/webhooks.md) |
-| What a WhatsApp inbox/CRM product builds on these APIs (a real example), and how each feature maps to "no webhook / needs webhook" | [references/platforms.md](references/platforms.md) |
+| What a WhatsApp inbox/CRM platform builds on these APIs, and how each feature maps to "no webhook / needs webhook" | [references/platforms.md](references/platforms.md) |
 
 ## Safety when testing against a real account
 

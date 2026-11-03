@@ -1,6 +1,6 @@
 # Webhooks: every field and what it unlocks
 
-Researched from Meta's docs on 2026-10-27. Doc paths are relative to
+Researched from Meta's docs on 2026-10-27, key facts re-checked 2026-11-03. Doc paths are relative to
 `https://developers.facebook.com/documentation/business-messaging/whatsapp/`; `R/` means `webhooks/reference/`.
 UNVERIFIED marks what no doc page confirmed.
 
@@ -28,7 +28,7 @@ UNVERIFIED marks what no doc page confirmed.
 - **IP allow-list:** AS32934 or facebook.com/peering/geofeed; Meta recommends mTLS instead.
 - **Subscribe each WABA:** `POST /{WABA}/subscribed_apps` ("You must individually subscribe to every Messaging
   account").
-- **Overrides** (webhooks/override): per WABA `POST /{WABA}/subscribed_apps` with `override_callback_uri` +
+- **Overrides** (webhooks/override, checked 2026-11-03): per WABA `POST /{WABA}/subscribed_apps` with `override_callback_uri` +
   `verify_token`; per number `POST /{PNID}` with `webhook_configuration`. Precedence: number, WABA, app default.
   Re-subscribing with no body removes the WABA override.
   - Overridable: messages, calls, the four group_* fields, history, smb_message_echoes, smb_app_state_sync,
@@ -63,15 +63,16 @@ UNVERIFIED marks what no doc page confirmed.
 | `calls` | `calls[]` id, from/to, `event` connect, call_created, terminate, call_recording_available, call_transcription_available; `direction`, `status`, duration; `statuses[]` RINGING/ACCEPTED/REJECTED | call volume, answer rate, durations; recordings kept 7 days |
 | `account_settings_update` | calling settings changes | settings audit |
 | `group_lifecycle_update`, `group_participants_update`, `group_settings_update`, `group_status_update` | create/delete with invite link; joins, requests, removals; subject/description/picture; suspend/cleared | group inventory, churn, suspension alert |
-| `business_username_updates` | `username`, `status` approved/reserved/deleted, `context` revoked | username tracker (renamed 2026-02-06) |
+| `business_username_updates` | `username`, `status` approved/reserved/deleted, `context` revoked (when Meta revokes a username, 2026-09-15) | username tracker (renamed 2026-02-06) |
 | `automatic_events` | wamid, `event_name` Purchase/LeadSubmitted, `ctwa_clid`, `custom_data` | revenue and leads per click-to-WhatsApp ad (opt-in) |
 | `history` | 180 days of chat history in chunks | import past chats, coexistence numbers only |
 | `smb_message_echoes`, `smb_app_state_sync` | messages sent from the WhatsApp Business app; contact add/remove | coexistence only |
 | `partner_solutions`, `payment_configuration_update` | partner solution status; payment gateway status | partners; India/Brazil payments |
 
 Not a webhook field: `user_id_update` ("There is no user_id_update webhook field"; BSUID changes arrive as
-`system` messages). Marketing link clicks arrive as `marketing_messages_link_click` on `messages`, limited
-availability, last 7 days.
+`system` messages; checked 2026-11-03). Marketing link clicks arrive as `marketing_messages_link_click` on
+`messages`, limited availability, last 7 days. Marketing Messages API landing page views arrive as
+`landing_page_view` (added 2026-09-23).
 
 ## Inside `messages`
 
@@ -102,8 +103,11 @@ per-user marketing cap, 131050 = user stopped marketing), `played` (first play o
 `biz_opaque_callback_data` (set on send, up to 512 chars, echoed back), `pricing` (on `sent` plus one of
 delivered/read: `type` regular, free_customer_service, free_entry_point, free_group_customer_service;
 `category` authentication, authentication-international, marketing, marketing_lite, utility, service,
-referral_conversion, group_*; `billable` to be deprecated), `conversation` (v24.0+ only in a free entry point
-window).
+referral_conversion, group_marketing, group_utility, group_service; `subtype` paid_exempt on free service
+messages of eligible government and non-profit organizations, from 2026-10-12; `billable` to be deprecated,
+use type + category), `conversation` (v24.0+ only in a free entry point window) (messages/status, checked
+2026-11-03). From 2026-10-01 `free_customer_service` means a 1:1 service message inside the monthly free
+tier; before that it also covered in-window utility messages.
 
 ## Data only webhooks give
 

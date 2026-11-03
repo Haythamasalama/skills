@@ -1,14 +1,18 @@
 # Account management, analytics and templates (no webhooks needed)
 
-Researched from Meta's docs on 2026-10-27; host `graph.facebook.com/v26.0`. `D/` =
+Researched from Meta's docs on 2026-10-27, key facts re-checked 2026-11-03; host `graph.facebook.com/v26.0`
+(released 2026-07-29, the newest Graph API version, checked 2026-11-03). `D/` =
 `https://developers.facebook.com/documentation/business-messaging/whatsapp/`, `R/` = `D/reference/`.
 Permissions: `whatsapp_business_management` (WBM) for nearly everything here; `whatsapp_business_messaging`
-for register/PIN; `business_management` for portfolio-level fields and credit lines. The changelog stops at
-2026-05-12; later changes live only on topic pages.
+for register/PIN; `business_management` for portfolio-level fields and credit lines. The main changelog
+stops at 2026-05-12; later changes live on topic pages (checked 2026-11-03).
 
-**Account model change:** from 2026-09-23 WABA ids are called "Messaging account" ids and numbers sit in a
-"WhatsApp account" (WAAC). Old ids and endpoints keep working; WAAC endpoints come in H1 2027 and replace
-phone-number ids in paths in H1 2028 (`D/account-model-evolution`).
+**Account model change** (`D/account-model-evolution`, checked 2026-11-03): phase 1 rolled out from
+2026-09-23 to all businesses by mid-October 2026. A WABA is now a "Messaging account" (same id); each number
+sits in a "WhatsApp account" (WAAC), a container for one number (later one username), its profile and
+catalog. Phase 1: WAAC ids are not exposed, phone-number ids keep working everywhere. Phase 2 (H1 2027):
+WAAC ids and WAAC endpoints arrive; new APIs accept either id. Phase 3 (H1 2028): paths that take a
+phone-number id (including Messages and Marketing Messages) must use the WAAC id. Plan that work in 2027.
 
 ## WABA (Messaging account) and business portfolio
 
@@ -35,10 +39,10 @@ appeal a rejected template (WhatsApp Manager only).
 |---|---|---|
 | List | `GET /{WABA}/phone_numbers?fields&filtering=[…]&sort=` | `filtering` is beta |
 | Fields | display_phone_number, verified_name, status (CONNECTED, DISCONNECTED, PENDING, FLAGGED, RESTRICTED, RATE_LIMITED, BANNED, DELETED, MIGRATED), quality_rating (GREEN/YELLOW/RED/UNKNOWN), name_status, new_display_name, new_name_status, code_verification_status, account_mode (LIVE/SANDBOX), platform_type, last_onboarded_time, is_official_business_account, throughput{level}, health_status, webhook_configuration, conversational_automation | |
-| **Messaging limit** | `whatsapp_business_manager_messaging_limit` (TIER_50, TIER_250, TIER_2K, TIER_10K, TIER_100K, TIER_UNLIMITED, UNTIERED) | `messaging_limit_tier` is **deprecated** (`D/messaging-limits`, checked 2026-10-27) |
+| **Messaging limit** | `whatsapp_business_manager_messaging_limit` (TIER_50, TIER_250, TIER_2K, TIER_10K, TIER_100K, TIER_UNLIMITED, UNTIERED) | `messaging_limit_tier` is **deprecated** (`D/messaging-limits`, checked 2026-11-03). New portfolios start at 250; 2,000 after verification or 2,000 delivered template messages outside the window in 30 days; then automatic steps within 6 h when quality is high and ≥ half the limit was used in 7 days. The FLAGGED quality state no longer exists and quality drops no longer lower the limit |
 | Add a number, OTP | `POST /{WABA}/phone_numbers`; `POST /{PNID}/request_code` (SMS/VOICE), `/verify_code` | |
 | Register / deregister | `POST /{PNID}/register` {pin, data_localization_region}, `/deregister` | 10 per 72 h each |
-| Two-step PIN | `POST /{PNID}` {pin} | no read, no disable; being phased out from 2026-09 |
+| Two-step PIN | `POST /{PNID}` {pin} | no read, no disable. Being deprecated for eligible numbers, rolled out with phase 1 of the account model change: if WhatsApp Manager shows no two-step tab, there is no PIN. Keep sending a valid 6-digit `pin` to `register` until Meta changes that contract (checked 2026-11-03) |
 | Display name change | `POST /{PNID}?new_display_name=` | 10 per 30 days |
 | Settings | `GET/POST /{PNID}/settings`: calling, user_identity_change, payload_encryption, storage_configuration | one feature per POST |
 | Official Business Account | `GET/POST /{PNID}/official_business_account` (website, country, supporting links 5–10) | needs a verified portfolio, 30+ days, 2FA, approved name |
@@ -77,15 +81,29 @@ group analytics.
 |---|---|---|
 | List / filter | `GET /{WABA}/message_templates?fields&limit` + filters category, content, language, name, name_or_content, quality_score, status, since/until; `summary=total_count,message_template_count,message_template_limit` | the limit tells how many more you can create |
 | Fields | id, name, language, category, sub_category, status (APPROVED, PENDING, REJECTED, PAUSED, DISABLED, IN_APPEAL, LIMIT_EXCEEDED, PENDING_DELETION, DELETED, ARCHIVED), quality_score{score, date}, rejected_reason, previous_category, correct_category, parameter_format, components, message_send_ttl_seconds, cta_url_link_tracking_opted_out, library_template_name, health_status, last_updated_time | |
-| Create | `POST /{WABA}/message_templates` | 100 per hour per WABA; cap 250 (unverified portfolio) or 6,000 |
-| Edit | `POST /{TEMPLATE}` {components replaces all, category, ttl, …} | APPROVED/REJECTED/PAUSED only; approved: 1 per 24 h, 10 per 30 days; approved category cannot change |
-| Delete | `DELETE /{WABA}/message_templates?name=` (all languages), `?hsm_id=&name=` (one), `?hsm_ids=[≤100]` | name blocked 30 days; DISABLED cannot be deleted |
-| Archive / unarchive | `POST /{WABA}/message_templates/archive`, `/unarchive` {hsm_ids} | auto-archived after 12 months unused, deleted 28 days later |
-| Unpause | `POST /{TEMPLATE}/unpause` | for pacing pauses; quality pauses last 3 h then 6 h, the third disables |
+| Create | `POST /{WABA}/message_templates` | 100 per hour per WABA; cap 250 (unverified portfolio) or 6,000 (verified, with an approved display name); each language counts (checked 2026-11-03) |
+| Edit | `POST /{TEMPLATE}` {components replaces all, category, ttl, …} | APPROVED/REJECTED/PAUSED only; approved: 1 per 24 h, 10 per 30 days; approved category cannot change (checked 2026-11-03) |
+| Delete | `DELETE /{WABA}/message_templates?name=` (all languages), `?hsm_id=&name=` (one), `?hsm_ids=[≤100]` | name blocked 30 days; DISABLED cannot be deleted; one bad id fails the whole bulk call; undelivered messages keep PENDING_DELETION for 30 days (checked 2026-11-03) |
+| Archive / unarchive | `POST /{WABA}/message_templates/archive`, `/unarchive` {hsm_ids} | auto-archived after 12 months unused, deleted 28 days later (checked 2026-11-03) |
+| Unpause | `POST /{TEMPLATE}/unpause` | for pacing pauses; quality pauses last 3 h then 6 h, the third disables (checked 2026-11-03) |
 | Library | `GET /message_template_library?search&topic&usecase&industry&language` | create with `library_template_name`, UTILITY only |
 | Copy between WABAs | `POST /{DEST_WABA}/migrate_message_templates` {source_waba_id, template_ids ≤ 500} | same owner; APPROVED with GREEN/UNKNOWN quality only |
 | Template groups | `POST /{WABA}/template_groups`, `GET/POST/DELETE /{GROUP}` | one group per template |
 | Authentication | `POST /{WABA}/upsert_message_templates`, `GET /{WABA}/message_template_previews` | |
+
+### Template categories (`D/templates/template-categorization`, checked 2026-11-03)
+
+- Three categories: MARKETING, UTILITY, AUTHENTICATION. Category sets the price.
+- UTILITY must be non-promotional and tied to the user (a request or a transaction, e.g. an Invoice
+  update). Mixed or unclear content is MARKETING. AUTHENTICATION must use a library OTP template: no URLs,
+  media or emojis.
+- Since 2025-04-09 a UTILITY template Meta judges as marketing is approved as MARKETING (no
+  `allow_category_change` needed). Meta also re-checks approved templates and recategorizes them, normally
+  with 24 h notice by the `template_category_update` webhook; for businesses warned about misuse the change
+  is instant.
+- Utility misuse escalates: warning, rate limiting (≥ 7 days), utility restriction (7 or 30 days),
+  portfolio-wide restriction (30 days); notices come by email and `account_update`.
+- A category review or appeal (60 days) is possible only in WhatsApp Manager / Business Support Home.
 
 ## What no API gives (evidence)
 
