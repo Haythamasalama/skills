@@ -2,8 +2,8 @@
 name: apple-screens
 description: Use when you need drawn Mac windows or iPhone screens in Apple's macOS 27 and iOS 27 style for a website, landing page, press kit, social post or other marketing image of an app. Draws the screen as HTML from ready templates — window chrome, sidebar, toolbar glass, window controls, status bar, large title, tab bar and home indicator, already set to the values in Apple's macOS 27 and iOS 27 UI Kits — then renders sharp PNGs with headless Chrome. Supports light and dark, active and inactive windows, and English or Arabic (right to left). Triggers include "draw the app for the website", "Mac window mockup", "iPhone screen for the landing page", "render a screenshot from HTML", «صور للموقع», «ارسم نافذة ماك», «صورة آيفون للتطبيق», «صور المتجر».
 metadata:
-  summary: "Draw Mac windows and iPhone screens as HTML, rendered to PNG."
-  tags: design, apple
+  summary: "Draw Mac window and iPhone screen mockups as HTML, rendered to PNG."
+  tags: mockups, apple, design, macos, ios
 ---
 
 # Apple-style screens

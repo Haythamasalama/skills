@@ -39,7 +39,7 @@ export const home: Seo = {
 export const recommended: Seo = {
   title: 'Recommended Agent Skills for Claude Code',
   description: clip('Agent skills worth installing, from Laravel, Vue, Nuxt, Cloudflare, Anthropic and others, each with its one-line install command.'),
-  keywords: [...COMMON_KEYWORDS, 'best claude code skills', 'recommended agent skills', 'laravel boost', 'vue best practices', 'security audit skill'],
+  keywords: [...COMMON_KEYWORDS, 'best claude code skills', 'recommended agent skills', 'laravel boost', 'vue best practices', 'security audit skill', 'taste skill', 'frontend design skill', 'impeccable skill', 'animation skills'],
 };
 
 export const explore: Seo = {
@@ -48,14 +48,33 @@ export const explore: Seo = {
   keywords: [...COMMON_KEYWORDS, 'search agent skills', 'bulk install skills'],
 };
 
+// The words people search for, which a skill's kebab-case folder name does not always contain.
+const SKILL_TOPICS: Record<string, string> = {
+  'apple-ios-27-design': 'iOS 27 Design',
+  'apple-macos-27-design': 'macOS 27 Design',
+  'apple-screens': 'Mac and iPhone Mockups',
+  'coolify-deploy': 'Coolify Deploy',
+  'git-workflow': 'Git Workflow',
+  'haythamasalama-brand': 'Personal Brand',
+  'laravel-code-quality': 'Laravel Code Quality',
+  'laravel-ddd': 'Laravel DDD',
+  'laravel-inertia-vue': 'Laravel Inertia Vue',
+  'liquid-glass-web': 'Liquid Glass CSS',
+  'nuxt-ui-kit': 'Nuxt UI',
+  'shadcn-vue-kit': 'shadcn-vue',
+  'whatsapp-business-manager': 'WhatsApp Cloud API',
+};
+
+const skillTitle = (name: string) => `${SKILL_TOPICS[name] ?? name} Skill for Claude Code`;
+
 export const skill = (name: string, summary: string, tags: string[] = []): Seo => ({
-  title: `${name}: Claude Code Skill`,
+  title: skillTitle(name),
   description: clip(`${summary} Install with npx skills add ${REPO_NAME} --skill ${name}.`),
-  keywords: [name, ...tags, ...COMMON_KEYWORDS],
+  keywords: [skillTitle(name).toLowerCase(), name, ...tags, ...COMMON_KEYWORDS],
 });
 
 export const skillFile = (name: string, heading: string, summary: string, tags: string[] = []): Seo => ({
-  title: `${heading}: ${name} skill`,
+  title: `${heading} | ${skillTitle(name)}`,
   description: clip(summary),
   keywords: [name, heading.toLowerCase(), ...tags, ...COMMON_KEYWORDS],
 });

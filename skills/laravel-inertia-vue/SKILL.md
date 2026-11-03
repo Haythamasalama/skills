@@ -2,8 +2,8 @@
 name: laravel-inertia-vue
 description: "Use when starting or building the front end of a Laravel app with Inertia, Vue 3, TypeScript and Tailwind 4 (usually with shadcn-vue) — a blueprint for a new project (the resources/js folder map, app.ts and layouts, the flash toast listener, translations, appearance, direction sync, shared prop types, a copy-ready app.css) and the house components (PageHeader, DataTable, RowActions, ConfirmAction, FormField, DetailCard, StatusBadge, EmptyState) plus the rules for pages, typed props and shared props, useForm with zod and Form Request validation, Wayfinder routes, lists with server-side filters and pagination, record pages, deletes and confirm dialogs, toasts, status badges, on-screen copy, tokens and dark mode, icons and motion, and Arabic/English with RTL. Trigger for work under resources/js, anything a controller renders with Inertia::render, a page that loses state or reloads fully, a status colour, an arrow pointing the wrong way in Arabic, or a new UI library. Also triggers on \"Laravel Inertia Vue\", \"Inertia + Vue\", \"Laravel Vue starter kit\". Arabic triggers: «لارافيل فيو إنيرشا», «فيو مع إنيرشا», «مشروع جديد», «صفحة جديدة», «نموذج إدخال», «جدول وفلاتر», «اتجاه RTL», «الوضع الغامق»."
 metadata:
-  summary: "A ready blueprint for Laravel + Inertia + Vue 3 front ends."
-  tags: vue, laravel, inertia
+  summary: "A ready blueprint for Laravel, Inertia.js and Vue 3 front ends."
+  tags: inertia, laravel, vue, vue3, typescript
 ---
 
 # Laravel + Inertia + Vue

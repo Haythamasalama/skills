@@ -2,8 +2,8 @@
 name: whatsapp-business-manager
 description: Use when a question or a task touches Meta's WhatsApp Business Platform (Cloud API, Business Management API, Graph API for WhatsApp) in any project — what the API can read or do, what needs webhooks, sending messages and templates, template rules and limits, analytics and costs, phone number quality and messaging limits, Flows, calling, groups, marketing messages, pricing changes, webhook fields and setup, or what a shared-inbox or CRM product built on the API needs. Answers "can we do X with the WhatsApp API?", "does this need a webhook?", "شو بنقدر نعمل بالواتساب API", "الويب هوك", "القوالب", "حد الرسائل", "التكلفة". Also triggers on "WhatsApp Business Manager", "WhatsApp Manager", «واتساب بزنس مانجر».
 metadata:
-  summary: "What Meta's WhatsApp Cloud API can do: webhooks, templates, limits, pricing."
-  tags: whatsapp, api
+  summary: "WhatsApp Cloud API guide: webhooks, message templates, limits and pricing."
+  tags: whatsapp, whatsapp-cloud-api, meta, webhooks, api
 ---
 
 # WhatsApp Business Manager

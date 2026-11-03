@@ -3,7 +3,7 @@ name: shadcn-vue-kit
 description: Use when starting, installing, adding, theming or fixing shadcn-vue in any Vue 3 project (Laravel + Inertia, Vite, Nuxt) — running the CLI (init, add, apply, migrate rtl, components.json), what init writes and where, the day-one component set, choosing the registry component for a need instead of a styled div, composition rules (items in groups, dialog titles, whole cards), customising a registry component through a wrapper instead of editing it, keeping the vendored components/ui folder healthy when add rewrites the stylesheet or reverts edits, the theme stylesheet with light and dark tokens, Arabic and Latin fonts, charts with Unovis, and the RTL gaps of the registry. Triggers include "shadcn", "shadcn-vue add", "shadcn-vue init", "components.json", "Reka UI", "dark mode tokens", "new Vue project UI setup", «ثبّت shadcn», «مكونات الواجهة», «الوضع الغامق», «اتجاه RTL», «ابدأ مشروع Vue».
 metadata:
   summary: "shadcn-vue setup with a ready theme, wrappers, charts and RTL fixes."
-  tags: vue, ui
+  tags: shadcn-vue, vue, ui, tailwindcss, rtl
 ---
 
 # shadcn-vue

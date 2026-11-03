@@ -39,9 +39,12 @@ name: <name>                # same as the folder
 description: "Use when …"   # one paragraph: when to load it, what it covers, trigger phrases (English + a few Arabic);
                             # quote it when it contains ": "
 metadata:
-  tags: laravel, php        # technologies, lowercase, most specific first; the site's tabs come from these
+  summary: "…"              # one line for lists and search results; lead with the words people search for
+  tags: laravel, php, ddd   # technologies and search terms, lowercase, most specific first; the site's categories read these
 ---
 ```
+
+Add the skill's search phrase to `SKILL_TOPICS` in `site/src/seo.ts`; it becomes the page title.
 
 Then, in this order:
 1. **Read when / Owns** — two lines.
