@@ -60,32 +60,32 @@ DEST="$TARGET/.claude"
 COMMIT="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
 install_skill() {
-  src="${1%/}"
-  pack="$2"
-  name="$(basename "$src")"
-  dst="$DEST/skills/$name"
-  if [ -e "$dst" ] && [ ! -f "$dst/.skills-repo" ] && [ "$FORCE" -eq 0 ]; then
-    echo "skipped $name: $dst exists and was not installed from this repo (use --force)"
+  # POSIX sh has no local variables, so these names must not collide with the main loop's.
+  skill_src="${1%/}"
+  skill_name="$(basename "$skill_src")"
+  skill_dst="$DEST/skills/$skill_name"
+  if [ -e "$skill_dst" ] && [ ! -f "$skill_dst/.skills-repo" ] && [ "$FORCE" -eq 0 ]; then
+    echo "skipped $skill_name: $skill_dst exists and was not installed from this repo (use --force)"
     return
   fi
   mkdir -p "$DEST/skills"
-  rm -rf "$dst"
-  cp -R "$src" "$dst"
-  printf 'pack=%s\ncommit=%s\n' "$pack" "$COMMIT" > "$dst/.skills-repo"
-  echo "skill   $name"
+  rm -rf "$skill_dst"
+  cp -R "$skill_src" "$skill_dst"
+  printf 'pack=%s\ncommit=%s\n' "$2" "$COMMIT" > "$skill_dst/.skills-repo"
+  echo "skill   $skill_name"
 }
 
 install_agent() {
-  src="$1"
-  name="$(basename "$src")"
-  dst="$DEST/agents/$name"
-  if [ -e "$dst" ] && ! cmp -s "$src" "$dst" && [ "$FORCE" -eq 0 ]; then
-    echo "skipped agent $name: a different $dst exists (use --force)"
+  agent_src="$1"
+  agent_file="$(basename "$agent_src")"
+  agent_dst="$DEST/agents/$agent_file"
+  if [ -e "$agent_dst" ] && ! cmp -s "$agent_src" "$agent_dst" && [ "$FORCE" -eq 0 ]; then
+    echo "skipped agent $agent_file: a different $agent_dst exists (use --force)"
     return
   fi
   mkdir -p "$DEST/agents"
-  cp "$src" "$dst"
-  echo "agent   ${name%.md}"
+  cp "$agent_src" "$agent_dst"
+  echo "agent   ${agent_file%.md}"
 }
 
 for name in $NAMES; do
