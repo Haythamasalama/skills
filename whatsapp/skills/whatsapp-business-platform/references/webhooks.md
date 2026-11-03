@@ -1,53 +1,74 @@
-# Webhooks: every field and what it unlocks
+# Webhooks: setup, every field, and what only they give
 
-Researched from Meta's docs on 2026-10-27, key facts re-checked 2026-11-03. Doc paths are relative to
-`https://developers.facebook.com/documentation/business-messaging/whatsapp/`; `R/` means `webhooks/reference/`.
-UNVERIFIED marks what no doc page confirmed.
+**Read when:** receiving anything from WhatsApp, choosing webhook fields, setting up or moving a callback
+URL, or deciding whether a feature can work by polling.
+**Owns:** the one-URL-per-app rule, setup (verify, signature, TLS, overrides), retries and ordering,
+every webhook field, inbound message and status payloads, and what no API gives.
+
+**TL;DR**
+- No backfill: store every payload on arrival.
+- One callback URL per Meta app; overrides move only some fields.
+- Retries last up to 7 days and go to every subscribed app: deduplicate by id.
+- Order statuses by precedence and timestamp; `delivered` can be skipped.
+
+Doc paths are relative to `https://developers.facebook.com/documentation/business-messaging/whatsapp/`.
+PNID = phone number id. UNVERIFIED marks what no doc page confirmed.
 
 ## The facts that decide a design
 
 - **No backfill.** "There are no APIs for fetching historical webhook data, so capture and store webhook
-  payloads accordingly." (webhooks/create-webhook-endpoint, checked 2026-10-27). Anything not stored on arrival
-  is gone.
-- **One callback URL per app** (solution-providers/get-started-for-solution-partners). Overrides can move some
-  fields per WABA or per phone number, but the template and account fields always go to the app default.
-- **Several apps on one WABA:** `GET /{WABA}/subscribed_apps` returns an array and the example shows two apps.
-  No doc sentence says every subscribed app gets every webhook (UNVERIFIED). Test on one account first.
-- **Retries:** immediately, then with decreasing frequency for up to 7 days; dropped after 7 days. Retries go to
-  all subscribed apps, so deduplicate.
-- Batches of up to 1,000 updates (not guaranteed); payloads up to 3 MB; no ordering guarantee documented, and
-  `delivered` can be skipped, so order statuses by precedence and timestamp.
+  payloads accordingly." (webhooks/create-webhook-endpoint, checked 2026-10-27). Anything not stored on
+  arrival is gone.
+- **Retries:** immediately, then with decreasing frequency for up to 7 days; dropped after 7 days.
+  Retries go to all subscribed apps, so deduplicate.
+- Batches of up to 1,000 updates (not guaranteed); payloads up to 3 MB; no ordering guarantee documented,
+  and `delivered` can be skipped, so order statuses by precedence and timestamp.
 - Some webhooks are not sent while the app is in Dev mode.
+
+## One callback URL per app
+
+- A Meta app has one callback URL (solution-providers/get-started-for-solution-partners). Overrides can
+  move some fields per WABA or per phone number, but the template and account fields always go to the
+  app default (list below).
+- **Several apps on one WABA:** `GET /{WABA}/subscribed_apps` returns an array and the example shows two
+  apps. No doc sentence says every subscribed app gets every webhook (UNVERIFIED). Test on one account
+  first.
+- **When another system already receives a WABA's webhooks**, pick one route on purpose:
+  - forward from that system (it keeps working; you depend on it);
+  - take the subscription or override over (you get the events; that system stops getting them);
+  - add a second app (UNVERIFIED, see above).
+  Why: an override on `messages` silently takes messages away from whoever had them.
+- Before changing anything, read `GET /{WABA}/subscribed_apps` and `GET /{PNID}?fields=webhook_configuration`.
 
 ## Setup
 
-- **Verify:** GET with `hub.mode=subscribe`, `hub.challenge`, `hub.verify_token`; answer 200 with the challenge.
+- **Verify:** GET with `hub.mode=subscribe`, `hub.challenge`, `hub.verify_token`; answer 200 with the
+  challenge.
 - **Signature:** `X-Hub-Signature-256: sha256=<hex>` = HMAC-SHA256 of the raw body with the app secret.
 - **TLS:** a valid certificate; self-signed is refused. mTLS is supported (Meta CA
   `meta-outbound-api-ca-2025-12.pem`, CN `client.webhooks.fbclientcerts.com`), per app only.
 - **IP allow-list:** AS32934 or facebook.com/peering/geofeed; Meta recommends mTLS instead.
-- **Subscribe each WABA:** `POST /{WABA}/subscribed_apps` ("You must individually subscribe to every Messaging
-  account").
-- **Overrides** (webhooks/override, checked 2026-11-03): per WABA `POST /{WABA}/subscribed_apps` with `override_callback_uri` +
-  `verify_token`; per number `POST /{PNID}` with `webhook_configuration`. Precedence: number, WABA, app default.
-  Re-subscribing with no body removes the WABA override.
-  - Overridable: messages, calls, the four group_* fields, history, smb_message_echoes, smb_app_state_sync,
-    account_settings_update (plus message_echoes, consumer_profile, messaging_handovers, standby: listed, no
-    WhatsApp payload doc).
-  - Never overridden: the four template fields, account_update, account_review_update, account_alerts, and any
-    field not on the list.
-  - **Risk:** overriding `messages` on an app another system already uses takes that system's messages away.
-- **Permissions:** `whatsapp_business_messaging` for `messages` and `calls`; `whatsapp_business_management` for
-  the rest.
-- Envelope: `object: "whatsapp_business_account"`, `entry[].id` (WABA id; business id for partner_solutions),
-  `entry[].changes[].field` and `.value`.
+- **Subscribe each WABA:** `POST /{WABA}/subscribed_apps` ("You must individually subscribe to every
+  Messaging account"); `GET` lists, `DELETE` removes.
+- **Overrides** (webhooks/override, checked 2026-11-03): per WABA `POST /{WABA}/subscribed_apps` with
+  `override_callback_uri` + `verify_token`; per number `POST /{PNID}` with `webhook_configuration`.
+  Precedence: number, WABA, app default. Re-subscribing with no body removes the WABA override.
+  - Overridable: messages, calls, the four group_* fields, history, smb_message_echoes,
+    smb_app_state_sync, account_settings_update (plus message_echoes, consumer_profile,
+    messaging_handovers, standby: listed, no WhatsApp payload doc).
+  - Never overridden: the four template fields, account_update, account_review_update, account_alerts,
+    and any field not on the list.
+- **Permissions:** `whatsapp_business_messaging` for `messages` and `calls`; `whatsapp_business_management`
+  for the rest.
+- Envelope: `object: "whatsapp_business_account"`, `entry[].id` (WABA id; business id for
+  partner_solutions), `entry[].changes[].field` and `.value`.
 
 ## Fields
 
 | Field | Key payload | Feature it enables |
 |---|---|---|
 | `messages` | inbound `messages[]` + `contacts[]`; outbound `statuses[]`; `errors[]` | message log, delivery funnel, failure reasons, per-message cost, inbox, reply times, ad attribution |
-| `message_template_status_update` | id, name, language, category; `event` APPROVED, REJECTED, PENDING, PAUSED, DISABLED, FLAGGED, IN_APPEAL, LOCKED, REINSTATED, ARCHIVED, UNARCHIVED, LIMIT_EXCEEDED, PENDING_DELETION, DELETED; `reason` ABUSIVE_CONTENT, INCORRECT_CATEGORY, INVALID_FORMAT, PROMOTIONAL, SCAM, TAG_CONTENT_MISMATCH, NONE; `disable_info.disable_date`; `other_info.title` FIRST_PAUSE, SECOND_PAUSE, RATE_LIMITING_PAUSE, UNPAUSE, DISABLED | instant approval/rejection alert with the reason, status timeline, first vs second pause, archive countdown (deleted after 28 days) |
+| `message_template_status_update` | id, name, language, category; `event` APPROVED, REJECTED, PENDING, PAUSED, DISABLED, FLAGGED, IN_APPEAL, LOCKED, REINSTATED, ARCHIVED, UNARCHIVED, LIMIT_EXCEEDED, PENDING_DELETION, DELETED; `reason` ABUSIVE_CONTENT, INCORRECT_CATEGORY, INVALID_FORMAT, PROMOTIONAL, SCAM, TAG_CONTENT_MISMATCH, NONE; `disable_info.disable_date`; `other_info.title` FIRST_PAUSE, SECOND_PAUSE, RATE_LIMITING_PAUSE, UNPAUSE, DISABLED | instant approval/rejection alert with the reason, status timeline, first vs second pause, archive countdown |
 | `message_template_quality_update` | `previous_quality_score`, `new_quality_score` (GREEN, YELLOW, RED, UNKNOWN) | quality timeline, alert on RED |
 | `message_template_components_update` | body, header text, footer, URL and phone buttons | audit log of template edits |
 | `template_category_update` | impending (24 h ahead): `correct_category`, `new_category` = current, `category_update_timestamp`; completed: `previous_category`, `new_category` | warning before Meta recategorizes a template (price change) |
@@ -76,11 +97,12 @@ Not a webhook field: `user_id_update` ("There is no user_id_update webhook field
 
 ## Inside `messages`
 
-Inbound common fields: `metadata.display_phone_number`, `metadata.phone_number_id`; `contacts[].profile.name`,
-`wa_id` (can be omitted), `user_id` (BSUID, since April 2026), `profile.username`; `messages[].from`,
-`from_user_id`, `id`, `timestamp`, `type`, `group_id`; `context` (reply-to `id`/`from`, `forwarded`,
-`frequently_forwarded`, `referred_product`); `referral` for click-to-WhatsApp ads (`source_url`, `source_id`,
-`headline`, `body`, media, `ctwa_clid`, `welcome_message.text`).
+Inbound common fields: `metadata.display_phone_number`, `metadata.phone_number_id`;
+`contacts[].profile.name`, `wa_id` (can be omitted), `user_id` (BSUID, since April 2026),
+`profile.username`; `messages[].from`, `from_user_id`, `id`, `timestamp`, `type`, `group_id`; `context`
+(reply-to `id`/`from`, `forwarded`, `frequently_forwarded`, `referred_product`); `referral` for
+click-to-WhatsApp ads (`source_url`, `source_id`, `headline`, `body`, media, `ctwa_clid`,
+`welcome_message.text`).
 
 | Type | Key fields |
 |---|---|
@@ -97,21 +119,38 @@ Inbound common fields: `metadata.display_phone_number`, `metadata.phone_number_i
 | unsupported | real type included since 2025-11-03 (poll, gif, pin, ...) |
 | errors | `value.errors[]` code, title, message, details (e.g. 130429 rate limit) |
 
-Statuses (`statuses[]`): `sent`, `delivered` (can be skipped), `read`, `failed` (`errors[]`; 131049 = Meta's
-per-user marketing cap, 131050 = user stopped marketing), `played` (first play of a voice message, since
-2025-11-03). Fields: `id` (wamid), `recipient_id`, `recipient_user_id`, `timestamp`,
-`biz_opaque_callback_data` (set on send, up to 512 chars, echoed back), `pricing` (on `sent` plus one of
-delivered/read: `type` regular, free_customer_service, free_entry_point, free_group_customer_service;
-`category` authentication, authentication-international, marketing, marketing_lite, utility, service,
-referral_conversion, group_marketing, group_utility, group_service; `subtype` paid_exempt on free service
-messages of eligible government and non-profit organizations, from 2026-10-12; `billable` to be deprecated,
-use type + category), `conversation` (v24.0+ only in a free entry point window) (messages/status, checked
-2026-11-03). From 2026-10-01 `free_customer_service` means a 1:1 service message inside the monthly free
-tier; before that it also covered in-window utility messages.
+### Statuses (`statuses[]`, messages/status, checked 2026-11-03)
 
-## Data only webhooks give
+- Values: `sent`, `delivered` (can be skipped), `read`, `failed` (`errors[]`; 131049 = Meta's per-user
+  marketing cap, 131050 = user stopped marketing), `played` (first play of a voice message, since
+  2025-11-03).
+- Fields: `id` (wamid), `recipient_id`, `recipient_user_id`, `timestamp`, `biz_opaque_callback_data` (set
+  on send, up to 512 chars, echoed back), `conversation` (v24.0+ only in a free entry point window).
+- `pricing` (on `sent` plus one of delivered/read): `type` regular, free_customer_service,
+  free_entry_point, free_group_customer_service; `category` authentication, authentication-international,
+  marketing, marketing_lite, utility, service, referral_conversion, group_marketing, group_utility,
+  group_service; `subtype` paid_exempt on free service messages of eligible government and non-profit
+  organizations, from 2026-10-12; `billable` is to be deprecated, use type + category.
+- From 2026-10-01 `free_customer_service` means a 1:1 service message inside the monthly free tier; before
+  that it also covered in-window utility messages.
 
-Inbound messages of every type, per-message statuses with cost and error codes, marketing opt-outs, ad click
-ids, call events and recordings, group events, PIN events, account alert and violation history, the 24-hour
-recategorization warning. Template status, quality, category, number limits and `health_status` can also be
-polled; for those the webhook only adds speed, reasons and history.
+## What no API gives
+
+Evidence from the API reference:
+1. Inbound messages: the Message API reference has only `POST /{PNID}/messages`.
+2. A sent message's status: the send response says only accepted / held_for_quality_assessment / paused.
+   A `GET /{Message-History-ID}/events` reference exists but the "message history APIs" that would give
+   the id are not documented (treat as unavailable).
+3. A list of conversations or customers: none. Closest: `block_users`, `contact_book?bsuid=` (yes/no),
+   group participants.
+4. Coexistence history: `POST /{PNID}/smb_app_data` once within 24 h of onboarding; the data arrives only
+   by webhook; partners only.
+
+So webhooks are the only source of: inbound messages of every type, per-message statuses with cost and
+error codes, marketing opt-outs and link clicks, ad click ids, call events and recordings, group events,
+PIN events, account alert and violation history, and the 24-hour recategorization warning.
+
+Can be polled instead (the webhook only adds speed, reasons and history): template status, quality and
+category (templates with `since`/`status`/`quality_score.date`), phone `quality_rating`, `name_status`,
+`health_status`, WABA `account_review_status`, messaging limits, `/activities`, and the
+`pricing_analytics` TIER dimension.
