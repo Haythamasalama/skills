@@ -115,12 +115,12 @@ Three shapes of the same mistake fork a domain's layout, so anything that walks 
 test, an audit) sees only part of the domain:
 
 ```
-❌ src/Domain/Billing/Reminders/Contracts/ReminderContract.php       a subsystem swallowing the layers
-❌ src/Domain/Billing/Contracts/Reminders/ReminderContract.php       a subsystem folder in a flat layer
-❌ src/Domain/Billing/Models/Entities/Abilities/InvoiceAbilities.php a layer nested in another
-✅ src/Domain/Billing/Contracts/ReminderContract.php
-✅ src/Domain/Billing/Actions/Reminders/SendInvoiceReminder.php      Actions may group
-✅ src/Domain/Billing/Models/Abilities/InvoiceAbilities.php
+❌ src/Domain/Employee/Invitations/Contracts/InvitationContract.php    a subsystem swallowing the layers
+❌ src/Domain/Employee/Contracts/Invitations/InvitationContract.php    a subsystem folder in a flat layer
+❌ src/Domain/Employee/Models/Entities/Abilities/EmployeeAbilities.php a layer nested in another
+✅ src/Domain/Employee/Contracts/InvitationContract.php
+✅ src/Domain/Employee/Actions/Invitations/InviteEmployee.php          Actions may group
+✅ src/Domain/Employee/Models/Abilities/EmployeeAbilities.php
 ```
 
 Classes that serve one subsystem (a strategy interface, its implementations, a value object) go together
@@ -136,22 +136,22 @@ A Contract is the gateway to a domain. Actions, Services and Models behind it ar
 
 ```php
 // ✅ same domain: you own the Action
-use Domain\Billing\Actions\CalculateInvoiceTotal;
+use Domain\Employee\Actions\CreateEmployee;
 
-$total = CalculateInvoiceTotal::handle($invoice);
+$employee = CreateEmployee::handle($data);
 
 // ❌ same domain: needless indirection
-$total = app(InvoiceContract::class)->calculateInvoiceTotal($invoice);
+$employee = app(EmployeeContract::class)->createEmployee($data);
 
 // ✅ other domain: through its Contract
-$customer = app(CustomerContract::class)->getCustomer($customerId);
+$user = app(UserContract::class)->getUser($userId);
 
 // ❌ other domain: reaching into internals
-use Domain\Customer\Models\Entities\Customer;
-use Domain\Customer\Actions\GetCustomer;
+use Domain\User\Models\Entities\User;
+use Domain\User\Actions\GetUser;
 
-$customer = Customer::find($customerId);
-$customer = GetCustomer::handle($customerId);
+$user = User::find($userId);
+$user = GetUser::handle($userId);
 ```
 
 - Type-hinting another domain's Entity because its Contract returns one is fine; querying or writing it
@@ -194,29 +194,29 @@ Use events only when a second domain must react and the publisher must not know 
 Contract call is simpler and easier to follow when there is one known consumer.
 
 ```php
-namespace Domain\Billing\Events;
+namespace Domain\Employee\Events;
 
-final class InvoiceIssued
+final class EmployeeCreated
 {
     use Dispatchable;
 
-    public function __construct(public readonly int $invoice_id, public readonly int $customer_id) {}
+    public function __construct(public readonly int $employee_id, public readonly int $user_id) {}
 }
 ```
 
 ```php
-namespace Domain\Customer\Listeners;
+namespace Domain\User\Listeners;
 
-final class RecordCustomerInvoice
+final class GrantEmployeeRole
 {
-    public function handle(InvoiceIssued $event): void
+    public function handle(EmployeeCreated $event): void
     {
-        app(CustomerContract::class)->recordInvoice($event->customer_id, $event->invoice_id);
+        app(UserContract::class)->assignRole($event->user_id, 'employee');
     }
 }
 
-// Domain\Customer\Providers\CustomerServiceProvider::boot()
-Event::listen(InvoiceIssued::class, RecordCustomerInvoice::class);
+// Domain\User\Providers\UserServiceProvider::boot()
+Event::listen(EmployeeCreated::class, GrantEmployeeRole::class);
 ```
 
 - The event lives in the publishing domain, the listener in the reacting domain.
@@ -229,9 +229,9 @@ Event::listen(InvoiceIssued::class, RecordCustomerInvoice::class);
 ## Jobs
 
 ```php
-namespace Domain\Billing\Jobs;
+namespace Domain\Employee\Jobs;
 
-final class SendInvoicePdf implements ShouldQueue
+final class SendEmployeeWelcomeEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -239,15 +239,15 @@ final class SendInvoicePdf implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(private readonly Invoice $invoice)
+    public function __construct(private readonly Employee $employee)
     {
-        $this->onQueue('documents');
+        $this->onQueue('mail');
         $this->afterCommit();
     }
 
-    public function handle(InvoiceContract $invoices): void
+    public function handle(EmployeeContract $employees): void
     {
-        $invoices->sendPdf($this->invoice);
+        $employees->sendWelcomeEmail($this->employee);
     }
 }
 ```
@@ -272,27 +272,27 @@ final class SendInvoicePdf implements ShouldQueue
 ## Console commands
 
 ```php
-namespace Domain\Billing\Commands;
+namespace Domain\User\Commands;
 
-final class SendOverdueInvoiceReminders extends Command
+final class DeactivateInactiveUsers extends Command
 {
-    protected $signature = 'invoices:send_overdue_reminders';
+    protected $signature = 'users:deactivate_inactive';
 
-    protected $description = 'Send reminders for invoices past their due date.';
+    protected $description = 'Deactivate users who have not signed in for 90 days.';
 
     public function handle(): void
     {
-        $count = app(InvoiceContract::class)->sendOverdueReminders();
+        $count = app(UserContract::class)->deactivateInactiveUsers();
 
-        $this->info("Sent {$count} reminders.");
+        $this->info("Deactivated {$count} users.");
     }
 }
 ```
 
 - File: `src/Domain/{Domain}/Commands/{Verb}{Noun}.php`, `final class`.
 - Signature `{group}:{action}`, both parts `snake_case`; the group is the domain's plural or the
-  integration's key (`invoices:expire_overdue`, `payments:refresh_token`). Not `app:expire-overdue`, not
-  `invoices:expireOverdue`.
+  integration's key (`users:deactivate_inactive`, `employees:send_welcome_emails`). Not
+  `app:deactivate-inactive`, not `users:deactivateInactive`.
 - Body: resolve a Contract, call one method, print one line. No Eloquent, no business logic.
 - Auto-register by glob, so a new file needs no wiring:
 
@@ -313,7 +313,7 @@ final class SendOverdueInvoiceReminders extends Command
 ## Observers
 
 `src/Domain/{Domain}/Observers/{Entity}Observer.php`, registered in that domain's provider `boot()` with
-`Invoice::observe(InvoiceObserver::class)`.
+`Employee::observe(EmployeeObserver::class)`.
 
 - Use an observer only when **every** write must be covered, whoever the caller. When one code path
   triggers the behaviour, put it in that Action, where it is explicit and testable.
@@ -355,7 +355,7 @@ domain that already has the same pattern.
 
 1. Check the concept does not already live in `Core` or an existing domain.
 2. Copy the closest domain's structure into `src/Domain/{NewDomain}/`.
-3. Rename namespaces and classes (`CustomerContract` → `InvoiceContract`).
+3. Rename namespaces and classes (`UserContract` → `EmployeeContract`).
 4. Adjust DTO properties, Action bodies and the filter scope to the new schema.
 5. Register `{NewDomain}ServiceProvider` in `bootstrap/providers.php`.
 
