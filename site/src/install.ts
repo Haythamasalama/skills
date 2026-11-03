@@ -1,6 +1,6 @@
 import { type Item, repoPath } from './catalog';
 
-export const REPO = 'Haythamasalama/skills';
+export const REPO = 'haythamasalama/skills';
 
 export function installCommands(item: Item) {
   return [

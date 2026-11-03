@@ -2,7 +2,7 @@
 
 Every skill here must help in **any** project, on any machine, and must work when it is the only skill
 installed. The layout follows the [Agent Skills](https://agentskills.io) format used by the official
-skill repos, so the standard CLI installs straight from this repo: `npx skills add Haythamasalama/skills`.
+skill repos, so the standard CLI installs straight from this repo: `npx skills add haythamasalama/skills`.
 
 ## Layout
 

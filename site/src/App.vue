@@ -51,7 +51,7 @@ const nav = [
             {{ item.label }}
           </a>
           <a
-            href="https://github.com/Haythamasalama/skills"
+            href="https://github.com/haythamasalama/skills"
             target="_blank"
             rel="noopener"
             class="inline-flex min-h-9 items-center rounded-full border border-chip px-3.5 text-fg transition-colors hover:bg-surface"
