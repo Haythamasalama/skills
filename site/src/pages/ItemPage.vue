@@ -28,7 +28,8 @@ const [owner, repoName] = REPO.split('/');
 const tabs = computed(() => [
   { label: 'Command', text: `npx skills add ${REPO} --skill ${props.item.name}` },
   { label: 'Prompt', text: `Install the ${props.item.name} skill from ${REPO} in this project` },
-  { label: 'Local', text: `npx skills add ${repoPath} --skill ${props.item.name}` },
+  // The local path only means something on the owner's machine, so the public build leaves it out.
+  ...(import.meta.env.DEV ? [{ label: 'Local', text: `npx skills add ${repoPath} --skill ${props.item.name}` }] : []),
 ]);
 const tab = ref(0);
 

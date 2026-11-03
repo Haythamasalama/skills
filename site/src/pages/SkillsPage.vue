@@ -3,6 +3,7 @@ import { Search } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { allItems, allTags, search } from '../catalog';
 import CopyButton from '../components/CopyButton.vue';
+import SkillsNav from '../components/SkillsNav.vue';
 import { installCommands, REPO } from '../install';
 
 const ALL = 'All';
@@ -48,6 +49,7 @@ const tryIt = `npx skills add ${REPO}`;
   <div>
     <section class="pt-16 md:pt-[88px]">
       <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[30px]">Skills</h1>
+      <SkillsNav current="skills" />
       <p class="mt-3 max-w-[60ch] text-[17px] leading-[1.7] text-soft">
         Playbooks for Claude Code, each one standalone. Install one, or pick from the list, with the standard skills CLI.
       </p>
