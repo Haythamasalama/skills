@@ -29,7 +29,8 @@ npx skills add haythamasalama/skills --skill laravel-ddd      # one skill
 ## Recommended skills from others
 
 [skills-lock.json](skills-lock.json) lists official and community skills that work well with these
-(shadcn-vue, Nuxt UI, Laravel best practices, Vue, a security audit, design and planning). To install
+(shadcn-vue, Nuxt UI, Laravel, Vue, a security audit, front-end design and motion, browser automation,
+and everyday agent workflows). Skills that need a paid service or a sign-in to work are left out. To install
 all of them in a project, copy the file into the project root and run:
 
 ```bash
