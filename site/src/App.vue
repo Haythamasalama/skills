@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted, onUnmounted, watchEffect } from 'vue';
+import { computed, onMounted, onUnmounted, watchEffect } from 'vue';
 import { findItem } from './catalog';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
@@ -7,10 +7,9 @@ import BulkBar from './components/BulkBar.vue';
 import ToolsBanner from './components/ToolsBanner.vue';
 import SkillsPage from './pages/SkillsPage.vue';
 import { picks } from './picks';
+import { itemPage, loadItemPage } from './preload';
 import { followLink, syncUrl, url } from './router';
 import * as seo from './seo';
-
-const ItemPage = defineAsyncComponent(() => import('./pages/ItemPage.vue'));
 
 onMounted(() => {
   addEventListener('popstate', syncUrl);
@@ -36,6 +35,10 @@ const route = computed(() => {
 });
 
 watchEffect(() => {
+  if (route.value.view === 'item') loadItemPage();
+});
+
+watchEffect(() => {
   const page = route.value;
 
   if (page.view === 'item') {
@@ -53,7 +56,9 @@ watchEffect(() => {
       <AppHeader :path="url" />
 
       <main id="main">
-        <ItemPage v-if="route.view === 'item'" :item="route.item" :path="route.path" :anchor="route.anchor" />
+        <template v-if="route.view === 'item'">
+          <component :is="itemPage" v-if="itemPage" :item="route.item" :path="route.path" :anchor="route.anchor" />
+        </template>
         <SkillsPage v-else :tab="route.view" :q="route.q" />
       </main>
 
