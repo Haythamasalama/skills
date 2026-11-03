@@ -79,8 +79,9 @@ revert: let us never again speak of the noodle incident
 Refs: 676104e, a215868
 ```
 
-`git revert` writes `Revert "<original subject>"`. Rewrite it into the form above, and say in the body
-why the change is going back out.
+`git revert` writes `Revert "<original subject>"`, and GitHub's revert button titles the PR the same
+way. Rewrite either into the form above before merging, and say in the body why the change is going
+back out.
 
 ## What the spec leaves open
 

@@ -11,14 +11,16 @@ hosts (GitLab merge requests, Bitbucket) work the same way with different button
 
 ## TL;DR
 
-- Branch `<type>/<short-description>`, lowercase kebab-case, from an up-to-date main branch.
+- Branch `<type>/<scope>-<short-description>` with the PR title's type and scope, cut from an up-to-date
+  main branch.
 - Title = a Conventional Commits subject. It becomes the squash commit, so it carries the type, the scope
   and a real description.
 - Body: what and why, how it was checked, what is left out, breaking changes, `Closes #N`.
 - One reason per PR. Small enough to review in one sitting.
 - Fill the repo's PR template when there is one.
 - Answer every review thread: fix and say what changed, or say why not. Resolve only what you fixed.
-- After review, add commits; force-push only your own branch that nobody else has checked out.
+- After review, add commits; force-push only your own branch that nobody else has checked out. Never
+  force-push or rebase the main branch.
 - Merge with the method the repo uses; with squash, rewrite the message before you click.
 
 ## Before opening
@@ -33,17 +35,36 @@ git diff --stat origin/main...HEAD      # no stray files
 - Look for a template: `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE.md`,
   `.github/PULL_REQUEST_TEMPLATE/*.md`, `PULL_REQUEST_TEMPLATE.md` or `docs/PULL_REQUEST_TEMPLATE.md`.
 - Read the last few merged PRs: title style, body headings, whether they squash.
+- Check the subject and the branch name agree:
+
+```bash
+s=$(git log -1 --format=%s)
+echo "$s" | grep -Eq '^(feat|fix|refactor|perf|test|style|ci|build|docs|chore|revert)(\([a-z0-9-]+\))?!?: [a-z]' \
+  || echo "subject: $s"
+b=$(git branch --show-current)
+p=$(echo "$s" | sed -nE 's/^([a-z]+)\(([a-z0-9-]+)\)!?: .*/\1\/\2-/p')
+[ -z "$p" ] || [ "${b#"$p"}" != "$b" ] || echo "branch: $b, expected $p…"
+```
 
 ## Branch names
 
+Name the branch `<type>/<scope>-<short-description>`, taking the type and scope from the PR title, so the
+branch, the title and the squash commit all agree. Lowercase kebab-case; the description is two to five
+words.
+
 ```
-feat/invoice-export
-fix/cart-total-rounding
-docs/api-pagination
+feat/invoices-csv-export          # feat(invoices): add CSV export
+fix/cart-total-rounding           # fix(cart): round totals once, after discounts
+
+feat/invoice-export               # no scope
+feat/412-invoice-export           # an issue number in place of the scope
+feat-invoices-export              # no slash after the type
 ```
 
-Type first, then a few words. Some repos add the scope or a ticket id (`fix/billing-412-rounding`);
-follow them. A tool-assigned branch name is fine as it is.
+- Leave issue numbers out unless the repo requires them; `Closes #N` in the body links the issue.
+- A tool-generated name (`<tool>/<random-slug>`) is renamed before the first push:
+  `git branch -m feat/invoices-csv-export`.
+- Don't rename the branch of an open PR just to fix its name: the squash commit takes the PR title.
 
 ## Title
 
@@ -96,6 +117,7 @@ Closes #123
 ## Size and scope
 
 - One reason to change per PR, the same test as a commit: could it be reverted alone?
+- A change that spans unrelated areas is two PRs. If it cannot be split, scope it to the main area.
 - A refactor and the feature on top of it can be two PRs, the refactor first.
 - Unrelated fixes you noticed go in their own PR or a note, not this one.
 - Generated files (lockfiles, snapshots) belong with the change that generated them.

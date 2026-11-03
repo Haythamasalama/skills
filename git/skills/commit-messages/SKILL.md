@@ -9,7 +9,6 @@ description: Use when writing a commit message, staging or committing changes, s
 merge one.
 **Owns:** the commit format, types, scopes, bodies, footers, breaking changes, splitting, rewording; PR
 titles, bodies, review replies and merge messages.
-**See also:** a stack skill may add its own scope list (for example layer scopes in a Laravel repo).
 
 Conventional Commits ([v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), checked 2026-11-03) for
 any repository. Commit, push, open a PR or merge only when the user asks; many owners review and commit
@@ -30,11 +29,11 @@ themselves.
 - One commit per reason to change. Test: can it be reverted alone without taking something
   unrelated with it?
 - Breaking change: `!` before the colon and/or a `BREAKING CHANGE:` footer.
-- Learn the repo's scopes from its history before inventing one.
+- The scope names the area the change is about, never a code layer. Learn the repo's scopes from its
+  history before inventing one.
 - The build (with its type check) passes before the commit, not after.
 - Reword only commits that are not pushed, unless the owner says otherwise.
-- A PR title is a commit subject: with squash merge it becomes one. Same format, same rules.
-- `fix` → patch, `feat` → minor, any breaking change → major.
+- A PR title is a commit subject; the PR rules are in [references/pull-requests.md](references/pull-requests.md).
 
 ## Before you write
 
@@ -85,10 +84,19 @@ the history uses.
 
 ## Scope
 
-A noun naming the part of the codebase touched: a feature area, a layer, or a tool (`auth`,
-`i18n`, `rtl`, `print`, `deps`, `docker`). Optional, but in a repo with clear seams it usually
-writes itself. Use the scopes the history already has. If a change spans more than two scopes, it
-is probably two commits.
+A noun naming the **area the change is about**, so `git log` reads by area: a business area
+(`invoices`, `orders`, `auth`), an app or panel (`admin`, `api`), or a tool (`deps`, `ci`, `docker`).
+Optional, but in a repo with clear seams it usually writes itself.
+
+- **Never a code layer** (`controllers`, `views`, `migrations`, `domain-actions`). Why: the diff already
+  shows which files changed; the scope should say what part of the product moved.
+- **One spelling per area.** Business areas are plural kebab-case nouns (`orders`, `payment-requests`);
+  areas with no plural keep their name (`billing`, `tracking`). Use the spellings the history already
+  has, and never two for one area (`order` and `orders`).
+- **Pick the narrowest true area.** Tooling first (`deps`, `ci`), then an app or panel when every changed
+  file belongs to it, otherwise the business area.
+- A change that spans unrelated areas is two commits. If it cannot be split, scope it to the area it is
+  mainly about.
 
 ## Description
 
@@ -96,15 +104,15 @@ Imperative mood, lowercase start, no trailing period, under ~72 characters. It c
 sentence "If applied, this commit will …".
 
 ```
-feat(lesson): add lesson 3 on food and drink
-fix(print): restore the answer key hidden by the match block rewrite
-refactor(blocks): render vocab through TargetText
+feat(invoices): add a due-date reminder email
+fix(orders): count each line's price once in the order total
+refactor(payments): move refund totals into one place
 ```
 
 Not:
 
 ```
-Added lesson 3.              (past tense, full stop)
+Added the CSV export.        (past tense, full stop)
 fix: bug                     (says nothing)
 feat(blocks): update files   (says nothing)
 ```
@@ -122,9 +130,9 @@ Write one when the change is not self-evident from the diff. Explain the **why**
 - the constraint that forced this approach;
 - the alternative you rejected, and the reason.
 
-When a commit touches a convention the codebase depends on but nothing enforces (a print
-contract, a bidi isolation class, a glob, module-level singletons, a "null means hidden" rule),
-say so in the body. Those are the ones that break silently.
+When a commit touches a convention the codebase depends on but nothing enforces (a naming rule
+another file greps for, a glob, a module-level singleton, a "null means hidden" rule), say so in the
+body. Those are the ones that break silently.
 
 Don't narrate the session ("first I tried…"), list files, or restate the diff.
 
@@ -151,18 +159,17 @@ key or environment variable is renamed, a supported version is dropped. A change
 the app's own rendering is not breaking, however visible it is.
 
 ```
-refactor(routes)!: consolidate on the programme pages
+refactor(api)!: rename the customer endpoints to plural nouns
 
-BREAKING CHANGE: /courses and /lesson/* are retired. They 301 to the new
-pages in both the router and the web server config. Change one, change the
-other: CI asserts the redirects against a real container.
+BREAKING CHANGE: /api/customer/* moves to /api/customers/*. The old paths
+answer 301 for one release, then 404. Clients must update their base URL.
 ```
 
 ## Splitting work
 
 - One commit per reason to change. Could this commit be reverted on its own without undoing
   something unrelated?
-- **Content and code go in separate commits.** A content update (`feat(content): add lesson 12`)
+- **Content and code go in separate commits.** A content update (`feat(content): add the pricing FAQ`)
   should revert without undoing a component fix that landed the same afternoon.
 - A refactor and the feature built on it are two commits: the refactor first, behaviour unchanged.
 - Formatting churn gets its own `style` commit, or stays out of the diff.
@@ -185,20 +192,14 @@ did not happen, so amending would change the previous one. Fix the problem and c
   `vite build`), template errors surface only there. A commit that does not build is not finished.
 - Lint and format the files you touched.
 - For anything visual, check it in a real browser before committing, not after.
-- Read `git diff --staged` once more. Nothing temporary, no secrets, no stray debug output.
+- **Stage files by name**, not `git add -A` or `git add .`, which sweep in untracked secrets and large
+  files. Never stage `.env` / `.env.*`, credential or key files, logs, dumps, or generated output that is
+  not meant to be tracked. A secret that was committed must be rotated: deleting it later leaves it in
+  history.
+- **Never bypass hooks** (`--no-verify`). When a hook fails, fix what it reports and commit again.
+- Read `git diff --staged` once more. Nothing temporary, no stray debug output.
 
 ## Pull requests
 
-The short version; the details and the body template are in
-[references/pull-requests.md](references/pull-requests.md).
-
-- **Title** = a commit subject: `type(scope): description`, same rules. Squash merge turns it into the
-  commit on the main branch, so a vague title becomes a vague history.
-- **Body** for a reviewer who has not seen the conversation: what and why, how it was checked, what is
-  left out on purpose, breaking changes, and the issue it closes (`Closes #12`).
-- Use the repo's PR template when there is one; fill its headings, skip what does not apply.
-- **One reason per PR**, like a commit. Unrelated fixes you noticed get their own PR.
-- After review, push new commits; don't force-push a branch others have checked out.
-- **Merge message:** with squash, rewrite the generated body (a list of "fix typo" commits) into the
-  why, keep the attribution footers, and check the title once more.
-
+A PR title is a commit subject, and with squash merge it becomes one. Branch names, the body, review
+replies, updating and merging: [references/pull-requests.md](references/pull-requests.md).

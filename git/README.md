@@ -8,4 +8,4 @@ description: Commit messages, splitting work into commits, and pull requests.
 
 | المهارة | شو بتعمل |
 |---|---|
-| `commit-messages` | رسائل Conventional Commits، تقسيم الشغل لـ commits، وفتح الـ PR ووصفه والرد على المراجعات والدمج |
+| `commit-messages` | رسائل Conventional Commits، والـ scopes حسب منطقة التغيير، وأسماء الفروع، وفتح الـ PR ووصفه والرد على المراجعات والدمج |
