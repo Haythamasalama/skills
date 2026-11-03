@@ -1,0 +1,233 @@
+/*
+ * The theme stylesheet: the file components.json names in "tailwind.css".
+ * Palette "Neutral": black and white weight, one warm hue kept for the chart ramp.
+ * Copy fonts.css next to it. Edit tokens in :root AND .dark; nothing else defines a colour.
+ */
+
+@import 'tailwindcss';
+@import './fonts.css';
+@import 'tw-animate-css';
+@import 'vue-sonner/style.css';
+@import 'shadcn-vue/tailwind.css';
+
+/* Laravel: also scan the Blade root view, e.g. @source '../views'; */
+
+@custom-variant dark (&:is(.dark *));
+
+/* A plain @theme, not inline: inline bakes this stack into font-sans and :root[lang='ar'] never reaches it. */
+@theme {
+    --font-sans: 'Noto Sans', 'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme inline {
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-tone-green: var(--tone-green);
+    --color-tone-blue: var(--tone-blue);
+    --color-tone-cyan: var(--tone-cyan);
+    --color-tone-orange: var(--tone-orange);
+    --color-tone-yellow: var(--tone-yellow);
+    --color-tone-pink: var(--tone-pink);
+    --font-heading: var(--font-sans);
+}
+
+:root {
+    /* Scrollbars, native selects and autofill follow the theme only when told. */
+    color-scheme: light;
+
+    --radius: 0.625rem;
+
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+
+    /* One hue, light to deep, so a series reads as a quantity. */
+    --chart-1: oklch(0.72 0.16 55);
+    --chart-2: oklch(0.63 0.17 45);
+    --chart-3: oklch(0.55 0.16 38);
+    --chart-4: oklch(0.47 0.13 32);
+    --chart-5: oklch(0.39 0.1 28);
+
+    /* Darker than --card, so the inset content panel reads as floating above the shell. */
+    --sidebar: oklch(0.968 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+
+    /* Status tones: the only other hues, for chips a reader scans. Lifted in dark mode. */
+    --tone-green: oklch(0.52 0.13 152);
+    --tone-blue: oklch(0.53 0.16 258);
+    --tone-cyan: oklch(0.54 0.11 215);
+    --tone-orange: oklch(0.58 0.15 55);
+    --tone-yellow: oklch(0.58 0.12 85);
+    --tone-pink: oklch(0.56 0.19 5);
+}
+
+/* Arabic leads with its own face; the Latin inside it falls through to the same design. */
+:root[lang='ar'] {
+    --font-sans: 'Noto Sans Arabic', 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+
+    --chart-1: oklch(0.8 0.16 58);
+    --chart-2: oklch(0.72 0.17 48);
+    --chart-3: oklch(0.64 0.16 40);
+    --chart-4: oklch(0.56 0.14 34);
+    --chart-5: oklch(0.48 0.11 30);
+
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.922 0 0);
+    --sidebar-primary-foreground: oklch(0.205 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+
+    --tone-green: oklch(0.8 0.15 152);
+    --tone-blue: oklch(0.78 0.13 258);
+    --tone-cyan: oklch(0.8 0.1 215);
+    --tone-orange: oklch(0.8 0.14 55);
+    --tone-yellow: oklch(0.85 0.13 85);
+    --tone-pink: oklch(0.78 0.15 5);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background font-sans text-foreground antialiased;
+    }
+}
+
+/*
+ * Unlayered from here on: an unlayered rule beats every layered Tailwind utility, whatever the
+ * specificity. Keep these at the foot of the file.
+ */
+
+/* vue-sonner's own stylesheet is unlayered and sets a font stack, so a font-sans class on <Toaster> loses. */
+[data-sonner-toaster],
+[data-sonner-toaster] * {
+    font-family: var(--font-sans);
+}
+
+/* Tracking breaks joined Arabic letters, and Arabic has no case. Unlayered so tracking-* and uppercase lose. */
+:root[lang='ar'] * {
+    letter-spacing: normal;
+}
+
+:root[lang='ar'] .uppercase {
+    text-transform: none;
+}
+
+/*
+ * RTL gaps of the registry (shadcn-vue 2.8.x, checked 2026-11-03). Re-check after upgrading.
+ * SheetContent stays on physical left-0/right-0 while Sidebar reads side as start/end. Two slots,
+ * because Sidebar's mobile branch overwrites the sheet's data-slot with "sidebar".
+ */
+[dir='rtl'] [data-slot='sheet-content'][data-side='left'],
+[dir='rtl'] [data-mobile='true'][data-side='left'] {
+    right: 0;
+    left: auto;
+    --tw-enter-translate-x: calc(0.1 * 100%);
+    --tw-exit-translate-x: calc(0.1 * 100%);
+}
+
+[dir='rtl'] [data-slot='sheet-content'][data-side='right'],
+[dir='rtl'] [data-mobile='true'][data-side='right'] {
+    left: 0;
+    right: auto;
+    --tw-enter-translate-x: calc(0.1 * -100%);
+    --tw-exit-translate-x: calc(0.1 * -100%);
+}
+
+/* AlertDialogHeader aligns with a physical sm:text-left; same breakpoint, so small-screen centring stays. */
+@media (width >= 40rem) {
+    [data-slot='alert-dialog-content'][data-size='default'] [data-slot='alert-dialog-header'] {
+        text-align: start;
+    }
+}
+
+/* The Switch thumb travels on a physical translate; mirror the checked travel only. */
+[dir='rtl'] [data-slot='switch-thumb'][data-state='checked'] {
+    translate: calc(-100% + 2px) 0;
+}
