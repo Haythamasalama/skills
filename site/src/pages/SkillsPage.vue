@@ -52,6 +52,7 @@ const ownAvatar = avatarOf(`${OWNER}/skills`);
 
 const remote = ref<Listing[]>([]);
 const status = ref<'idle' | 'loading' | 'done' | 'error'>('idle');
+const loading = computed(() => !local.value && status.value === 'loading');
 let controller: AbortController | undefined;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -232,8 +233,23 @@ const highlight = (snippet: string) => {
 
       <FilterChips v-if="local" v-model="category" class="mt-4" :options="options" label="Filter by category" />
 
-      <div class="flex flex-col divide-y divide-line border-b border-line" :class="{ 'mt-4 border-t': local }">
-        <div v-if="rows.length" class="px-2 py-1.5">
+      <div class="flex flex-col divide-y divide-line border-b border-line" :class="{ 'mt-4 border-t': local }" :aria-busy="loading">
+        <span v-if="loading" class="sr-only" role="status">Searching skills.sh</span>
+        <template v-if="loading">
+          <div v-for="n in 6" :key="n" class="flex items-center gap-3 px-2 py-4 motion-safe:animate-pulse" aria-hidden="true">
+            <span class="-ml-1 inline-flex size-8 shrink-0 items-center justify-center">
+              <span class="size-[18px] rounded-[5px] bg-chip" />
+            </span>
+            <span class="size-9 shrink-0 rounded-full bg-chip" />
+            <span class="ml-1 flex min-w-0 flex-auto flex-col gap-2">
+              <span class="h-3.5 rounded bg-chip" :style="{ width: `${[38, 52, 30, 46, 34, 42][n - 1]}%` }" />
+              <span class="h-3 w-24 rounded bg-chip" />
+            </span>
+            <span class="h-6 w-14 shrink-0 rounded-md bg-chip" />
+          </div>
+        </template>
+
+        <div v-if="rows.length && !loading" class="px-2 py-1.5">
           <button
             type="button"
             role="checkbox"
@@ -253,7 +269,7 @@ const highlight = (snippet: string) => {
           </button>
         </div>
 
-        <div v-for="row in rows" :key="row.key" class="relative flex items-center gap-3 px-2 py-4 transition-colors hover:bg-raised">
+        <div v-for="row in loading ? [] : rows" :key="row.key" class="relative flex items-center gap-3 px-2 py-4 transition-colors hover:bg-raised">
           <button
             type="button"
             role="checkbox"
@@ -303,7 +319,7 @@ const highlight = (snippet: string) => {
           </span>
         </div>
 
-        <p v-if="!rows.length" class="px-2 py-10 text-center text-[15px] text-muted">
+        <p v-if="!rows.length && !loading" class="px-2 py-10 text-center text-[15px] text-muted">
           <template v-if="local">Nothing matches “{{ query }}”.</template>
           <template v-else-if="status === 'idle'">
             skills.sh needs at least two letters. Try
@@ -311,7 +327,6 @@ const highlight = (snippet: string) => {
               <button type="button" class="cursor-pointer font-mono text-fg underline decoration-chip underline-offset-4 hover:decoration-fg" @click="query = word">{{ word }}</button>{{ i < suggestions.length - 1 ? ', ' : '.' }}
             </template>
           </template>
-          <template v-else-if="status === 'loading'">Searching skills.sh…</template>
           <template v-else-if="status === 'error'">skills.sh did not answer. Try again in a moment.</template>
           <template v-else>Nothing on skills.sh matches “{{ query }}”.</template>
         </p>
