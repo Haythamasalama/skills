@@ -3,7 +3,7 @@ name: laravel-code-quality
 description: Use when writing, reviewing or cleaning up Laravel PHP for quality and safety rather than layout — formatting with Pint, one-line method signatures, named arguments, the few-comments rule and when PHPDoc is allowed, naming and types, readable conditionals (guard clauses, named conditions, elseif, match), private methods over single-use classes; security (fail-closed authorization, routes inside auth groups, file-route permissions, row-level visibility, Form Request validation, one-value-or-list fields, mass assignment, bound raw SQL, XSS, secrets and env(), throttle keys, random_int, signed public links); sensitive operations such as refunds, payouts, data exports and access grants (duplicate-submit protection, once-only execution, maker-checker approvals, self-approval, overrides, step-up auth, append-only audit logs, masking, bounded output); tests that guard all of this; the numbered anti-pattern catalogue; the code review report format. Also triggers on "review this diff", "code review", "clean this up", "is this secure", "anti-pattern", "double submit", "approval flow", "audit log", "مراجعة الكود", "جودة الكود", "تنظيف الكود", "التعليقات", "ثغرة", "أمان", "موافقات".
 metadata:
   summary: "Laravel code style, security, sensitive operations and code review."
-  tags: laravel, php
+  tags: laravel, php, security
 ---
 
 # Laravel code quality
