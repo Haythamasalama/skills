@@ -21,7 +21,7 @@ scripts/                install.sh, check.sh, privacy-scan.sh (repo tools, never
 - `<pack>` and `<name>`: lowercase kebab-case, say the subject, never a project or client name.
 - Skill and agent names are unique across the whole repo: they land in the same `.claude/skills` and
   `.claude/agents` folders of a project. When two packs need a similar skill, prefix it with the pack
-  (`vue-inertia-ui-review`, `nuxt-ui-review`).
+  (`vue-inertia-ui-review`).
 - A project gets skills with `sh scripts/install.sh <pack|skill>… --to <project>`; they are copied into
   `<project>/.claude/`. Only `tooling` goes to `~/.claude` (`--global`).
 

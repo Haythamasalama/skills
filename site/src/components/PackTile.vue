@@ -5,7 +5,6 @@ import {
   Layers,
   LayoutTemplate,
   MessageCircle,
-  Mountain,
   Package,
   PenLine,
   Rocket,
@@ -19,7 +18,6 @@ const { pack, agent = false, size = 36 } = defineProps<{ pack: string; agent?: b
 const icons: Record<string, unknown> = {
   laravel: Layers,
   'vue-inertia': LayoutTemplate,
-  'nuxt-ui': Mountain,
   brand: Signature,
   writing: PenLine,
   deploy: Rocket,
