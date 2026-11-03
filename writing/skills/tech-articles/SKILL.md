@@ -87,10 +87,8 @@ Aim for three to six figures on a full page. Template and section rules:
 
 Plain words over jargon; first person for your own work, "the team" for shared work; short
 sentences, one idea per paragraph; headings in sentence case that say what the section is ("The
-integration engine", not "One engine to rule them all"); no marketing words and no AI filler. The
-owner's voice and the words to avoid: the `haytham-brand` skill's
-[voice.md](../haytham-brand/references/voice.md). Honesty, employer rules and the lengths table:
-[references/writing-rules.md](references/writing-rules.md).
+integration engine", not "One engine to rule them all"); no marketing words and no AI filler. The full voice, honesty, employer
+rules and the lengths table: [references/writing-rules.md](references/writing-rules.md).
 
 ## Figures
 
@@ -107,9 +105,8 @@ Details: [references/screenshots.md](references/screenshots.md).
 
 ## Social posts
 
-After the article is published. The X thread (five to eight posts) and the LinkedIn post are the
-`linkedin-posts` skill's: [Sharing an article](../linkedin-posts/SKILL.md#6-sharing-an-article).
-The Medium import (keeps the canonical link) and, for a case study, a LinkedIn Projects entry under
+After the article is published: the X thread (five to eight posts), the LinkedIn post, the Medium
+import (keeps the canonical link) and, for a case study, a LinkedIn Projects entry under
 2,000 characters: [references/social-posts.md](references/social-posts.md). Keep drafts out of the
 repository.
 

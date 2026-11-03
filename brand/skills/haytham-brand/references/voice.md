@@ -3,16 +3,8 @@
 How Haytham's words sound, in English and Arabic. Checked 2026-10-27. His readers include CEOs,
 CTOs, engineers and recruiters; write so all of them follow.
 
-This file is the home of his voice and of the words to avoid. Two other skills hold rules that apply
-to all of his text, and this file does not repeat them:
-
-- exact attribution, checkable claims, what never to publish about an employer or client, and the
-  lengths of cards, descriptions, captions and alt text:
-  [tech-articles writing rules](../../tech-articles/references/writing-rules.md);
-- Arabic register, wording, punctuation and the terms that stay in Latin letters:
-  the [arabic-copy](../../arabic-copy/SKILL.md) skill.
-
-LinkedIn posts and X threads follow `linkedin-posts` on top of this voice.
+This file is the home of his voice, the words to avoid, the employer rules and the lengths of short
+texts. They hold for his site, his posts and his articles alike.
 
 ## The voice in one line
 
@@ -39,7 +31,8 @@ LinkedIn posts and X threads follow `linkedin-posts` on top of this voice.
 
 ## Arabic
 
-On top of `arabic-copy`:
+Register: simple modern standard Arabic (فصحى بسيطة): not classical, not dialect; the everyday word
+over the literary one; technical names stay in Latin letters; one fixed term per concept. On top of that:
 
 - Numbers in Latin digits (30 يوماً، 6 ساعات), as in his Arabic product copy.
 - First person for his own work: «صممتُ وبنيتُ ...». Shared work: «الفريق».
@@ -65,15 +58,42 @@ those from the site when they are needed):
 
 Write bios in the third person. Posts and his own pages use the first person.
 
-## Lengths and employer rules
+## Honesty
 
-Both live in [tech-articles writing rules](../../tech-articles/references/writing-rules.md#lengths)
-and hold for his site, his posts and his articles alike. LinkedIn post length: `linkedin-posts`.
+- Every claim can be traced to code, git history or a measurement. If it can't, ask; don't invent it.
+- Say exactly what he did: "I designed and built X", "I built the foundation of X; the team grew it".
+- No unmeasured outcomes ("3× faster" only when it was measured).
+
+## Employers and clients
+
+These hold for every past and future employer or client.
+
+- **No internal counts**: files, pages, components, releases, endpoints, pull-request sizes.
+- **Growing counts are "more than N"** ("more than 50 domains"): the real number will change.
+- **No dated internal milestones** ("in February we added…"). Public facts such as job dates are fine.
+- **No long lists of vendors or internal tools.** Describe integrations by category (payment gateways,
+  AI models, messaging). Don't name the AI tooling vendor; say "AI coding agents".
+- **Colleagues:** "the team" on the site; named only where they agreed, as contributors.
+- **Never publish:** secrets, hostnames, endpoint paths, database schemas, permission keys,
+  rate-limit numbers, known weaknesses, pricing, customer or personal data.
+- **Screenshots and code:** none of employer or client products unless he asks; short snippets typed
+  fresh, never copied from a company's code.
+
+## Lengths
+
+| Text | Length |
+|---|---|
+| page or article `description` (search, link previews) | 120–220 characters |
+| project card description | one sentence, about 80–160 characters |
+| paragraph | two or three sentences |
+| figure caption | one sentence that says what to notice |
+| LinkedIn post | under about 1,300 characters |
+| LinkedIn project description | under 2,000 characters |
 
 ## Checks before publishing
 
 - [ ] Read it aloud. Anything that sounds like an advert gets rewritten.
 - [ ] Every claim can be traced to code, history or a measurement.
 - [ ] Name, title and handle are spelled as in [../SKILL.md](../SKILL.md).
-- [ ] Arabic text passes `arabic-copy`, with Latin digits.
-- [ ] Nothing from the [employer "Never publish" list](../../tech-articles/references/writing-rules.md#employers-and-clients).
+- [ ] Arabic text is simple فصحى, with Latin digits.
+- [ ] Nothing from the "Never publish" list above.

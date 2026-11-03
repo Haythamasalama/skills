@@ -3,8 +3,7 @@
 How to run one Nuxt UI app in Arabic (right to left) and English (left to right) without writing the layout twice.
 Checked 2026-10-27.
 
-The sections from "Layout once, both directions" to "Fonts for Arabic" hold for any stack. They are the
-one home of the generic bidi rules; `admin-ui` and `arabic-copy` link here for them.
+The sections from "Layout once, both directions" to "Fonts for Arabic" hold for any stack.
 
 ## Two settings, both needed
 
@@ -241,8 +240,9 @@ convention; leave it, and put `dir="ltr"` on a numeric axis container that would
 
 ## Writing the copy
 
-Arabic register, wording, punctuation and the terms that stay in Latin letters: the
-[arabic-copy](../../arabic-copy/SKILL.md) skill. For this stack:
+Arabic copy is simple modern standard Arabic (فصحى بسيطة): not classical, not dialect; the everyday word
+over the literary one; technical names stay in Latin letters; one fixed term per concept. Arabic punctuation (، ؛ ؟) in Arabic text,
+and no em dash. For this stack:
 
 - Keep its glossary of fixed terms at the top of the dictionary: one word per concept across the app.
 - Template names, IDs and codes stay exactly as the source wrote them.

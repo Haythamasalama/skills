@@ -5,11 +5,16 @@ social drafts.
 
 ## Voice
 
-The owner's voice lives in the `haytham-brand` skill:
-[voice.md](../../haytham-brand/references/voice.md) (plain words, first person, short sentences,
-headings, spelling, meta lines, and the marketing words and AI filler to avoid in English and
-Arabic). Arabic copy also follows the `arabic-copy` skill. The rules below are the ones that voice
-file links back to; they hold for every text about the owner's work, not only articles.
+- Plain words over jargon. First person for your own work ("I designed and built…"), "the team" for
+  shared work. Short sentences, one idea per paragraph; drop an adjective the sentence works without.
+- Headings in sentence case say plainly what the section is.
+- British spelling in new text (colour, behaviour). Meta lines use a middle dot: `Founder · 2026 – now`.
+- No marketing words (cutting-edge, seamless, robust, revolutionary, world-class, leverage, unlock,
+  game-changing) and no AI filler ("It's worth noting", "Let's dive in", groups of three for rhythm).
+- Arabic: simple modern standard Arabic (فصحى بسيطة): not classical, not dialect; the everyday word
+over the literary one; technical names stay in Latin letters; one fixed term per concept; Latin digits; no exaggeration (ثوري، لا مثيل له، نقلة نوعية).
+
+The rules below hold for every text about the owner's work, not only articles.
 
 ## Honesty and attribution
 

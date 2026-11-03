@@ -102,9 +102,10 @@ Rules that came from false clean reports:
 
 ## 5. RTL checklist
 
-The rules behind these checks (logical classes, isolation, which icons flip, digits, Arabic fonts)
-live once in the `nuxt-ui` skill's [i18n-rtl.md](../../nuxt-ui/references/i18n-rtl.md#layout-once-both-directions); they hold for
-any stack. On the rendered page, check:
+The rules behind these checks: logical classes (`ms-`, `pe-`, `start-`, `text-start`) instead of
+physical ones; a Latin run inside Arabic isolated with `dir="ltr"` or U+2066 … U+2069; directional
+icons flip, symbols with digits or letters don't; Latin digits; an Arabic font beside the Latin one.
+On the rendered page, check:
 
 - no physical direction class (`ml-`, `pr-`, `left-`, `text-left`) on anything that should flip;
 - no typed directional glyph («→»): each is an icon that flips;

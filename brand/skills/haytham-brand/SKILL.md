@@ -123,7 +123,7 @@ Full scales, light-theme tokens and the code and diagram palettes: [references/c
 - Plain words, short sentences, one idea per paragraph. First person for his own work, "the team" for shared work.
 - No marketing words and no unmeasured claims.
 - English: British spelling in new text, sentence-case headings.
-- Arabic: the `arabic-copy` register (Modern Standard Arabic, short and plain), with Latin digits.
+- Arabic: Modern Standard Arabic, short and plain, technical names in Latin letters, with Latin digits.
 
 Full rules and bios: [references/voice.md](references/voice.md).
 

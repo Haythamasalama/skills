@@ -139,12 +139,13 @@ No scanner finds these. The side-by-side dump does.
 ## 6. Bidi
 
 - A `#41`, a bare identifier, a host or a version next to punctuation reorders on screen.
-- Wrap the run in U+2066 … U+2069 (LRI … PDI) in a string, or `<bdi dir="ltr">` in markup. The
-  mechanics, and why not to add isolates in advance: [Mixed-direction text](../../nuxt-ui/references/i18n-rtl.md#mixed-direction-text).
+- Wrap the run in U+2066 … U+2069 (LRI … PDI) in a string, or `<bdi dir="ltr">` in markup. Add
+  isolates only where the rendered page shows a flip: they are invisible in the source and easy to
+  duplicate.
 - Check the rendered page first. A Latin word right before an Arabic comma («Slack،») usually
   renders fine. Look before you wrap.
-- A horizontal arrow typed as a character cannot flip; use an icon
-  ([which icons flip](../../nuxt-ui/references/i18n-rtl.md#icons-that-point-somewhere)).
+- A horizontal arrow typed as a character cannot flip; use an icon that
+  flips in RTL (chevrons, arrows, send, external link). Clocks, checkmarks and logos never flip.
 
 ## What the scanner covers
 

@@ -7,8 +7,7 @@ description: Use when writing, polishing or publishing a LinkedIn post or an X (
 
 **Read when:** drafting or publishing a post about something the owner built or learned.
 **Owns:** structure, tone, image, approval and publishing steps, and the X thread and LinkedIn post
-that share an article. For the visual identity and the voice see the `haytham-brand` skill; for the
-article itself, its Medium import and a LinkedIn Projects entry see `tech-articles`.
+that share an article.
 
 ## TL;DR
 
@@ -18,8 +17,8 @@ article itself, its Medium import and a LinkedIn Projects entry see `tech-articl
   points, how it runs, one question to the reader, links, hashtags.
 - **One image.** A single clear product screenshot (in the post's language) beat a 6-image carousel;
   nobody opens PDFs. Make extra images only if asked.
-- Arabic posts are warm and direct, in the register of the [arabic-copy](../arabic-copy/SKILL.md)
-  skill (simple فصحى, technical names in Latin script).
+- Arabic posts are warm and direct: simple فصحى, not classical and not dialect, technical names in
+  Latin script, Latin digits.
 - Attach the image **before** pasting text that contains a link: once LinkedIn shows a link preview the
   media button disappears.
 - After publishing, open the post's URL and check the text, the image count and the links.
@@ -47,12 +46,12 @@ when the user is unhappy, and let them pick.
 ## 2. Tone rules
 
 - First person, the builder speaking to peers. Concrete over impressive: numbers, real steps.
-- The owner's voice applies, including the words to avoid in both languages and no unmeasured
-  numbers: [haytham-brand voice](../haytham-brand/references/voice.md).
+- Plain words, no unmeasured numbers. No marketing words (seamless, revolutionary, game-changing,
+  ثوري، لا مثيل له، نقلة نوعية) and no AI filler ("It's worth noting", groups of three for rhythm).
 - Emojis: one per point, plus at most 2 elsewhere. Never a row of emojis.
 - English posts follow the same order.
-- Check the draft for AI tells: the `humanizer` skill (if installed) for English, the
-  [arabic-copy tells](../arabic-copy/references/tells-and-rewrites.md) for Arabic.
+- Check the draft for AI tells: read it aloud; in Arabic, rebuild any sentence that reads like
+  English translated word by word (an em dash, «قم بـ», «يتم + مصدر», a caption that describes the image).
 
 ## 3. The image
 
@@ -121,5 +120,5 @@ One line each. No bullets of buzzwords.>
 
 - One figure.
 - Colleagues may be named here (not on the site), as contributors.
-- The article's employer rules hold (no internal counts, dated milestones or vendor lists):
-  [tech-articles writing rules](../tech-articles/references/writing-rules.md#employers-and-clients).
+- Employer rules hold: no internal counts, no dated internal milestones, no vendor lists, no
+  secrets, hostnames, schemas, pricing or customer data, no screenshots of employer products.

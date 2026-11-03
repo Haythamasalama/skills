@@ -48,7 +48,7 @@ fetch onto the client.
 npm run build      # with the type check first, e.g. vue-tsc --build && vite build
 ```
 
-If the change was visual or touched content, check it in a real browser too (`ui-review`). A green
+If the change was visual or touched content, check it in a real browser too: every changed page, light and dark, desktop and mobile width. A green
 build says nothing about whether the page looks right.
 
 ## Verify the container
