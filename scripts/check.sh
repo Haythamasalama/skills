@@ -17,6 +17,7 @@ for pack in "$ROOT"/*/; do
   pack_name="$(basename "$pack")"
   [ -d "$pack/skills" ] || [ -d "$pack/agents" ] || continue
   [ -f "$pack/README.md" ] || fail "$pack_name: missing README.md"
+  [ ! -f "$pack/README.md" ] || [ -n "$(frontmatter "$pack/README.md" description)" ] || fail "$pack_name: README.md has no frontmatter description"
   for skill in "$pack"/skills/*/; do
     [ -d "$skill" ] || continue
     all_names="$all_names $(basename "$skill")"

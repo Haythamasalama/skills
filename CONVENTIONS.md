@@ -7,7 +7,8 @@ installed. The `skill-publisher` agent follows this file.
 
 ```
 <pack>/                 one subject: laravel, vue-inertia, whatsapp, …
-  README.md             Arabic: one line on the pack, then a table of its skills and agents
+  README.md             frontmatter `description:` (English, one line, shown on the site), then in
+                        Arabic: one line on the pack and a table of its skills and agents
   skills/<name>/
     SKILL.md            required: frontmatter + the short version
     references/*.md     optional: one topic per file, linked from SKILL.md

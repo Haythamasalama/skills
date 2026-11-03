@@ -1,3 +1,7 @@
+---
+description: Meta's WhatsApp Business Platform: what the Cloud API can do, webhooks, templates, limits and pricing.
+---
+
 # whatsapp
 
 منصة واتساب للأعمال من Meta (Cloud API).

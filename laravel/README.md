@@ -1,3 +1,7 @@
+---
+description: Laravel code: where each file goes in a Domain-Driven Design layout, and how to write it clean and safe.
+---
+
 # laravel
 
 كتابة كود Laravel: وين بيروح كل ملف بطريقة Domain-Driven Design، وكيف ينكتب الكود نظيف وآمن.

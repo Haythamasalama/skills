@@ -1,3 +1,7 @@
+---
+description: Writing: Arabic copy for products, technical articles, and LinkedIn and X posts.
+---
+
 # writing
 
 الكتابة: نصوص عربية للمواقع، مقالات تقنية، ومنشورات لينكدإن و X.

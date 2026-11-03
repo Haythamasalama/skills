@@ -1,3 +1,7 @@
+---
+description: Vue 3 front ends with Inertia, TypeScript and Tailwind 4 on Laravel: pages, forms, shadcn-vue, and a browser review.
+---
+
 # vue-inertia
 
 واجهات Vue 3 مع Inertia و TypeScript و Tailwind 4 فوق Laravel، لأي مشروع جديد.

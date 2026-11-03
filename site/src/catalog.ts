@@ -74,7 +74,7 @@ function add(key: string, content: string | null, url: string | null) {
   if (parts[1] === 'README.md' && content !== null) {
     const p = pack(packName);
     p.readme = content;
-    p.summary = content.split('\n\n')[1]?.trim() ?? '';
+    p.summary = frontmatter(content).data.description ?? '';
 
     return;
   }

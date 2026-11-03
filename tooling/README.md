@@ -1,3 +1,7 @@
+---
+description: Tools for this repo itself: install skills into any project, and turn work into new skills.
+---
+
 # tooling
 
 أدوات هذا الريبو نفسه. بتنزل على الجهاز كله مش على مشروع:

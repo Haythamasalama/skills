@@ -1,3 +1,7 @@
+---
+description: Commit messages, splitting work into commits, and pull requests.
+---
+
 # git
 
 سير العمل مع git.

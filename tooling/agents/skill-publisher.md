@@ -29,8 +29,9 @@ any project.
 5. **Check.** Run `sh scripts/check.sh` and `sh scripts/privacy-scan.sh`. Fix every hit and run them
    again until they print `ok` and `clean`. Add any new private name you met in the source (employer,
    client, private project) to `~/.config/skills/private-terms.txt` (never commit that file).
-6. **Index.** Add or update the skill's row in the pack's `README.md` (Arabic one-liner), and the pack's
-   row in the root `README.md` when the pack is new.
+6. **Index.** Add or update the skill's row in the pack's `README.md` (Arabic one-liner). A new pack also
+   gets a frontmatter `description:` in English in its README (the skills site shows it) and a row in
+   the root `README.md`.
 7. **Commit.** `git add` only the files you changed, on the current branch, with Conventional Commits
    (`feat(<skill>): …` / `fix(<skill>): …`). Push (`git push origin HEAD`) only when the user asked to
    upload or publish; if the push fails, say so and leave the commit in place. Never force-push or

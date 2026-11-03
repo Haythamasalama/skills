@@ -1,3 +1,7 @@
+---
+description: Containerising an app with Docker and shipping it to Coolify.
+---
+
 # deploy
 
 تجهيز التطبيق بـ Docker ونشره.
