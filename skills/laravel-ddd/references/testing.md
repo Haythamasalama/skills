@@ -42,17 +42,17 @@ Written for Pest 4 on Laravel 12 (checked 2026-11-03).
 - If the schema uses engine-specific features (JSON functions, generated columns, full-text), run the
   suite on that engine, not SQLite: a SQLite run fails in ways that look like test bugs.
 - One test database shared by several checkouts means one suite at a time.
-- Run the narrowest set while working: `php artisan test --compact --filter=IssueInvoiceTest`.
+- Run the narrowest set while working: `php artisan test --compact --filter=ActivateEmployeeTest`.
 
 ## Where tests live
 
 ```
-tests/Feature/Billing/IssueInvoiceTest.php         an Action or a Contract, with the database
-tests/Feature/Billing/Api/InvoiceEndpointsTest.php routes of one JSON panel
-tests/Feature/Pages/InvoiceShowPageTest.php        one Inertia page, named after its props class
-tests/Feature/Pages/InvoiceFormPageTest.php        Create and Edit, as InvoiceFormProps
-tests/Unit/Billing/InvoiceStatusTest.php           an enum, a value object, a pure helper
-tests/Arch/LayersTest.php                          the layer rules
+tests/Feature/Employee/ActivateEmployeeTest.php      an Action or a Contract, with the database
+tests/Feature/Employee/Api/EmployeeEndpointsTest.php routes of one JSON panel
+tests/Feature/Pages/EmployeeShowPageTest.php         one Inertia page, named after its props class
+tests/Feature/Pages/EmployeeFormPageTest.php         Create and Edit, as EmployeeFormProps
+tests/Unit/Employee/EmployeeStatusTest.php           an enum, a value object, a pure helper
+tests/Arch/LayersTest.php                            the layer rules
 ```
 
 Most tests are feature tests. A unit test fits a pure function, an enum, a key builder, or a trait with
@@ -68,7 +68,7 @@ pest()->extend(Tests\TestCase::class)->use(RefreshDatabase::class)->in('Feature'
 | Subject | Test | Why |
 |---|---|---|
 | A write, a calculation, a branch | the Action directly | it holds the logic; the cheapest place to cover branches |
-| Behaviour another domain relies on | `app(InvoiceContract::class)` | that is the real boundary |
+| Behaviour another domain relies on | `app(EmployeeContract::class)` | that is the real boundary |
 | A Service | usually not directly | it only delegates; you would test the Action twice |
 | An endpoint | a feature test on the route | covers routing, the Form Request, authorization, the envelope |
 | A page | a feature test with `assertInertia` | covers the props class and the controller together |
@@ -77,19 +77,19 @@ pest()->extend(Tests\TestCase::class)->use(RefreshDatabase::class)->in('Feature'
 | A filter | the `Get{Entity}s` Action with a DTO | rows in and rows out, including the scoping key |
 
 ```php
-it('issues a draft invoice', function () {
-    $invoice = Invoice::factory()->draft()->create();
+it('activates a pending employee', function () {
+    $employee = Employee::factory()->pending()->create();
 
-    $issued = IssueInvoice::handle($invoice);
+    $activated = ActivateEmployee::handle($employee);
 
-    expect($issued->status)->toBe(InvoiceStatus::ISSUED)
-        ->and($issued->number)->not->toBeNull();
+    expect($activated->status)->toBe(EmployeeStatus::ACTIVE)
+        ->and($activated->employee_number)->not->toBeNull();
 });
 
-it('refuses to issue a paid invoice', function () {
-    $invoice = Invoice::factory()->paid()->create();
+it('refuses to activate an archived employee', function () {
+    $employee = Employee::factory()->archived()->create();
 
-    expect(fn () => IssueInvoice::handle($invoice))->toThrow(InvoiceAlreadyPaid::class);
+    expect(fn () => ActivateEmployee::handle($employee))->toThrow(EmployeeAlreadyArchived::class);
 });
 ```
 
@@ -98,29 +98,29 @@ it('refuses to issue a paid invoice', function () {
 The shape is in [json-api.md](json-api.md#the-envelope).
 
 ```php
-it('creates an invoice', function () {
-    $customer = Customer::factory()->create();
+it('creates an employee', function () {
+    $user = User::factory()->create();
 
     actingAs(User::factory()->create(), 'sanctum')
-        ->postJson('/api/v1/invoices', ['customer_id' => $customer->id, 'currency' => 'USD', 'lines' => []])
+        ->postJson('/api/v1/employees', ['user_id' => $user->id, 'job_title' => 'Analyst', 'contacts' => []])
         ->assertCreated()
         ->assertJsonPath('status.success', true)
-        ->assertJsonPath('data.customer.id', (string) $customer->id);
+        ->assertJsonPath('data.user.id', (string) $user->id);
 });
 
-it('rejects a missing customer', function () {
+it('rejects a missing user', function () {
     actingAs(User::factory()->create(), 'sanctum')
-        ->postJson('/api/v1/invoices', [])
+        ->postJson('/api/v1/employees', [])
         ->assertUnprocessable()
         ->assertJsonPath('status.error_key', 'validation_error')
-        ->assertJsonPath('status.errors_list.*.field', ['customer_id', 'currency']);
+        ->assertJsonPath('status.errors_list.*.field', ['user_id', 'job_title']);
 });
 
-it('hides another tenant\'s invoice', function () {
-    $foreign = Invoice::factory()->create();
+it('hides another tenant\'s employee', function () {
+    $foreign = Employee::factory()->create();
 
     actingAs(User::factory()->create(), 'sanctum')
-        ->getJson("/api/v1/invoices/{$foreign->id}")
+        ->getJson("/api/v1/employees/{$foreign->id}")
         ->assertNotFound()
         ->assertJsonPath('status.error_key', 'not_found');
 });
@@ -141,36 +141,36 @@ it('hides another tenant\'s invoice', function () {
 ```php
 beforeEach(function () {
     $this->withoutVite();
-    $this->admin = User::factory()->withPermissions(['admin.invoices.show', 'admin.invoices.update'])->create();
+    $this->admin = User::factory()->withPermissions(['admin.employees.show', 'admin.employees.update'])->create();
 });
 
-it('renders the show page with its payments deferred', function () {
-    $invoice = Invoice::factory()->issued()->has(Payment::factory()->count(2))->create();
+it('renders the show page with its invitations deferred', function () {
+    $employee = Employee::factory()->active()->has(Invitation::factory()->count(2))->create();
 
     actingAs($this->admin)
-        ->get(route('admin.invoices.show', $invoice->id))
+        ->get(route('admin.employees.show', $employee->id))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('invoices/Show')
-            ->where('invoice.id', (string) $invoice->id)
-            ->where('invoice.status.value', InvoiceStatus::ISSUED->value)
-            ->missing('payments')
-            ->loadDeferredProps(fn (Assert $reload) => $reload->has('payments', 2)));
+            ->component('employees/Show')
+            ->where('employee.id', (string) $employee->id)
+            ->where('employee.status.value', EmployeeStatus::ACTIVE->value)
+            ->missing('invitations')
+            ->loadDeferredProps(fn (Assert $reload) => $reload->has('invitations', 2)));
 });
 
 it('goes back to the record after a save', function () {
-    $invoice = Invoice::factory()->draft()->create();
+    $employee = Employee::factory()->pending()->create();
 
     actingAs($this->admin)
-        ->put(route('admin.invoices.update', $invoice->id), ['notes' => 'Net 30'])
-        ->assertRedirect(route('admin.invoices.show', $invoice->id));
+        ->put(route('admin.employees.update', $employee->id), ['notes' => 'Starts Monday'])
+        ->assertRedirect(route('admin.employees.show', $employee->id));
 
-    expect($invoice->fresh()->notes)->toBe('Net 30');
+    expect($employee->fresh()->notes)->toBe('Starts Monday');
 });
 
 it('refuses a user without the permission', function () {
     actingAs(User::factory()->create())
-        ->get(route('admin.invoices.show', Invoice::factory()->create()->id))
+        ->get(route('admin.employees.show', Employee::factory()->create()->id))
         ->assertForbidden();
 });
 ```
@@ -190,16 +190,16 @@ Each page's tests cover at least:
 
 ```php
 // ✅ factory with states
-$invoice = Invoice::factory()->issued()->for($customer)->create();
+$employee = Employee::factory()->active()->for($user)->create();
 
 // ❌ magic values the casts would have caught
-$invoice = new Invoice(['status' => 2, 'customer_id' => $customer->id]);
-$invoice->save();
+$employee = new Employee(['status' => 2, 'user_id' => $user->id]);
+$employee->save();
 ```
 
 - Check for an existing state before adding one.
 - Domain entities live outside `App\Models`, so either each model defines
-  `protected static function newFactory(): InvoiceFactory`, or a provider maps names once with
+  `protected static function newFactory(): EmployeeFactory`, or a provider maps names once with
   `Factory::guessFactoryNamesUsing()`. Factories live in `database/factories/{Domain}/`.
 - A codebase without factories seeds what each test needs: `Model::create([...])` when the model's casts
   and events matter, `DB::table(...)->insertGetId([...])` for plain rows. Adding factories is its own
@@ -214,7 +214,7 @@ $invoice->save();
 - `Bus::fake()` / `Queue::fake()` to assert dispatch; with `QUEUE_CONNECTION=sync` jobs otherwise run
   inline.
 - Assert a notification with `Notification::assertSentTo()`, not by counting rows in a table.
-- Swap a Contract with `$this->app->instance(PaymentGatewayContract::class, $fake)`. This works because
+- Swap a Contract with `$this->app->instance(MailProviderContract::class, $fake)`. This works because
   domain classes resolve with `app()`.
 - An external integration ships a fake implementation of its Contract; tests bind it.
 
@@ -278,7 +278,7 @@ foreach ($panels as $panel) {
 
 - `glob()`, not a facade: the file runs before the application boots.
 - When two domains were split on purpose, pin it with a named rule
-  (`expect('Domain\Billing')->not->toUse('Domain\Shipping')`) and a one-line why above it. Why: the
+  (`expect('Domain\Department')->not->toUse('Domain\Employee')`) and a one-line why above it. Why: the
   coupling grows back one convenient import at a time.
 - Start a legacy codebase with the rules that already pass, and add the rest as each layer is cleaned;
   `->ignoring('Domain\Legacy\…')` names the known exceptions instead of dropping the rule.
@@ -290,13 +290,13 @@ foreach ($panels as $panel) {
 - Don't delete, skip or weaken a failing test to get green; find the cause.
 - Don't write a one-off verification script when a test would prove the same thing.
 - Don't let a test depend on another test's data or on run order.
-- Don't call real AI, payment or messaging providers from tests, even once.
+- Don't call real AI, mail or messaging providers from tests, even once.
 
 ## Verify
 
 ```bash
 # Tests asserting top-level payload keys on an enveloped API
-grep -rnE "assertJsonPath\('(id|name|number)'" tests/
+grep -rnE "assertJsonPath\('(id|name|employee_number)'" tests/
 
 # Validation asserted against Laravel's default errors key
 grep -rn "assertJsonValidationErrors" tests/Feature/

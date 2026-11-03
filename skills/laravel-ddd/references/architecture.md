@@ -326,7 +326,7 @@ final class DeactivateInactiveUsers extends Command
 
 ## High-risk resources get one seam
 
-When a resource is dangerous to touch (a payment gateway, an external database, a bulk mail transport),
+When a resource is dangerous to touch (a mail provider, an external database, a directory service),
 exactly one domain touches it, behind one small Contract. Nothing else opens that connection or builds its
 requests. Keep that Contract transport-agnostic (scalars and DTOs in, DTOs out, never a model or a live
 handle). Why: every guard on the resource lives in one code path, and the local implementation can later

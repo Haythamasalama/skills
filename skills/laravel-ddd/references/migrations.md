@@ -23,17 +23,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Customer::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('number')->unique();
+            $table->string('employee_number')->unique();
             $table->unsignedTinyInteger('status');
-            $table->char('currency', 3);
-            $table->unsignedBigInteger('total')->default(0);
+            $table->string('job_title');
+            $table->boolean('is_locked')->default(false);
             $table->json('options')->nullable();
-            $table->timestamp('issued_at')->nullable();
-            $table->date('due_at')->nullable();
+            $table->timestamp('activated_at')->nullable();
+            $table->date('hired_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -41,7 +41,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('invoices');
+        Schema::dropIfExists('employees');
     }
 };
 ```
@@ -77,10 +77,10 @@ need one, add it in its own migration and name the query in the PR description, 
 
 ```php
 // ❌ a second, duplicate index
-$table->foreignId('customer_id')->constrained()->index();
+$table->foreignId('user_id')->constrained()->index();
 
 // ✅
-$table->foreignIdFor(Customer::class)->constrained();
+$table->foreignIdFor(User::class)->constrained();
 ```
 
 A composite index whose first column is the foreign key can replace the FK's own index; that is the one
@@ -90,12 +90,12 @@ time to think about it, not by default.
 
 ```php
 // ❌
-$table->unique('number', 'inv_number_uq');
-$table->dropIndex('inv_number_uq');
+$table->unique('employee_number', 'emp_number_uq');
+$table->dropIndex('emp_number_uq');
 
 // ✅
-$table->unique('number');
-$table->dropUnique(['number']);
+$table->unique('employee_number');
+$table->dropUnique(['employee_number']);
 ```
 
 Applies to `index()`, `unique()`, `foreign()`, `constrained()` and every `drop*()`. Why: hand-picked names
@@ -156,7 +156,7 @@ everywhere, in order.
 
 ## Append-only tables
 
-A table that must never change after insert (an audit or ledger table) has no `updated_at` and no soft
+A table that must never change after insert (an audit or activity log table) has no `updated_at` and no soft
 deletes. Optionally enforce it in the database with triggers that refuse `UPDATE` and `DELETE`, guarded on
 the driver if they are driver-specific, and dropped in `down()`. The strongest control is operational: a
 database user with only `INSERT` and `SELECT` on that table.

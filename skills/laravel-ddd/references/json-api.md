@@ -24,10 +24,10 @@ Controllers, Form Requests, route binding and authorization are shared with page
 ## Endpoints
 
 ```
-✅ GET /api/v1/invoices   GET /api/v1/invoices/42   POST /api/v1/invoices
-   PUT|PATCH /api/v1/invoices/42   DELETE /api/v1/invoices/42   GET /api/v1/invoices?customer_id=7
-❌ GET /api/getInvoices   POST /api/invoice/create   POST /api/invoices/42/update   GET /api/v1/Invoice
-   GET /api/v1/customers/7/invoices/42/lines/3
+✅ GET /api/v1/employees   GET /api/v1/employees/42   POST /api/v1/employees
+   PUT|PATCH /api/v1/employees/42   DELETE /api/v1/employees/42   GET /api/v1/employees?user_id=7
+❌ GET /api/getEmployees   POST /api/employee/create   POST /api/employees/42/update   GET /api/v1/Employee
+   GET /api/v1/users/7/employees/42/contacts/3
 ```
 
 - Plural, lowercase nouns. Nest one level at most; past that, filter by query string.
@@ -38,27 +38,27 @@ Controllers, Form Requests, route binding and authorization are shared with page
 
 ```json
 { "status": { "code": 201, "success": true, "message": "Created", "error_key": "created" },
-  "data": { "id": "42", "number": "INV-0042", "total": "1500.00" } }
+  "data": { "id": "42", "employee_number": "EMP-0042", "name": "Jane Doe" } }
 
 { "status": { "code": 422, "success": false, "message": "The given data was invalid.", "error_key": "validation_error",
-              "errors_list": [ { "field": "customer_id", "message": "The customer id field is required." } ] },
+              "errors_list": [ { "field": "user_id", "message": "The user id field is required." } ] },
   "data": {} }
 
 { "status": { "code": 200, "success": true, "message": "OK", "error_key": "ok" },
-  "data": [ { "id": "1", "number": "INV-0001" } ],
+  "data": [ { "id": "1", "employee_number": "EMP-0001" } ],
   "pagination": { "total": 137, "count": 20, "per_page": 20, "current_page": 1, "last_page": 7,
                   "from": 1, "to": 20, "next_page_url": "…?page=2", "prev_page_url": null } }
 ```
 
 - `status.code` mirrors the HTTP status; `success` is `code < 400`.
 - `error_key` is a stable slug: the message key when one was given (`validation_error`, `not_found`,
-  `invoice_already_paid`), else the lower-cased status text (`ok`, `created`). Clients branch on it.
+  `employee_already_archived`), else the lower-cased status text (`ok`, `created`). Clients branch on it.
 - `message` is human and translated. Never branch on it, and never assert it in a test without pinning
   the locale.
 - `errors_list` appears only when there are field errors: one entry per field, its first message. Never
   send an empty list.
 - `data` is `{}` when there is nothing to send, so a client can always read it as an object or list.
-- A paginated list adds `pagination`; extra list-level values (totals) sit beside it, never inside
+- A paginated list adds `pagination`; extra list-level values (counts) sit beside it, never inside
   each row.
 - A 500 says something generic. Log the exception; never put a trace or SQL in `message`.
 
@@ -146,10 +146,10 @@ function res(int $status = 200, ?string $message = null, array $replace = []): R
 - `res(204)` sends no body: Symfony drops the content of a 204.
 
 ```php
-return res()->data(InvoiceResource::make($invoice));                 // 200
-return res(201)->data(InvoiceResource::make($invoice));              // 201
+return res()->data(EmployeeResource::make($employee));               // 200
+return res(201)->data(EmployeeResource::make($employee));            // 201
 return res(204);                                                     // 204
-return res()->message('invoice_issued')->data(InvoiceResource::make($invoice));
+return res()->message('employee_activated')->data(EmployeeResource::make($employee));
 ```
 
 ## Status codes
@@ -174,17 +174,17 @@ which would confirm the row exists.
 ## API Resources
 
 ```php
-final class InvoiceResource extends JsonResource
+final class EmployeeResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
             'id' => (string) $this->id,
-            'number' => $this->number,
+            'employee_number' => $this->employee_number,
             'status' => ['value' => $this->status->value, 'label' => $this->status->label()],
-            'total' => number_format((float) $this->total, 2, '.', ''),
-            'customer' => CustomerResource::make($this->whenLoaded('customer')),
-            'issued_at' => $this->issued_at?->toIso8601String(),
+            'name' => $this->name,
+            'user' => UserResource::make($this->whenLoaded('user')),
+            'activated_at' => $this->activated_at?->toIso8601String(),
         ];
     }
 }
@@ -196,7 +196,7 @@ final class InvoiceResource extends JsonResource
   `whenLoaded()`, so a missing eager load shows as absent, not as one query per row.
 - It is the whitelist: a field not listed never leaves the server, so password hashes, tokens and
   internal flags stay out by default.
-- A list's own Resource (`IndexInvoiceResource`) may be slimmer than the detail one.
+- A list's own Resource (`IndexEmployeeResource`) may be slimmer than the detail one.
 - Page panels use their own typed resources instead; see [http.md](http.md#typed-page-resources).
 
 ## Pagination
@@ -204,7 +204,7 @@ final class InvoiceResource extends JsonResource
 - Lists paginate through the query's `->pagination()` ([queries.md](queries.md)); the controller passes
   the paginated collection to `data()` and the builder adds `pagination`.
 - Default page size 20. The index request caps the `pages_count` input at 100 (the response reports it as `per_page`), so a client cannot ask for the table.
-- Totals for the whole filtered set go through `->additional(['totals' => […])]` on the collection,
+- Counts for the whole filtered set go through `->additional(['counts' => […]])` on the collection,
   computed by the Contract, not in the Resource.
 
 ## Validation errors
@@ -270,11 +270,11 @@ class BaseException extends Exception
     }
 }
 
-final class InvoiceAlreadyPaid extends BaseException
+final class EmployeeAlreadyArchived extends BaseException
 {
     public function __construct()
     {
-        parent::__construct('invoice_already_paid', 422);
+        parent::__construct('employee_already_archived', 422);
     }
 }
 ```
@@ -287,41 +287,41 @@ final class InvoiceAlreadyPaid extends BaseException
 ## API CRUD recipe
 
 ```php
-final class InvoiceController extends Controller
+final class EmployeeController extends Controller
 {
     use HasCurrentTenant;
 
-    public function __construct(private readonly InvoiceContract $invoices) {}
+    public function __construct(private readonly EmployeeContract $employees) {}
 
-    public function index(IndexInvoiceRequest $request): ResponseBuilder
+    public function index(IndexEmployeeRequest $request): ResponseBuilder
     {
-        return res()->data(InvoiceResource::collection(
-            $this->invoices->getInvoices(FilterInvoiceData::fromArray([...$request->validated(), ...$this->scope()]), withRelations: ['customer'])->pagination(),
+        return res()->data(EmployeeResource::collection(
+            $this->employees->getEmployees(FilterEmployeeData::fromArray([...$request->validated(), ...$this->scope()]), withRelations: ['user'])->pagination(),
         ));
     }
 
     public function show(string $id): ResponseBuilder
     {
-        return res()->data(InvoiceResource::make($this->findOrFail($id)));
+        return res()->data(EmployeeResource::make($this->findOrFail($id)));
     }
 
-    public function store(StoreInvoiceRequest $request): ResponseBuilder
+    public function store(StoreEmployeeRequest $request): ResponseBuilder
     {
-        $invoice = $this->invoices->create(CreateInvoiceData::fromArray([...$request->validated(), ...$this->scope()]));
+        $employee = $this->employees->create(CreateEmployeeData::fromArray([...$request->validated(), ...$this->scope()]));
 
-        return res(201)->data(InvoiceResource::make($invoice));
+        return res(201)->data(EmployeeResource::make($employee));
     }
 
-    public function update(string $id, UpdateInvoiceRequest $request): ResponseBuilder
+    public function update(string $id, UpdateEmployeeRequest $request): ResponseBuilder
     {
-        $invoice = $this->invoices->update($this->findOrFail($id), UpdateInvoiceData::fromArray($request->validated()));
+        $employee = $this->employees->update($this->findOrFail($id), UpdateEmployeeData::fromArray($request->validated()));
 
-        return res()->data(InvoiceResource::make($invoice));
+        return res()->data(EmployeeResource::make($employee));
     }
 
     public function destroy(string $id): ResponseBuilder
     {
-        $this->invoices->delete($this->findOrFail($id));
+        $this->employees->delete($this->findOrFail($id));
 
         return res(204);
     }
@@ -331,12 +331,12 @@ final class InvoiceController extends Controller
         return ['tenant_id' => $this->currentTenant()->id];
     }
 
-    private function findOrFail(string $id): Invoice
+    private function findOrFail(string $id): Employee
     {
-        $invoice = $this->invoices->getInvoice($id, FilterInvoiceData::fromArray($this->scope()));
-        abort_if($invoice === null, 404);
+        $employee = $this->employees->getEmployee($id, FilterEmployeeData::fromArray($this->scope()));
+        abort_if($employee === null, 404);
 
-        return $invoice;
+        return $employee;
     }
 }
 ```
@@ -344,7 +344,7 @@ final class InvoiceController extends Controller
 ```php
 Route::prefix('api/v1')->name('api.')->middleware('api')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('invoices', InvoiceController::class);
+        Route::apiResource('employees', EmployeeController::class);
     });
 });
 ```
@@ -356,7 +356,7 @@ Checklist:
 - [ ] Every method returns `ResponseBuilder`; `201` on store, `204` on destroy.
 - [ ] `Route::apiResource()` inside the authenticated group; `->only([...])` or `->except([...])` for a
       subset, and drop the matching methods, requests and Contract methods.
-- [ ] The scope key comes after the spread, and every method that takes an id (`export`, `cancel`
+- [ ] The scope key comes after the spread, and every method that takes an id (`export`, `archive`
       included) resolves it through the same scoped lookup.
 - [ ] Foreign keys to tenant-owned tables use an ownership-scoped `Rule::exists`.
 - [ ] Contract methods exist for each call ([contracts-and-services.md](contracts-and-services.md)); no
@@ -372,7 +372,7 @@ refreshes). These are not the public API:
   panel's login. An endpoint that serves one page is a method on that page's controller; one that
   several pages share gets its own controller.
 - The group has no page-permission middleware, so each endpoint checks it itself: it answers 403 unless
-  the user may open the page it serves (`abort_unless($user->hasPermission('admin.invoices.show'), 403)`).
+  the user may open the page it serves (`abort_unless($user->hasPermission('admin.employees.show'), 403)`).
 - Input through a Form Request, like any action.
 - A success is plain JSON with no envelope: records through the page resources, under a named key
   (`['activities' => ActivityResource::collection($activities)]`); a paginated list uses the same

@@ -21,23 +21,23 @@ polymorphic existence checks, chunking, column selection, raw SQL.
 
 ```php
 // ❌ filtering spread across a controller
-$query = Invoice::query();
+$query = Employee::query();
 if ($request->status) {
     $query->where('status', $request->status);
 }
 return $query->paginate();
 
 // ✅ the controller builds a DTO; the list Action runs the scope
-$invoices = $this->invoices->getInvoices(FilterInvoiceData::fromArray($request->validated()))->pagination();
+$employees = $this->employees->getEmployees(FilterEmployeeData::fromArray($request->validated()))->pagination();
 ```
 
 ```php
-/** @extends GetDataAbstract<Invoice> */
-final class GetInvoices extends GetDataAbstract
+/** @extends GetDataAbstract<Employee> */
+final class GetEmployees extends GetDataAbstract
 {
     public function query(): Builder
     {
-        return Invoice::query()->filterBy($this->data);
+        return Employee::query()->filterBy($this->data);
     }
 }
 ```
@@ -91,21 +91,21 @@ An entity whose name lives in a `translations` table has no `name` column; `wher
 ## Eager loading
 
 ```php
-// ❌ N+1: one query per invoice, twice
-foreach (Invoice::all() as $invoice) {
-    echo $invoice->customer->name, $invoice->lines->count();
+// ❌ N+1: one query per employee, twice
+foreach (Employee::all() as $employee) {
+    echo $employee->user->name, $employee->contacts->count();
 }
 
 // ✅ the caller declares what it needs
-$invoices = $this->invoices->getInvoices($filters, withRelations: ['customer'], withCount: ['lines'])->pagination();
+$employees = $this->employees->getEmployees($filters, withRelations: ['user'], withCount: ['contacts'])->pagination();
 ```
 
 - `Get{Entity}s` takes `$withRelations` and `$withCount`, and the Service **forwards** them to `for()`.
-  Why: a Service that declares them but calls `GetInvoices::for($data)` drops them, and every caller N+1s
+  Why: a Service that declares them but calls `GetEmployees::for($data)` drops them, and every caller N+1s
   while the signature looks right ([contracts-and-services.md](contracts-and-services.md)).
 - Inertia props and API Resources serialize everything handed to them. A model with unloaded relations
   lazy-loads per row during serialization. Load first, then pass.
-- In Resources, guard relations with `$this->whenLoaded('customer')` ([json-api.md](json-api.md)).
+- In Resources, guard relations with `$this->whenLoaded('user')` ([json-api.md](json-api.md)).
 - Turn on `Model::preventLazyLoading(! app()->isProduction())` so a missing eager load fails in
   development instead of slowing production.
 - Never query from a view.
@@ -114,11 +114,11 @@ $invoices = $this->invoices->getInvoices($filters, withRelations: ['customer'], 
 
 ```php
 // ❌ fetches and hydrates every matching row
-$open = $this->invoices->getInvoices($filters)->collection()->count();
+$active = $this->employees->getEmployees($filters)->collection()->count();
 
 // ✅ one SELECT COUNT(*)
-$open = $this->invoices->getInvoices($filters)->count();
-$any = $this->invoices->getInvoices($filters)->exists();
+$active = $this->employees->getEmployees($filters)->count();
+$any = $this->employees->getEmployees($filters)->exists();
 ```
 
 Same for `isEmpty()` / `isNotEmpty()` on a loaded collection. This matters most on hot paths: menu badges,
@@ -141,15 +141,15 @@ Same for `whereDoesntHave()` on a `morphTo`. The type list is a constant on the 
 
 ```php
 // processing that writes as it goes
-Invoice::query()->filterBy($filters)->chunkById(500, function (Collection $invoices) {
-    foreach ($invoices as $invoice) {
-        RecalculateInvoiceTotal::handle($invoice);
+Employee::query()->filterBy($filters)->chunkById(500, function (Collection $employees) {
+    foreach ($employees as $employee) {
+        SyncEmployeeProfile::handle($employee);
     }
 });
 
 // read-only streaming (exports)
-foreach (Invoice::query()->filterBy($filters)->cursor() as $invoice) {
-    yield InvoiceExportRow::fromModel($invoice);
+foreach (Employee::query()->filterBy($filters)->cursor() as $employee) {
+    yield EmployeeExportRow::fromModel($employee);
 }
 ```
 
@@ -160,10 +160,10 @@ update that moves rows out of the filter makes the next page skip some.
 
 ```php
 // ❌ every column, including wide text and JSON, for a dropdown
-Product::query()->filterBy($filters)->get();
+Department::query()->filterBy($filters)->get();
 
 // ✅
-Product::query()->filterBy($filters)->select(['id', 'name'])->get();
+Department::query()->filterBy($filters)->select(['id', 'name'])->get();
 ```
 
 - Always include the primary key. Why: relations, `find()` and route generation need it, and a missing key

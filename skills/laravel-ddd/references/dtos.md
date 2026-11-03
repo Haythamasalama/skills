@@ -22,16 +22,16 @@ create / update shapes, sent keys in updates, nested DTOs, options DTOs for JSON
 
 | Shape | Name | Used by |
 |---|---|---|
-| Read-side filter | `FilterInvoiceData extends FilterData` | `GetInvoices`, the `scopeFilterBy()` scope |
-| Insert payload | `CreateInvoiceData` | `CreateInvoice` |
-| Partial update | `UpdateInvoiceData` | `UpdateInvoice` |
-| Domain operation | `IssueInvoiceData`, `ApplyDiscountData` | the Action of the same verb |
-| Child structure | `InvoiceLineData` | inside another DTO |
-| JSON column | `ProductOptionsData` | the model's `options` accessor |
-| Read model (option) | `InvoiceData` | a Contract or a page prop |
+| Read-side filter | `FilterEmployeeData extends FilterData` | `GetEmployees`, the `scopeFilterBy()` scope |
+| Insert payload | `CreateEmployeeData` | `CreateEmployee` |
+| Partial update | `UpdateEmployeeData` | `UpdateEmployee` |
+| Domain operation | `ActivateEmployeeData`, `AssignManagerData` | the Action of the same verb |
+| Child structure | `EmployeeContactData` | inside another DTO |
+| JSON column | `DepartmentSettingsData` | the model's `settings` accessor |
+| Read model (option) | `EmployeeData` | a Contract or a page prop |
 
-`CreateInvoiceDTO`, `InvoiceDto` and `InvoiceLine` are all wrong. Why: the suffix is how every layer, and
-every grep, recognises a transport object.
+`CreateEmployeeDTO`, `EmployeeDto` and `EmployeeContact` are all wrong. Why: the suffix is how every layer,
+and every grep, recognises a transport object.
 
 ## `snake_case` properties
 
@@ -39,19 +39,19 @@ Generic PHP style says camelCase. DTO properties are the one carve-out.
 
 ```php
 // ✅ keys match columns, so no mapping layer exists
-final class CreateInvoiceData
+final class CreateEmployeeData
 {
     use Arrayable;
 
     public function __construct(
-        public readonly int $customer_id,
-        public readonly string $currency,
+        public readonly int $user_id,
+        public readonly string $job_title,
         public readonly ?string $notes = null,
     ) {}
 }
 
-// ❌ camelCase forces a customerId → customer_id translation at every boundary
-public readonly int $customerId,
+// ❌ camelCase forces a userId → user_id translation at every boundary
+public readonly int $userId,
 ```
 
 Why: `Model::create($data->toArray())`, `$model->update(...)` and `fromArray($request->validated())` only
@@ -65,13 +65,13 @@ cannot use a trait that holds static state, and `Arrayable` keeps its sent-keys 
 
 ```php
 // ✅
-$data = UpdateCustomerData::fromArray(['email' => $email, 'phone' => $phone]);
+$data = UpdateUserData::fromArray(['email' => $email, 'phone' => $phone]);
 
 // ❌ bypasses fromArray()
-$data = new UpdateCustomerData(email: $email, phone: $phone);
+$data = new UpdateUserData(email: $email, phone: $phone);
 
 // ❌ a named factory whose only job is to wrap new
-public static function forCustomer(Customer $customer): self { return new self(customer_id: $customer->id); }
+public static function forUser(User $user): self { return new self(user_id: $user->id); }
 ```
 
 Why: `fromArray()` records which keys the caller sent. A DTO built with `new` has an empty record, so a
@@ -82,11 +82,11 @@ A `fromRequest()` on the DTO is the one place for shaping `fromArray()` cannot d
 combining fields, coercing a type. It ends in `self::fromArray()` so the sent keys are still recorded.
 
 ```php
-public static function fromRequest(StoreInvoiceRequest $request): self
+public static function fromRequest(StoreEmployeeRequest $request): self
 {
     return self::fromArray([
-        ...$request->safe()->except('lines'),
-        'lines' => InvoiceLineData::arrayFrom($request->validated('lines')),
+        ...$request->safe()->except('contacts'),
+        'contacts' => EmployeeContactData::arrayFrom($request->validated('contacts')),
     ]);
 }
 ```
@@ -115,18 +115,18 @@ spreads extra keys.
 ## Filter DTOs
 
 ```php
-final class FilterInvoiceData extends FilterData
+final class FilterEmployeeData extends FilterData
 {
     use Arrayable;
 
-    /** @param InvoiceStatus|array<int, InvoiceStatus>|null $status */
+    /** @param EmployeeStatus|array<int, EmployeeStatus>|null $status */
     public function __construct(
         public readonly int|array|null $id = null,
-        public readonly int|array|null $customer_id = null,
-        public readonly InvoiceStatus|int|array|null $status = null,
-        public readonly ?string $number = null,
-        public readonly ?string $issued_from = null,
-        public readonly ?string $issued_to = null,
+        public readonly int|array|null $user_id = null,
+        public readonly EmployeeStatus|int|array|null $status = null,
+        public readonly ?string $employee_number = null,
+        public readonly ?string $hired_from = null,
+        public readonly ?string $hired_to = null,
         public readonly ?bool $with_trashed = null,
     ) {}
 }
@@ -134,7 +134,7 @@ final class FilterInvoiceData extends FilterData
 
 - Every property nullable with a `null` default, so an empty filter is valid and means "no filter".
 - A field that takes one value or many is **one** property typed `int|array|null`, paired with
-  `whereByType` in the scope. Never add a parallel `customer_ids` beside `customer_id`; widen the one you
+  `whereByType` in the scope. Never add a parallel `user_ids` beside `user_id`; widen the one you
   have. Why: two keys for one column means two scope branches and callers guessing which to send.
 - Every declared property is read by the scope ([models.md](models.md#the-filter-trait)). A property no
   clause reads looks like a working filter and filters nothing.
@@ -153,13 +153,13 @@ Only the tenant entity itself and the `FilterData` base declare no scope.
 
 ```php
 // ✅ the spread puts the server's value last, so it wins
-$filters = FilterInvoiceData::fromArray([
+$filters = FilterEmployeeData::fromArray([
     ...$request->validated(),
-    'customer_id' => $request->user()->customer_id,
+    'user_id' => $request->user()->id,
 ]);
 
-// ❌ + keeps the LEFT value: ?customer_id=7 reads someone else's invoices
-$filters = FilterInvoiceData::fromArray($request->all() + ['customer_id' => $request->user()->customer_id]);
+// ❌ + keeps the LEFT value: ?user_id=7 reads someone else's employee records
+$filters = FilterEmployeeData::fromArray($request->all() + ['user_id' => $request->user()->id]);
 ```
 
 Use `+` only for defaults the request may change (`+ ['pages_count' => 20]`). A privileged flag
@@ -177,18 +177,18 @@ Never echo `$request->all()` back to the page as the current filters; echo `vali
 ### Writing only what was sent
 
 ```php
-final class UpdateInvoice
+final class UpdateEmployee
 {
-    public static function handle(Invoice $invoice, UpdateInvoiceData $data): Invoice
+    public static function handle(Employee $employee, UpdateEmployeeData $data): Employee
     {
-        return DB::transaction(function () use ($invoice, $data) {
-            $invoice->update((clone $data)->exclude(['lines'])->excludeUnsent()->toArray());
+        return DB::transaction(function () use ($employee, $data) {
+            $employee->update((clone $data)->exclude(['contacts'])->excludeUnsent()->toArray());
 
-            if ($data->isSent('lines')) {
-                SyncInvoiceLines::handle($invoice, $data->lines);
+            if ($data->isSent('contacts')) {
+                SyncEmployeeContacts::handle($employee, $data->contacts);
             }
 
-            return $invoice;
+            return $employee;
         });
     }
 }
@@ -209,36 +209,36 @@ The helpers themselves are defined in [core-kernel.md](core-kernel.md); the Acti
 ## Nested DTOs
 
 ```php
-final class InvoiceLineData
+final class EmployeeContactData
 {
     use Arrayable;
 
     public function __construct(
-        public readonly int $product_id,
-        public readonly int $quantity,
-        public readonly int $unit_price,
+        public readonly ContactType|string $type,
+        public readonly string $value,
+        public readonly bool $is_primary = false,
     ) {}
 }
 
-final class CreateInvoiceData
+final class CreateEmployeeData
 {
     use Arrayable;
 
-    /** @param array<int, InvoiceLineData> $lines */
+    /** @param array<int, EmployeeContactData> $contacts */
     public function __construct(
-        public readonly int $customer_id,
-        public readonly string $currency,
-        public readonly array $lines,
+        public readonly int $user_id,
+        public readonly string $job_title,
+        public readonly array $contacts,
         public readonly ?string $notes = null,
     ) {}
 }
 ```
 
 **The construction path:** `fromArray()` does not build children. The children are built with
-`InvoiceLineData::arrayFrom($rows)` and handed to the parent's `fromArray()` under their key. For a
+`EmployeeContactData::arrayFrom($rows)` and handed to the parent's `fromArray()` under their key. For a
 request, that happens in the parent's `fromRequest()` (above), and the controller calls
-`CreateInvoiceData::fromRequest($request)`. `CreateInvoiceData::fromArray($request->validated())` on a DTO
-with children is wrong: `lines` arrives as raw arrays and the Action's typed closure fails.
+`CreateEmployeeData::fromRequest($request)`. `CreateEmployeeData::fromArray($request->validated())` on a DTO
+with children is wrong: `contacts` arrives as raw arrays and the Action's typed closure fails.
 
 Why children are DTOs: an array of arrays leaves the inner keys informal, and the consuming Action has to
 read them defensively. Type the parent property with `@param array<int, ChildData>` so tools see the
@@ -246,65 +246,65 @@ element type.
 
 ## Options DTOs for a JSON column
 
-A model with a free-form `options` JSON column backs it with `{Entity}OptionsData`, so every read is
-typed (`$product->options->is_featured`) instead of `$product->options['is_featured'] ?? null`.
+A model with a free-form `settings` JSON column backs it with `{Entity}SettingsData`, so every read is
+typed (`$department->settings->is_public`) instead of `$department->settings['is_public'] ?? null`.
 
 ```php
 // On the entity
-protected function options(): Attribute
+protected function settings(): Attribute
 {
     return Attribute::get(function (?string $value) {
-        $options = json_decode($value ?? '{}', true) ?? [];
+        $settings = json_decode($value ?? '{}', true) ?? [];
 
-        return ProductOptionsData::fromArray([
-            ...$options,
-            'stock_policy' => StockPolicy::tryFrom((int) ($options['stock_policy'] ?? 0)) ?? StockPolicy::TRACK,
+        return DepartmentSettingsData::fromArray([
+            ...$settings,
+            'invitation_policy' => InvitationPolicy::tryFrom((int) ($settings['invitation_policy'] ?? 0)) ?? InvitationPolicy::AUTOMATIC,
         ]);
     });
 }
 ```
 
 ```php
-final class ProductOptionsData
+final class DepartmentSettingsData
 {
     use Arrayable;
 
     public function __construct(
-        public readonly bool $is_featured = false,
-        public readonly StockPolicy $stock_policy = StockPolicy::TRACK,
+        public readonly bool $is_public = false,
+        public readonly InvitationPolicy $invitation_policy = InvitationPolicy::AUTOMATIC,
     ) {}
 }
 ```
 
-- One options DTO per model with an `options` column; keys `snake_case`; every property defaulted, so
+- One options DTO per model with a `settings` column; keys `snake_case`; every property defaulted, so
   old rows read cleanly.
 - Derive and cast in the accessor once (enum from int, filename to URL, defaults), never at a call site.
 - Store scalars in the JSON; expose typed values through the DTO.
-- Keep `'options' => 'array'` in `casts()` so writes encode; the accessor overrides reads.
+- Keep `'settings' => 'array'` in `casts()` so writes encode; the accessor overrides reads.
 - **Writes merge** from the raw stored value, or every other key is lost:
 
 ```php
 // ✅
-$product->update(['options' => [...json_decode($product->getRawOriginal('options') ?? '{}', true), 'is_featured' => true]]);
+$department->update(['settings' => [...json_decode($department->getRawOriginal('settings') ?? '{}', true), 'is_public' => true]]);
 
 // ❌ drops every other key
-$product->update(['options' => ['is_featured' => true]]);
+$department->update(['settings' => ['is_public' => true]]);
 ```
 
-Only the Action that creates the row may write a fresh options bag.
+Only the Action that creates the row may write a fresh settings bag.
 
 ## Read DTOs
 
-Contracts usually return Entities; the stricter target is a read DTO (`InvoiceData`) so callers cannot
+Contracts usually return Entities; the stricter target is a read DTO (`EmployeeData`) so callers cannot
 mutate the row or lazy-load relations. Do not block a change on this. When you do build one:
 
 ```php
-public static function fromModel(Invoice $invoice): self
+public static function fromModel(Employee $employee): self
 {
     return self::fromArray([
-        'id' => $invoice->id,
-        'number' => $invoice->number,
-        'customer_name' => $invoice->relationLoaded('customer') ? $invoice->customer?->name : null,
+        'id' => $employee->id,
+        'employee_number' => $employee->employee_number,
+        'user_name' => $employee->relationLoaded('user') ? $employee->user?->name : null,
     ]);
 }
 ```
@@ -332,5 +332,5 @@ grep -rnE "loadMissing\(|->load\(|::query\(" src/Domain/*/DataTransferObjects/
 grep -rnE 'request->(all|validated)\(\) \+' src/Presentation/
 
 # Options writes that do not merge the stored value (review each)
-grep -rn -A1 "'options' => \[" src/Domain/*/Actions/
+grep -rnE -A1 "'(options|settings)' => \[" src/Domain/*/Actions/
 ```

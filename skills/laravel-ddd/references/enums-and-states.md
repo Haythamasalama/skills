@@ -22,29 +22,29 @@ statuses and the state machine, once-only claims, request idempotency.
 ## Enum shape
 
 ```php
-namespace Domain\Billing\Enums;
+namespace Domain\Employee\Enums;
 
-enum InvoiceStatus: int
+enum EmployeeStatus: int
 {
     use BaseEnum;
 
-    case DRAFT = 1;
-    case ISSUED = 2;
-    case PAID = 3;
-    case CANCELLED = 4;
+    case PENDING = 1;
+    case ACTIVE = 2;
+    case SUSPENDED = 3;
+    case ARCHIVED = 4;
 
     public function label(?string $locale = null): string
     {
-        return __("enums.invoice_status.{$this->name}", locale: $locale);
+        return __("enums.employee_status.{$this->name}", locale: $locale);
     }
 
     public function color(): string
     {
         return match ($this) {
-            self::DRAFT => 'gray',
-            self::ISSUED => 'orange',
-            self::PAID => 'green',
-            self::CANCELLED => 'red',
+            self::PENDING => 'gray',
+            self::ACTIVE => 'green',
+            self::SUSPENDED => 'orange',
+            self::ARCHIVED => 'red',
         };
     }
 }
@@ -54,7 +54,7 @@ enum InvoiceStatus: int
   for values that travel in URLs or payloads. A string value must fit its column; check the width when you
   add a case.
 - **`UPPER_SNAKE_CASE` case names, one style everywhere.** Why: a mixed codebase makes every reader guess
-  `Paid` or `PAID`, and the label keys are built from `$this->name`.
+  `Active` or `ACTIVE`, and the label keys are built from `$this->name`.
 - `label()` reads translations keyed by the **case name**, so a value change never orphans a label. Take an
   optional locale for exports and messages rendered in a fixed language.
 - `color()` returns a design-system token name, never hex or a CSS class. The status → colour map lives on
@@ -69,7 +69,7 @@ The trait is defined in [core-kernel.md](core-kernel.md). What callers use:
 
 | Method | Use |
 |---|---|
-| `values()` | backing values for validation: `Rule::in(InvoiceStatus::values())`, or `Rule::enum(InvoiceStatus::class)` |
+| `values()` | backing values for validation: `Rule::in(EmployeeStatus::values())`, or `Rule::enum(EmployeeStatus::class)` |
 | `all()` / `only([...])` / `except([...])` | each case as an object with every instance method's result folded in, for dropdowns and badges |
 | `isListed($value)` | membership without building a case; strict comparison, so `'1'` is not `1` |
 | `fromName()` / `tryFromName()` | lookup by case name |
@@ -82,29 +82,29 @@ argument breaks every dropdown built from `all()`.
 ## What never goes in an enum
 
 `auth()`, `request()`, `session()`, queries, `Cache::`, permission checks, `->save()`, events, jobs, or
-`config()` that differs per environment. An enum knows what `PAID` **is**, not who may see it or what
+`config()` that differs per environment. An enum knows what `ARCHIVED` **is**, not who may see it or what
 happens next.
 
 | Rule | Goes in |
 |---|---|
 | Which statuses a user may see | an Ability or a Policy |
 | Which status this record may move to | the state machine, surfaced through an Ability |
-| What happens when an invoice becomes paid | the Action of that transition, or a listener on its event |
-| Which values an endpoint accepts | the Form Request: `Rule::in(InvoiceStatus::values())` |
-| Which cases a dropdown shows for a role | the controller or a read Action: `InvoiceStatus::except([...])` |
+| What happens when an employee is archived | the Action of that transition, or a listener on its event |
+| Which values an endpoint accepts | the Form Request: `Rule::in(EmployeeStatus::values())` |
+| Which cases a dropdown shows for a role | the controller or a read Action: `EmployeeStatus::except([...])` |
 
 ## `from`, `tryFrom`, `fromOrAbort`
 
 ```php
 // ❌ a retired or invalid value in the URL becomes a 500
-$status = InvoiceStatus::from($request->route('status'));
+$status = EmployeeStatus::from($request->route('status'));
 
 // ❌ correct, but boilerplate every time
-$status = InvoiceStatus::tryFrom($value);
+$status = EmployeeStatus::tryFrom($value);
 abort_if($status === null, 404);
 
 // ✅
-$status = InvoiceStatus::fromOrAbort($request->route('status'));
+$status = EmployeeStatus::fromOrAbort($request->route('status'));
 ```
 
 Route parameters, query strings, bodies, stale bookmarks and rows written by older code can all hold a
@@ -115,10 +115,10 @@ miss there is a bug that should throw.
 
 ```php
 // ❌ an enum case never == its backing value; this matches nothing, silently
-$invoices->where('status', InvoiceStatus::PAID->value);
+$employees->where('status', EmployeeStatus::ARCHIVED->value);
 
 // ✅ compare the case
-$invoices->where('status', InvoiceStatus::PAID);
+$employees->where('status', EmployeeStatus::ARCHIVED);
 ```
 
 Query builders accept either form; the trap is in-memory collections of enum-cast models.
@@ -143,7 +143,7 @@ type-specific attributes in an `options` JSON column backed by an options DTO.
 
 - A new type is an enum case plus its labels. No table, no migration.
 - A type-specific value goes in `options`. It gets a real column only when it must be indexed or joined.
-- A type gets its own table when its rows need real columns (a price, a foreign key, a status).
+- A type gets its own table when its rows need real columns (a date, a foreign key, a status).
 - The filter DTO **requires** `type`, so no query can read across types; fetching one row also goes
   through the filter, so an id of another type is a 404.
 - Soft or force delete is a per-type answer on the enum (`isRestorable()`); restorable only when the screen
@@ -158,82 +158,82 @@ and their side effects then live in one class instead of in every controller tha
 | Piece | Location | Role |
 |---|---|---|
 | `{Entity}Status` enum (`int`) | `Enums/` | the states; `isInitial()`, `isTerminal()` |
-| `{Entity}Transition` enum (`string`) | `Enums/` | the verbs: `ISSUE = 'issue'`, `CANCEL = 'cancel'` |
+| `{Entity}Transition` enum (`string`) | `Enums/` | the verbs: `ACTIVATE = 'activate'`, `ARCHIVE = 'archive'` |
 | `{Entity}StateMachine` | `Actions/StateMachine/` | declares every transition |
 | Guard classes | `Actions/StateMachine/Conditions/` | one rule each; return allow, or deny with a translated reason |
 | `HasStateMachine` trait | on the entity | `canTransition()`, `checkTransition()`, `executeTransition()`, `availableTransitions()`, `isInAnyStatus()` |
 | Transition result | kernel DTO | `allowed`, `executed`, `reasons`, `summary()`, `dueToStatus()`, `dueToOnlyConditions()`, `dueToPermissions()` |
 
 ```php
-final class InvoiceStateMachine extends AbstractStateMachine
+final class EmployeeStateMachine extends AbstractStateMachine
 {
     protected function registerTransitions(): void
     {
-        $this->addTransition((new TransitionDefinition(InvoiceTransition::ISSUE))
-            ->from(InvoiceStatus::DRAFT)
-            ->to(InvoiceStatus::ISSUED)
-            ->condition([HasLinesCondition::class, HasCustomerTaxIdCondition::class]));
+        $this->addTransition((new TransitionDefinition(EmployeeTransition::ACTIVATE))
+            ->from(EmployeeStatus::PENDING)
+            ->to(EmployeeStatus::ACTIVE)
+            ->condition([HasContactsCondition::class, HasUserAccountCondition::class]));
 
-        $this->addTransition((new TransitionDefinition(InvoiceTransition::CANCEL))
-            ->from([InvoiceStatus::DRAFT, InvoiceStatus::ISSUED])
-            ->to(InvoiceStatus::CANCELLED)
-            ->condition(HasNoPaymentsCondition::class)
-            ->permission('invoices.cancel'));
+        $this->addTransition((new TransitionDefinition(EmployeeTransition::ARCHIVE))
+            ->from([EmployeeStatus::PENDING, EmployeeStatus::ACTIVE])
+            ->to(EmployeeStatus::ARCHIVED)
+            ->condition(HasNoDirectReportsCondition::class)
+            ->permission('employees.archive'));
 
-        $this->addTransition((new TransitionDefinition(InvoiceTransition::SEND_REMINDER))
-            ->from(InvoiceStatus::ISSUED)
+        $this->addTransition((new TransitionDefinition(EmployeeTransition::SEND_INVITATION))
+            ->from(EmployeeStatus::PENDING)
             ->soft());
     }
 }
 ```
 
 - **One rule per guard class.** Why: the result can then say *which* rule failed
-  (`dueToOnlyConditions(HasNoPaymentsCondition::class)`), and an ability can make an exception for one.
+  (`dueToOnlyConditions(HasNoDirectReportsCondition::class)`), and an ability can make an exception for one.
 - **Soft transitions** (`->soft()`): same from-statuses, guards and permissions, but no status write and
   no history; only events fire. Use one for an action that is legal in a status without changing it
-  (send a reminder, issue a document), so the rule "when is this allowed" still lives in one place.
+  (send an invitation, send a welcome email), so the rule "when is this allowed" still lives in one place.
 - `executeTransition()` checks, writes the status, records history and fires events in one transaction,
   and throws when the transition is not allowed.
 - Call transitions from the Action that owns the operation, never from a controller or another domain.
   The Action's own transaction wraps everything else it writes ([actions.md](actions.md)).
 
 ```php
-final class CancelInvoice
+final class ArchiveEmployee
 {
-    public static function handle(Invoice $invoice, CancelInvoiceData $data): Invoice
+    public static function handle(Employee $employee, ArchiveEmployeeData $data): Employee
     {
-        return DB::transaction(function () use ($invoice, $data) {
-            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
-            $check = $invoice->checkTransition(InvoiceTransition::CANCEL, ['user' => $data->user]);
+        return DB::transaction(function () use ($employee, $data) {
+            $employee = Employee::query()->lockForUpdate()->findOrFail($employee->id);
+            $check = $employee->checkTransition(EmployeeTransition::ARCHIVE, ['user' => $data->user]);
 
-            throw_unless($check->allowed, InvoiceException::cannotCancel($check->summary()));
+            throw_unless($check->allowed, EmployeeException::cannotArchive($check->summary()));
 
-            $invoice->update(['cancel_reason' => $data->reason]);
-            $invoice->executeTransition(InvoiceTransition::CANCEL, ['user' => $data->user]);
+            $employee->update(['notes' => $data->notes]);
+            $employee->executeTransition(EmployeeTransition::ARCHIVE, ['user' => $data->user]);
 
-            return $invoice;
+            return $employee;
         });
     }
 }
 ```
 
-The `lockForUpdate()` re-read makes the check and the write see the same row. Why: two concurrent cancels
+The `lockForUpdate()` re-read makes the check and the write see the same row. Why: two concurrent archives
 both pass a check made on a stale model, and both run the side effects.
 
 ### Abilities over the state machine
 
 | Need | Use |
 |---|---|
-| Hide a button when the action is not available | an ability: `$invoice->ability('cancel')` |
+| Hide a button when the action is not available | an ability: `$employee->ability('archive')` |
 | Always show the button and explain on click | `checkTransition()` → `summary()` / `reasons` in a 422 or a flash |
 | A state-machine answer with one business exception | an ability that wraps the result |
 
 ```php
-public function cancel(): bool
+public function archive(): bool
 {
-    $result = $this->invoice->checkTransition(InvoiceTransition::CANCEL);
+    $result = $this->employee->checkTransition(EmployeeTransition::ARCHIVE);
 
-    return $result->allowed || $result->dueToOnlyConditions(HasNoPaymentsCondition::class);
+    return $result->allowed || $result->dueToOnlyConditions(HasNoDirectReportsCondition::class);
 }
 ```
 
@@ -242,36 +242,36 @@ ability flags) to the page from the server, so the UI never offers a move the Ac
 
 ## Once-only claims
 
-An operation that must happen at most once (issue a number, send a payment, post to a ledger) claims the
-row with a conditional update and stops when nothing changed:
+An operation that must happen at most once (assign a number, send an invitation, write an audit entry) claims
+the row with a conditional update and stops when nothing changed:
 
 ```php
-$claimed = Invoice::query()
-    ->whereKey($invoice->id)
-    ->where('status', InvoiceStatus::DRAFT)
-    ->update(['status' => InvoiceStatus::ISSUING]);
+$claimed = Employee::query()
+    ->whereKey($employee->id)
+    ->where('status', EmployeeStatus::PENDING)
+    ->update(['status' => EmployeeStatus::ACTIVATING]);
 
 if ($claimed === 0) {
-    return $invoice->refresh();
+    return $employee->refresh();
 }
 ```
 
 The second caller gets `0` and returns. Why: the database applies the `WHERE` and the `SET` atomically; an
-`if ($invoice->status === DRAFT)` check in PHP lets two requests both pass. This conditional write is the
+`if ($employee->status === PENDING)` check in PHP lets two requests both pass. This conditional write is the
 one status write allowed outside the state machine, and it lives inside the Action that owns the transition.
 
-- Use an intermediate status (`ISSUING`) when the work after the claim calls an outside service, so a crash
+- Use an intermediate status (`ACTIVATING`) when the work after the claim calls an outside service, so a crash
   leaves a visible row to retry, not a silent half-done one.
-- When the guard is not one row's status (a nightly run, a per-customer recalculation), take a named
-  cache lock around the transaction: `Cache::lock("invoice-recalc:{$customerId}", 60)->block(10, fn () =>
+- When the guard is not one row's status (a nightly run, a per-user profile sync), take a named
+  cache lock around the transaction: `Cache::lock("employee-sync:{$userId}", 60)->block(10, fn () =>
   DB::transaction(...))`, and turn a lock timeout into a domain exception the caller can show.
-- A uniqueness rule that must never break (one payment per external reference) also gets a unique index;
+- A uniqueness rule that must never break (one invitation per external reference) also gets a unique index;
   the claim is the fast path, the index is the guarantee.
 
 ## Request idempotency
 
 Double clicks, back-button re-posts and dropped connections resubmit the same form. Protect every
-state-changing form where a duplicate is harmful (payments, invoices, ledger entries):
+state-changing form where a duplicate is harmful (invitations, new employees, audit entries):
 
 - A middleware on the route dedupes by an `idempotency_key` field; the form renders that key as a hidden
   input generated **on the server**, so plain and AJAX submits both carry one. The middleware alone does

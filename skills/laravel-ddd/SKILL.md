@@ -96,42 +96,42 @@ A shared `Core` domain holds the kernel every domain uses: the `Arrayable` DTO b
 ## One request, end to end
 
 ```php
-// Presentation\Admin\Controllers\Invoice\InvoiceController
-public function __construct(private readonly InvoiceContract $invoices) {}
+// Presentation\Admin\Controllers\Employee\EmployeeController
+public function __construct(private readonly EmployeeContract $employees) {}
 
-public function store(StoreInvoiceRequest $request): RedirectResponse
+public function store(StoreEmployeeRequest $request): RedirectResponse
 {
-    $invoice = $this->invoices->create(CreateInvoiceData::fromRequest($request));
+    $employee = $this->employees->create(CreateEmployeeData::fromRequest($request));
 
-    return to_route('admin.invoices.show', $invoice->id)->with('success', __('messages.saved'));
+    return to_route('admin.employees.show', $employee->id)->with('success', __('messages.saved'));
 }
 
-// Domain\Billing\DataTransferObjects\CreateInvoiceData
-public static function fromRequest(StoreInvoiceRequest $request): self
+// Domain\Employee\DataTransferObjects\CreateEmployeeData
+public static function fromRequest(StoreEmployeeRequest $request): self
 {
     return self::fromArray([
         ...$request->validated(),
-        'lines' => InvoiceLineData::arrayFrom($request->validated('lines')),
+        'contacts' => EmployeeContactData::arrayFrom($request->validated('contacts')),
     ]);
 }
 
-// Domain\Billing\Services\InvoiceService
-public function create(CreateInvoiceData $data): Invoice
+// Domain\Employee\Services\EmployeeService
+public function create(CreateEmployeeData $data): Employee
 {
-    return CreateInvoice::handle($data);
+    return CreateEmployee::handle($data);
 }
 
-// Domain\Billing\Actions\Invoice\CreateInvoice
-final class CreateInvoice
+// Domain\Employee\Actions\Employee\CreateEmployee
+final class CreateEmployee
 {
-    public static function handle(CreateInvoiceData $data): Invoice
+    public static function handle(CreateEmployeeData $data): Employee
     {
         return DB::transaction(function () use ($data) {
-            $customer = app(CustomerContract::class)->getCustomer($data->customer_id);
-            $invoice = Invoice::create([...(clone $data)->exclude(['lines'])->toArray(), 'customer_id' => $customer->id]);
-            $invoice->lines()->createMany(array_map(fn (InvoiceLineData $line) => $line->toArray(), $data->lines));
+            $user = app(UserContract::class)->getUser($data->user_id);
+            $employee = Employee::create([...(clone $data)->exclude(['contacts'])->toArray(), 'user_id' => $user->id]);
+            $employee->contacts()->createMany(array_map(fn (EmployeeContactData $contact) => $contact->toArray(), $data->contacts));
 
-            return $invoice;
+            return $employee;
         });
     }
 }

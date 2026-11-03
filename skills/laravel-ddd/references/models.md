@@ -10,7 +10,7 @@
 - Entities live in `Models/Entities/`, created by hand. New models use the `casts()` method.
 - `$fillable` on any model that takes request data; `$guarded = []` only on internal models.
 - **No state-changing or workflow methods on a model.** Writes are Actions. Read-only questions about the
-  row itself are fine (`isOverdue()`).
+  row itself are fine (`needsActivation()`).
 - `Attribute` accessors do all their work inside the `get:` closure.
 - One `{Entity}Filter` trait per listable entity, exposing `scopeFilterBy()`. Every list query goes through it.
 - Abilities answer "can this record do X now?" with a `bool`. Role checks are Policies.
@@ -33,46 +33,46 @@
 ## Entities
 
 ```php
-namespace Domain\Billing\Models\Entities;
+namespace Domain\Employee\Models\Entities;
 
-class Invoice extends Model
+class Employee extends Model
 {
-    use HasFactory, InvoiceFilter, ModelAbility, SoftDeletes;
+    use EmployeeFilter, HasFactory, ModelAbility, SoftDeletes;
 
-    protected string $abilityClass = InvoiceAbilities::class;
+    protected string $abilityClass = EmployeeAbilities::class;
 
-    protected $fillable = ['customer_id', 'number', 'status', 'currency', 'issued_at', 'due_at', 'notes'];
+    protected $fillable = ['user_id', 'employee_number', 'name', 'email', 'job_title', 'status', 'hired_at', 'notes'];
 
     protected function casts(): array
     {
         return [
-            'status' => InvoiceStatus::class,
-            'issued_at' => 'datetime',
-            'due_at' => 'date',
-            'total' => 'integer',
+            'status' => EmployeeStatus::class,
+            'activated_at' => 'datetime',
+            'archived_at' => 'datetime',
+            'hired_at' => 'date',
             'is_locked' => 'boolean',
             'options' => 'array',
         ];
     }
 
-    public function customer(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function lines(): HasMany
+    public function contacts(): HasMany
     {
-        return $this->hasMany(InvoiceLine::class);
+        return $this->hasMany(EmployeeContact::class);
     }
 
-    public function isOverdue(): bool
+    public function needsActivation(): bool
     {
-        return $this->status === InvoiceStatus::ISSUED && $this->due_at?->isPast();
+        return $this->status === EmployeeStatus::PENDING && $this->hired_at?->isPast();
     }
 
-    protected static function newFactory(): InvoiceFactory
+    protected static function newFactory(): EmployeeFactory
     {
-        return InvoiceFactory::new();
+        return EmployeeFactory::new();
     }
 }
 ```
@@ -80,9 +80,9 @@ class Invoice extends Model
 - Never `php artisan make:model`: it writes to `app/Models/`. Create by hand or clone a neighbour.
 - Extend `Model`, or `Illuminate\Foundation\Auth\User` only when the entity signs in.
 - Type every relation's return so static analysis catches misuse. Follow Laravel's key names
-  (`customer_id`); override them only for a column that already exists under another name.
+  (`user_id`); override them only for a column that already exists under another name.
 - Add `->withTrashed()` to a relation when the related row soft-deletes but the link must still resolve
-  (a cancel reason, a retired product on an old invoice).
+  (an archive reason, a closed department on an old employee).
 - Keep a `morphTo`'s target list as a constant on the model that owns it
   (`Attachment::ATTACHABLE_TYPES`), so `whereHasMorph()` uses one list ([queries.md](queries.md#polymorphic-existence)).
 - Entities under `src/Domain/` are invisible to factory name guessing. Add `newFactory()` per model, or map
@@ -96,7 +96,7 @@ class Invoice extends Model
   remember to coerce, and one of them will not.
 - New models use `protected function casts(): array`. A model that still has the `$casts` property keeps it
   until someone refactors it on purpose, not as a side effect of other work.
-- A JSON list of enum values: `AsEnumCollection::of(InvoiceFlag::class)` (Laravel 12, checked 2026-11-03).
+- A JSON list of enum values: `AsEnumCollection::of(EmployeeFlag::class)` (Laravel 12, checked 2026-11-03).
   It throws on a value the enum no longer has; if old rows can hold retired values, use a custom cast that
   maps with `tryFrom()` and drops the nulls.
 - A JSON object with known keys gets an options DTO accessor ([dtos.md](dtos.md#options-dtos-for-a-json-column)).
@@ -113,17 +113,17 @@ class Invoice extends Model
 
 ```php
 // ✅ the work runs on read
-protected function displayTotal(): Attribute
+protected function displayName(): Attribute
 {
-    return Attribute::get(fn () => Money::format($this->total, $this->currency));
+    return Attribute::get(fn () => "{$this->name} ({$this->department->name})");
 }
 
 // ❌ the work runs when the accessor is built, before the model is ready
-protected function displayTotal(): Attribute
+protected function displayName(): Attribute
 {
-    $formatted = Money::format($this->total, $this->currency);
+    $label = "{$this->name} ({$this->department->name})";
 
-    return Attribute::get(fn () => $formatted);
+    return Attribute::get(fn () => $label);
 }
 ```
 
@@ -135,28 +135,28 @@ Use `Attribute::get()` for read-only values and `Attribute::make(get:, set:)` on
 
 ```php
 // ❌ a workflow hidden on the model
-public function markPaid(): void
+public function markArchived(): void
 {
-    $this->update(['status' => InvoiceStatus::PAID, 'paid_at' => now()]);
-    app(LedgerContract::class)->recordPayment($this->id);
+    $this->update(['status' => EmployeeStatus::ARCHIVED, 'archived_at' => now()]);
+    app(AuditContract::class)->record('employee.archived', $this->id);
 }
 
 // ✅ the model answers questions about itself; an Action owns the write
-public function isPaid(): bool
+public function isArchived(): bool
 {
-    return $this->status === InvoiceStatus::PAID;
+    return $this->status === EmployeeStatus::ARCHIVED;
 }
 ```
 
 Why: a model method runs from anywhere (views, serialization, other domains) with no transaction and no
-Contract in sight. Plain methods read as questions (`isOverdue()`, `requiresApproval()`) or derived values
-(`outstandingAmount()`). A method may call `route()` to build a link; it never reads `request()`, the
+Contract in sight. Plain methods read as questions (`needsActivation()`, `requiresApproval()`) or derived
+values (`initials()`). A method may call `route()` to build a link; it never reads `request()`, the
 session, `auth()` or another domain's data.
 
 ## Model traits
 
-`Models/Traits/` holds traits that group one concern of a large entity (`InvoiceAddresses`,
-`HasInvoiceDocument`) or share relations, casts and accessors between entities. The same limits apply as
+`Models/Traits/` holds traits that group one concern of a large entity (`EmployeeAddresses`,
+`HasEmployeePhoto`) or share relations, casts and accessors between entities. The same limits apply as
 on the entity: relations, accessors, scopes and read-only questions; no writes, no workflows. Name a
 shared trait `Has{Thing}`; name a grouping trait after the concern.
 
@@ -165,36 +165,36 @@ shared trait `Has{Thing}`; name a grouping trait after the concern.
 ### The filter trait
 
 ```php
-namespace Domain\Billing\Models\Scopes;
+namespace Domain\Employee\Models\Scopes;
 
-trait InvoiceFilter
+trait EmployeeFilter
 {
-    public function scopeFilterBy(Builder $query, ?FilterInvoiceData $filters): void
+    public function scopeFilterBy(Builder $query, ?FilterEmployeeData $filters): void
     {
         $query->when($filters?->id, fn (Builder $q) => $q->whereByType('id', $filters->id))
-            ->when($filters?->customer_id, fn (Builder $q) => $q->whereByType('customer_id', $filters->customer_id))
+            ->when($filters?->user_id, fn (Builder $q) => $q->whereByType('user_id', $filters->user_id))
             ->when($filters?->status, fn (Builder $q) => $q->whereByType('status', $filters->status))
-            ->when($filters?->number, fn (Builder $q) => $q->whereLikeText('number', $filters->number))
-            ->when($filters?->issued_from, fn (Builder $q) => $q->whereDate('issued_at', '>=', $filters->issued_from))
-            ->when($filters?->issued_to, fn (Builder $q) => $q->whereDate('issued_at', '<=', $filters->issued_to))
+            ->when($filters?->employee_number, fn (Builder $q) => $q->whereLikeText('employee_number', $filters->employee_number))
+            ->when($filters?->hired_from, fn (Builder $q) => $q->whereDate('hired_at', '>=', $filters->hired_from))
+            ->when($filters?->hired_to, fn (Builder $q) => $q->whereDate('hired_at', '<=', $filters->hired_to))
             ->when($filters?->with_trashed, fn (Builder $q) => $q->withTrashed());
     }
 
-    public function scopeOpen(Builder $query): void
+    public function scopeCurrent(Builder $query): void
     {
-        $query->whereIn('status', [InvoiceStatus::DRAFT, InvoiceStatus::ISSUED]);
+        $query->whereIn('status', [EmployeeStatus::PENDING, EmployeeStatus::ACTIVE]);
     }
 }
 ```
 
-- The entry scope is `scopeFilterBy()` (called as `Invoice::query()->filterBy($filters)`). It takes the
+- The entry scope is `scopeFilterBy()` (called as `Employee::query()->filterBy($filters)`). It takes the
   nullable Filter DTO, never a request or a loose array ([dtos.md](dtos.md#filter-dtos)).
 - Every clause sits inside `when()`, so a null field is skipped and the Action has one code path.
 - `when($filters?->flag, …)` skips `false`. For a boolean filter where `false` is a real value, test
-  `! is_null($filters?->is_paid)`.
+  `! is_null($filters?->is_locked)`.
 - Every property the DTO declares is read here.
 - A where-chain that names a domain idea and appears twice becomes a named scope in the same trait
-  (`scopeOpen`). Why: three copies of "open invoice" drift apart. Move named scopes to their own trait
+  (`scopeCurrent`). Why: three copies of "current employee" drift apart. Move named scopes to their own trait
   only when the filter trait grows large.
 - The macros, eager loading and the rest of the query rules: [queries.md](queries.md). A self-evident
   `when()` chain takes no comment.
@@ -220,28 +220,29 @@ memory on a dropdown.
 ## Abilities
 
 ```php
-namespace Domain\Billing\Models\Abilities;
+namespace Domain\Employee\Models\Abilities;
 
-final readonly class InvoiceAbilities
+final readonly class EmployeeAbilities
 {
-    public function __construct(public Invoice $invoice) {}
+    public function __construct(public Employee $employee) {}
 
     public function update(): bool
     {
-        return $this->invoice->status === InvoiceStatus::DRAFT && ! $this->invoice->is_locked;
+        return $this->employee->status === EmployeeStatus::PENDING && ! $this->employee->is_locked;
     }
 
-    public function cancel(User $user): bool
+    public function archive(User $user): bool
     {
-        return $this->invoice->canTransition(InvoiceTransition::CANCEL, ['user' => $user]);
+        return $this->employee->canTransition(EmployeeTransition::ARCHIVE, ['user' => $user]);
     }
 }
 ```
 
-- The entity uses `ModelAbility` and declares `protected string $abilityClass = InvoiceAbilities::class;`
+- The entity uses `ModelAbility` and declares `protected string $abilityClass = EmployeeAbilities::class;`
   ([core-kernel.md](core-kernel.md)).
 - The constructor takes the model as a public property. One public method per question, named for the
-  action (`update`, `cancel`, `issue`), no `can` prefix: the call reads `$invoice->ability('cancel', $user)`.
+  action (`update`, `archive`, `activate`), no `can` prefix: the call reads
+  `$employee->ability('archive', $user)`.
 - Returns `bool`, no reason and no message. Private helpers for shared sub-checks; extra arguments are
   forwarded.
 - `getAbility()` returns the object when you need several flags; `hasAbility()` aborts 403 and is rare,
@@ -251,9 +252,9 @@ final readonly class InvoiceAbilities
 
 | Question | Where |
 |---|---|
-| Can **this** invoice be edited now, given its status? | `InvoiceAbilities::update()` |
-| May this **role** edit invoices at all? | `app/Policies/InvoicePolicy.php` or a permission middleware |
-| Why exactly can it not be cancelled? (shown to the user) | the state machine's result ([enums-and-states.md](enums-and-states.md)) |
+| Can **this** employee be edited now, given its status? | `EmployeeAbilities::update()` |
+| May this **role** edit employees at all? | `app/Policies/EmployeePolicy.php` or a permission middleware |
+| Why exactly can it not be archived? (shown to the user) | the state machine's result ([enums-and-states.md](enums-and-states.md)) |
 
 Policies may call abilities; abilities never check roles. Send the reachable actions to the page from the
 server, so the UI never offers a move the Action will refuse.

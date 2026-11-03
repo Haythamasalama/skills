@@ -44,25 +44,25 @@ Contract; a controller never extends or includes another panel's controller.
 // ❌ lookups, a write and orchestration in HTTP code
 public function store(Request $request): RedirectResponse
 {
-    $customer = Customer::findOrFail($request->customer_id);
-    $invoice = Invoice::create(['customer_id' => $customer->id, 'currency' => $request->currency]);
-    $invoice->lines()->createMany($request->lines);
+    $user = User::findOrFail($request->user_id);
+    $employee = Employee::create(['user_id' => $user->id, 'job_title' => $request->job_title]);
+    $employee->contacts()->createMany($request->contacts);
 
     return back();
 }
 
 // ✅
-final class InvoiceController extends Controller
+final class EmployeeController extends Controller
 {
-    public function __construct(private readonly InvoiceContract $invoices) {}
+    public function __construct(private readonly EmployeeContract $employees) {}
 
-    public function store(StoreInvoiceRequest $request): RedirectResponse
+    public function store(StoreEmployeeRequest $request): RedirectResponse
     {
-        $invoice = $this->invoices->create(CreateInvoiceData::fromArray($request->validated()));
+        $employee = $this->employees->create(CreateEmployeeData::fromArray($request->validated()));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.created')]);
 
-        return to_route('admin.invoices.show', $invoice->id);
+        return to_route('admin.employees.show', $employee->id);
     }
 }
 ```
@@ -83,7 +83,7 @@ final class InvoiceController extends Controller
 |---|---|
 | `index` (page or API list) | `Index{Entity}Request` |
 | `store` / `update` | `Store{Entity}Request` / `Update{Entity}Request` |
-| any other action | `{Action}{Entity}Request` (`CancelInvoiceRequest`) |
+| any other action | `{Action}{Entity}Request` (`ArchiveEmployeeRequest`) |
 | an endpoint that takes criteria and returns matches | `{Entity}SearchRequest` |
 
 - The entity is singular. Files live in the panel's `Requests/{Feature}/`; `make:request` writes to
@@ -102,18 +102,18 @@ values. Only validated keys reach the DTO, so an unknown or renamed parameter is
 queryable surface is written down.
 
 ```php
-final class IndexInvoiceRequest extends FormRequest
+final class IndexEmployeeRequest extends FormRequest
 {
-    protected $redirectRoute = 'admin.invoices.index';
+    protected $redirectRoute = 'admin.employees.index';
 
     public function rules(): array
     {
         return [
             'id' => ['nullable', new StringOrArray, new ValidId],
-            'number' => ['nullable', 'string', 'max:255'],
+            'employee_number' => ['nullable', 'string', 'max:255'],
             'statuses' => ['nullable', 'array', 'max:10'],
-            'statuses.*' => [Rule::enum(InvoiceStatus::class)],
-            'customer_type' => ['nullable', 'string', Rule::in(['business', 'person'])],
+            'statuses.*' => [Rule::enum(EmployeeStatus::class)],
+            'user_type' => ['nullable', 'string', Rule::in(['admin', 'staff'])],
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date'],
             'page' => ['nullable', 'integer', 'min:1'],
@@ -121,11 +121,11 @@ final class IndexInvoiceRequest extends FormRequest
         ];
     }
 
-    public function toFilterData(): FilterInvoiceData
+    public function toFilterData(): FilterEmployeeData
     {
-        return FilterInvoiceData::fromArray([
+        return FilterEmployeeData::fromArray([
             ...$this->validated(),
-            'customer_type' => CustomerType::tryFromShort($this->validated('customer_type'))?->value,
+            'user_type' => UserType::tryFromShort($this->validated('user_type'))?->value,
         ]);
     }
 }
@@ -137,8 +137,8 @@ final class IndexInvoiceRequest extends FormRequest
 - On a page panel, `$redirectRoute` sends a bad filter to the plain list. Why: the user lands on a
   working page, never back on the URL that failed.
 - `id` is the records picked in a filter (database ids). A number the user types from the screen
-  (`INV-0042`) is a different field (`number`), a plain string, matched as text, never `ValidId`.
-- The browser sends short type names (`business`), never a PHP class name; the request validates the
+  (`EMP-0042`) is a different field (`employee_number`), a plain string, matched as text, never `ValidId`.
+- The browser sends short type names (`staff`), never a PHP class name; the request validates the
   short name and the server maps it.
 
 ### One value or a list
@@ -157,20 +157,20 @@ property then accepts both shapes (`int|string|array|null`); see [dtos.md](dtos.
 
 ### Foreign keys are an ownership check
 
-On tenant-owned data, `exists:customers,id` lets a caller attach another tenant's row to its own, and
+On tenant-owned data, `exists:users,id` lets a caller attach another tenant's row to its own, and
 the response then reads it back. Scope the rule to the caller:
 
 ```php
-'customer_id' => ['required', Rule::exists('customers', 'id')->where('tenant_id', $this->currentTenant()->id)],
+'user_id' => ['required', Rule::exists('users', 'id')->where('tenant_id', $this->currentTenant()->id)],
 ```
 
-Shared reference tables (countries, currencies) need no scope. Why the rule and not the controller: the
+Shared reference tables (countries, languages) need no scope. Why the rule and not the controller: the
 controller only spreads `validated()`, so the guarantee is invisible in review unless it lives here.
 
 ## Building DTOs from requests
 
 ```php
-$this->invoices->create(CreateInvoiceData::fromArray([
+$this->employees->create(CreateEmployeeData::fromArray([
     ...$request->validated(),
     'tenant_id' => $this->currentTenant()->id,
     'created_by_id' => $request->user()->id,
@@ -190,22 +190,22 @@ Pass the id and fetch through the Contract:
 ```php
 public function show(string $id): InertiaResponse
 {
-    $invoice = $this->invoices->getInvoice($id);
-    abort_if($invoice === null, 404);
+    $employee = $this->employees->getEmployee($id);
+    abort_if($employee === null, 404);
 
-    return Inertia::render('invoices/Show', new InvoiceShowProps($invoice));
+    return Inertia::render('employees/Show', new EmployeeShowProps($employee));
 }
 ```
 
-- Do not bind models (`show(Invoice $invoice)`). Why: the router then runs its own query, which skips
+- Do not bind models (`show(Employee $employee)`). Why: the router then runs its own query, which skips
   the Contract's scopes, eager loads and tenant filter, and says nothing about whether this person may
   see the row.
 - Binding a backed enum (`edit(SettingsTab $tab)`) is fine: it is a value check, not a query.
 - Laravel passes route parameters by position, after the injected classes are removed. Keep the route
-  parameters first and in route order (`update(string $id, UpdateInvoiceRequest $request)`); see
+  parameters first and in route order (`update(string $id, UpdateEmployeeRequest $request)`); see
   [architecture.md](architecture.md) for a prefix consumed by middleware.
 - **Every** method that takes an id resolves it with the same scope `show` uses: `export`, `download`,
-  `cancel` included. A lookup with no scope lets a caller name any id in the table. When three methods
+  `archive` included. A lookup with no scope lets a caller name any id in the table. When three methods
   repeat the scope, give the controller one private helper that returns it.
 
 ## Authorization
@@ -214,7 +214,7 @@ public function show(string $id): InertiaResponse
 |---|---|
 | The panel (signed in, right guard) | `auth:{guard}` on the route group |
 | A page or action | one permission middleware on the route group (for example, permission = route name) |
-| This record, now (its status, its owner) | the record's ability in the method: `$invoice->hasAbility('cancel')` answers 403 |
+| This record, now (its status, its owner) | the record's ability in the method: `$employee->hasAbility('archive')` answers 403 |
 | What the UI shows | the same answers, sent as props; never the only check |
 
 - Pick one permission mechanism per panel. If the panel's users are not modelled for Laravel's Gate, do
@@ -257,26 +257,26 @@ after a list delete they keep their place.
 ### Inertia: one props class per page
 
 ```php
-abstract class PageProps implements ProvidesInertiaProperties { /* shared shapes: money(), status(), paginated() */ }
+abstract class PageProps implements ProvidesInertiaProperties { /* shared shapes: option(), status(), paginated() */ }
 
-final class InvoiceShowProps extends PageProps
+final class EmployeeShowProps extends PageProps
 {
-    public function __construct(private readonly Invoice $invoice) {}
+    public function __construct(private readonly Employee $employee) {}
 
     public function toInertiaProperties(RenderContext $context): array
     {
         return [
-            'invoice' => [
-                'id' => (string) $this->invoice->id,
-                'number' => $this->invoice->number,
-                'status' => $this->status($this->invoice->status),
-                'customer' => PersonLinkResource::make($this->invoice->customer),
-                'total' => $this->money($this->invoice->total),
-                'issued_at' => $this->invoice->issued_at?->toIso8601String(),
-                'can_cancel' => $this->invoice->ability('cancel'),
+            'employee' => [
+                'id' => (string) $this->employee->id,
+                'employee_number' => $this->employee->employee_number,
+                'status' => $this->status($this->employee->status),
+                'user' => PersonLinkResource::make($this->employee->user),
+                'department' => $this->option($this->employee->department),
+                'activated_at' => $this->employee->activated_at?->toIso8601String(),
+                'can_archive' => $this->employee->ability('archive'),
             ],
-            'payments' => Inertia::defer(fn () => PaymentResource::collection(
-                app(PaymentContract::class)->getPayments(FilterPaymentData::fromArray(['invoice_id' => $this->invoice->id]))->collection(),
+            'invitations' => Inertia::defer(fn () => InvitationResource::collection(
+                app(InvitationContract::class)->getInvitations(FilterInvitationData::fromArray(['employee_id' => $this->employee->id]))->collection(),
             )),
         ];
     }
@@ -286,9 +286,9 @@ final class InvoiceShowProps extends PageProps
 `ProvidesInertiaProperties` and `RenderContext` are inertia-laravel API (checked 2026-11-03).
 
 - Name: `{Module}{Page}Props` in `Props/{Module}/`, `final`. Two pages that send the same props share
-  one class named for what they share (`InvoiceFormProps` for Create and Edit).
+  one class named for what they share (`EmployeeFormProps` for Create and Edit).
 - The controller passes what it already has: the record, the viewer, the filter DTO
-  (`new InvoiceIndexProps(filters: $request->toFilterData())`). The class never reads the request.
+  (`new EmployeeIndexProps(filters: $request->toFilterData())`). The class never reads the request.
 - New reads go through Contracts, never an Action. Reading a relation of the record it was given is fine.
 - Keys are `snake_case` and always present: a missing value is `null`, never a missing key. Ids are
   strings, dates ISO 8601, money a fixed two-decimal string.
@@ -335,10 +335,10 @@ row. The submit runs the check again; the disabled button is only a hint. State 
 ```php
 public function pdf(string $id): Response
 {
-    $invoice = $this->invoices->getInvoice($id);
-    abort_if($invoice === null, 404);
+    $employee = $this->employees->getEmployee($id);
+    abort_if($employee === null, 404);
 
-    return PdfResponse::inline($this->invoices->renderPdf($invoice), "invoice-{$invoice->number}.pdf");
+    return PdfResponse::inline($this->employees->renderPdf($employee), "employee-{$employee->employee_number}.pdf");
 }
 
 final class PdfResponse

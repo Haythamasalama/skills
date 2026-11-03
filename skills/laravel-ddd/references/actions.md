@@ -10,7 +10,7 @@ transactions, locks, exceptions, resolving dependencies, and the CRUD templates.
 
 - `final class X { public static function handle(...) }`. Stateless. **Never a constructor.**
 - One Action, one operation. Names: `Get{Entity}`, `Get{Entity}s`, `Create{Entity}`, `Update{Entity}`,
-  `Delete{Entity}`, or the natural verb (`IssueInvoice`, `ApplyDiscount`). No `Action` suffix.
+  `Delete{Entity}`, or the natural verb (`ActivateEmployee`, `AssignManager`). No `Action` suffix.
 - `Get{Entity}s` extends `GetDataAbstract` and is built through `::for()`.
 - The payload travels as a `*Data` DTO. The entity it acts on stays a plain parameter.
 - **Never validate inside an Action.** That is the Form Request's job.
@@ -23,24 +23,24 @@ transactions, locks, exceptions, resolving dependencies, and the CRUD templates.
 
 ```php
 // ✅
-final class GetInvoice
+final class GetEmployee
 {
-    public static function handle(int $id): ?Invoice
+    public static function handle(int $id): ?Employee
     {
-        return Invoice::query()->find($id);
+        return Employee::query()->find($id);
     }
 }
 
-GetInvoice::handle($id);
+GetEmployee::handle($id);
 ```
 
 ```php
 // ❌ instantiated, instance method, injected dependency, suffix
-class CreateInvoiceAction
+class CreateEmployeeAction
 {
-    public function __construct(private CustomerService $customers) {}
+    public function __construct(private UserService $users) {}
 
-    public function execute(array $input): Invoice { /* ... */ }
+    public function execute(array $input): Employee { /* ... */ }
 }
 ```
 
@@ -52,29 +52,29 @@ injecting Contracts, which hides what a call needs.
 
 | Kind | Name |
 |---|---|
-| Read one | `GetInvoice` |
-| Read many (filtered, paginated) or an aggregate | `GetInvoices`, `GetInvoiceTotalsByStatus` (both extend `GetDataAbstract`) |
-| Insert | `CreateInvoice` |
-| Partial update | `UpdateInvoice` |
-| Remove | `DeleteInvoice` |
-| Domain operation | `IssueInvoice`, `CancelInvoice`, `RecalculateInvoiceTotal`, `SendInvoiceReminder` |
+| Read one | `GetEmployee` |
+| Read many (filtered, paginated) or an aggregate | `GetEmployees`, `GetEmployeeCountsByStatus` (both extend `GetDataAbstract`) |
+| Insert | `CreateEmployee` |
+| Partial update | `UpdateEmployee` |
+| Remove | `DeleteEmployee` |
+| Domain operation | `ActivateEmployee`, `ArchiveEmployee`, `SyncEmployeeProfile`, `SendEmployeeInvitation` |
 
 The namespace `Domain\{Domain}\Actions\` already says "Action". When a domain holds several entities,
-group by entity: `Actions/Invoice/CreateInvoice.php`, `Actions/Payment/RefundPayment.php`. Why: a folder
-per entity keeps forty Actions findable; the class name still says what it does.
+group by entity: `Actions/Employee/CreateEmployee.php`, `Actions/Invitation/ResendInvitation.php`. Why:
+a folder per entity keeps forty Actions findable; the class name still says what it does.
 
 ## Every Action takes a DTO
 
 ```php
 // ✅ one typed payload; adding a field touches one class
-UpdateCustomer::handle($customer, UpdateCustomerData::fromArray($request->validated()));
+UpdateUser::handle($user, UpdateUserData::fromArray($request->validated()));
 
 // ❌ loose scalars drift out of sync with every caller
-UpdateCustomer::handle($customer, $name, $email, $phone);
+UpdateUser::handle($user, $name, $email, $phone);
 ```
 
-Prefer one `UpdateCustomer` with an all-nullable `UpdateCustomerData` over `UpdateCustomerName` +
-`UpdateCustomerEmail`. Why: the write rules (only sent keys, reset `email_verified_at` when the address
+Prefer one `UpdateUser` with an all-nullable `UpdateUserData` over `UpdateUserName` +
+`UpdateUserEmail`. Why: the write rules (only sent keys, reset `email_verified_at` when the address
 changes) then live in one place. An Action that receives a raw external payload (a webhook body) takes it
 as a typed `array` with a PHPDoc shape and builds DTOs itself.
 
@@ -82,9 +82,9 @@ as a typed `array` with a PHPDoc shape and builds DTOs itself.
 
 ```php
 // ❌ the domain re-validates what the boundary owns
-final class CreateCustomer
+final class CreateUser
 {
-    public static function handle(array $input): Customer
+    public static function handle(array $input): User
     {
         Validator::make($input, [...])->validate();
         // ...
@@ -94,25 +94,25 @@ final class CreateCustomer
 
 When a package owns the route and hands you a raw array with no Form Request in the path (an auth
 package's "create user" hook), that adapter is framework glue. Put it in `app/`, validate there, and call
-the Action. Why: it keeps validation out of `src/Domain/`. Checking a **business** rule ("an issued invoice
-cannot be edited") is not validation; it belongs in the Action or the entity's Abilities, and fails with a
-domain exception.
+the Action. Why: it keeps validation out of `src/Domain/`. Checking a **business** rule ("an archived
+employee cannot be edited") is not validation; it belongs in the Action or the entity's Abilities, and
+fails with a domain exception.
 
 ## Transactions
 
 Any Action that writes more than one row wraps the writes in a transaction. Read-only Actions do not.
 
 ```php
-// ❌ the invoice is committed even when a line fails
-$invoice = Invoice::create([...]);
-$invoice->lines()->createMany([...]);
+// ❌ the employee is committed even when a contact fails
+$employee = Employee::create([...]);
+$employee->contacts()->createMany([...]);
 
 // ✅ atomic
 return DB::transaction(function () use ($data) {
-    $invoice = Invoice::create((clone $data)->exclude(['lines'])->toArray());
-    $invoice->lines()->createMany(array_map(fn (InvoiceLineData $line) => $line->toArray(), $data->lines));
+    $employee = Employee::create((clone $data)->exclude(['contacts'])->toArray());
+    $employee->contacts()->createMany(array_map(fn (EmployeeContactData $contact) => $contact->toArray(), $data->contacts));
 
-    return $invoice;
+    return $employee;
 });
 ```
 
@@ -127,8 +127,8 @@ return DB::transaction(function () use ($data) {
 
 | Risk | Use |
 |---|---|
-| Two requests run the same operation on one record (double approve, double pay) | `LockTransactionRunner::run('invoice_pay', (string) $invoice->id, fn () => ...)` |
-| A gapless number per key (invoice numbers) | `app(SequenceContract::class)->incrementCount("invoice:{$year}")` |
+| Two requests run the same operation on one record (double approve, double activate) | `LockTransactionRunner::run('employee_activate', (string) $employee->id, fn () => ...)` |
+| A gapless number per key (employee numbers) | `app(SequenceContract::class)->incrementCount("employee:{$year}")` |
 | Read, then write based on what was read | `->lockForUpdate()` on the read, inside the transaction |
 
 Why: a transaction alone does not stop two requests reading the same "pending" status and both acting on
@@ -137,8 +137,8 @@ it. The helpers are in [core-kernel.md](core-kernel.md#concurrency-helpers).
 ## Failing
 
 ```php
-if (! $invoice->ability('canIssue')) {
-    throw InvoiceException::cannotIssue();
+if (! $employee->ability('canActivate')) {
+    throw EmployeeException::cannotActivate();
 }
 ```
 
@@ -150,28 +150,28 @@ say it.
 ## Resolving dependencies
 
 ```php
-final class IssueInvoice
+final class ActivateEmployee
 {
-    public static function handle(Invoice $invoice): Invoice
+    public static function handle(Employee $employee): Employee
     {
-        return DB::transaction(function () use ($invoice) {
-            $customer = app(CustomerContract::class)->getCustomer($invoice->customer_id);
-            $number = NextInvoiceNumber::handle();
+        return DB::transaction(function () use ($employee) {
+            $user = app(UserContract::class)->getUser($employee->user_id);
+            $number = NextEmployeeNumber::handle();
 
-            $invoice->update(['number' => $number, 'status' => InvoiceStatus::ISSUED, 'issued_at' => now()]);
+            $employee->update(['employee_number' => $number, 'email' => $user->email, 'status' => EmployeeStatus::ACTIVE, 'activated_at' => now()]);
 
-            app(LedgerContract::class)->recordReceivable($invoice->id, $customer->id, $invoice->total);
+            app(AuditContract::class)->record('employee.activated', $employee->id);
 
-            SendInvoicePdf::dispatch($invoice);
+            SendEmployeeWelcomeEmail::dispatch($employee);
 
-            return $invoice;
+            return $employee;
         });
     }
 }
 ```
 
-- `NextInvoiceNumber` and `SendInvoicePdf` are in the same domain, so they are imported directly.
-- `CustomerContract` and `LedgerContract` are other domains, so they go through `app()`.
+- `NextEmployeeNumber` and `SendEmployeeWelcomeEmail` are in the same domain, so they are imported directly.
+- `UserContract` and `AuditContract` are other domains, so they go through `app()`.
 - Who is acting comes from `app(CurrentUser::class)`, never `auth()`
   ([architecture.md](architecture.md#who-is-acting)).
 
@@ -181,15 +181,15 @@ When an operation calls several Actions or Contracts, loops over input, or parse
 Action (often a domain verb). The Service method stays a one-line delegation to it.
 
 ```php
-final class ProcessPaymentWebhook
+final class ProcessMailWebhook
 {
-    /** @param array<int, array{type: string, payment_id: string}> $events */
+    /** @param array<int, array{type: string, invitation_id: string}> $events */
     public static function handle(array $events): void
     {
         foreach ($events as $event) {
             match ($event['type']) {
-                'payment.succeeded' => MarkPaymentPaid::handle($event['payment_id']),
-                'payment.failed' => MarkPaymentFailed::handle($event['payment_id']),
+                'email.delivered' => MarkInvitationDelivered::handle($event['invitation_id']),
+                'email.bounced' => MarkInvitationBounced::handle($event['invitation_id']),
                 default => null,
             };
         }
@@ -253,10 +253,10 @@ final class Update{Entity}
     public static function handle({Entity} $entity, Update{Entity}Data $data): {Entity}
     {
         return DB::transaction(function () use ($entity, $data) {
-            $entity->update((clone $data)->exclude(['lines'])->excludeUnsent()->toArray());
+            $entity->update((clone $data)->exclude(['contacts'])->excludeUnsent()->toArray());
 
-            if ($data->isSent('lines')) {
-                $entity->lines()->createOrUpdateOrDelete(array_map(fn (LineData $line) => $line->toArray(), $data->lines));
+            if ($data->isSent('contacts')) {
+                $entity->contacts()->createOrUpdateOrDelete(array_map(fn (ContactData $contact) => $contact->toArray(), $data->contacts));
             }
 
             return $entity;
@@ -274,7 +274,7 @@ final class Delete{Entity}
 ```
 
 - `Get{Entity}s` returns a builder holder, not rows; the caller picks `pagination()`, `collection()` or
-  `count()` ([core-kernel.md](core-kernel.md#getdataabstract)). An aggregate (`GetInvoiceTotalsByStatus`)
+  `count()` ([core-kernel.md](core-kernel.md#getdataabstract)). An aggregate (`GetEmployeeCountsByStatus`)
   uses the same base with `select()` and `groupBy()` in `query()`.
 - `Update{Entity}` writes only the keys the caller sent, so an explicit `null` clears a column and an absent
   key is left alone. Clone before narrowing, because the helpers change the same instance. Why and the
@@ -282,7 +282,7 @@ final class Delete{Entity}
 - `Create{Entity}` with children cuts them out with `exclude([...])` and writes them in the same
   transaction, as in the Transactions section.
 - `find()` returning `null` vs `findOrFail()` throwing a 404: pick per Action and let the return type say
-  it (`?Invoice` vs `Invoice`).
+  it (`?Employee` vs `Employee`).
 
 ## Where Actions live
 

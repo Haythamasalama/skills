@@ -141,7 +141,7 @@ trait Arrayable
   and are freed with the DTO.
 - `only($keys)`, `exclude($keys)` and `filterNull()` are written like `excludeUnsent()`:
   `$this->remember(<a narrowed toArray()>)`. All four narrow **this instance**. Clone first when the
-  DTO is read again: `(clone $data)->exclude(['lines'])->excludeUnsent()->toArray()`.
+  DTO is read again: `(clone $data)->exclude(['contacts'])->excludeUnsent()->toArray()`.
 - `__clone()` finds the source in the map (a shallow clone's public values are `===` to it) and copies its
   entry. Why: PHP gives `__clone()` no reference to the source.
 - `__serialize()` carries the sent keys through the queue. Why: the `WeakMap` entry does not survive
@@ -348,8 +348,8 @@ class BaseException extends Exception
 ```
 
 `statusCode(int)` and `withData(array)` set the property and return `$this`. Each domain has one exception
-class with a named constructor per failure: `InvoiceException::alreadyIssued()` returns
-`self::withMessage('invoice_already_issued')->statusCode(409)`.
+class with a named constructor per failure: `EmployeeException::alreadyArchived()` returns
+`self::withMessage('employee_already_archived')->statusCode(409)`.
 
 Why: an Action throws and never builds a response, yet the user gets a translated message and the right
 status. The base lives in `app/` because `render()` is HTTP glue. `res()` and its envelope:
@@ -371,8 +371,8 @@ each: [actions.md](actions.md).
 `Domain\Core\Abstracts\Feature` has `abstract protected static function flag(): FeatureFlag` and
 `enabled()` / `disabled()` that ask Pennant for `static::flag()->value`. `FeatureFlag` is a Core enum whose
 cases `CoreServiceProvider::boot()` defines from config. A domain wraps its flag in
-`Models/Features/{Name}Feature.php`, so callers ask `InvoiceRemindersFeature::enabled()` and never spell the
-flag string.
+`Models/Features/{Name}Feature.php`, so callers ask `EmployeeInvitationsFeature::enabled()` and never spell
+the flag string.
 
 ## CurrentUser
 
