@@ -168,6 +168,7 @@ export function prerender(repo: string): Plugin {
               url: `${SITE_URL}${path}`,
               codeRepository: `https://github.com/${REPO_NAME}`,
               keywords: skill.tags.join(', '),
+              license: 'https://opensource.org/licenses/MIT',
               author,
             },
             {

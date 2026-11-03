@@ -56,3 +56,8 @@ Read [CONVENTIONS.md](CONVENTIONS.md). Before every commit both checks must pass
 sh scripts/check.sh
 sh scripts/privacy-scan.sh
 ```
+
+## License
+
+[MIT](LICENSE). The license does not cover the name, signature and logos in `skills/haythamasalama-brand/` and
+`site/public/logos/`, or the third-party trademarks mentioned in the skills.
